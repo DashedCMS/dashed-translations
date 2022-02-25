@@ -1,46 +1,42 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "qubiqx/qcommerce-translations",
+    "description": "This is my package qcommerce-translations",
     "keywords": [
-        ":vendor_name",
+        "Qubiqx",
         "laravel",
-        ":package_slug"
+        "qcommerce-translations"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/qubiqx/qcommerce-translations",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Robin van Maasakker",
+            "email": "robin@qubiqx.com",
             "role": "Developer"
         }
     ],
     "require": {
         "php": "^8.0",
         "spatie/laravel-package-tools": "^1.9.2",
-        "illuminate/contracts": "^9.0"
+        "illuminate/contracts": "^8.73"
     },
     "require-dev": {
         "nunomaduro/collision": "^6.0",
-        "nunomaduro/larastan": "^2.0.1",
         "orchestra/testbench": "^7.0",
         "pestphp/pest": "^1.21",
         "pestphp/pest-plugin-laravel": "^1.1",
-        "phpstan/extension-installer": "^1.1",
-        "phpstan/phpstan-deprecation-rules": "^1.0",
-        "phpstan/phpstan-phpunit": "^1.0",
         "phpunit/phpunit": "^9.5",
         "spatie/laravel-ray": "^1.26"
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories"
+            "Qubiqx\\QcommerceTranslations\\": "src",
+            "Qubiqx\\QcommerceTranslations\\Database\\Factories\\": "database/factories"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests"
+            "Qubiqx\\QcommerceTranslations\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -54,10 +50,11 @@
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
+                "Qubiqx\\QcommerceTranslations\\QcommerceTranslationsServiceProvider"
             ],
             "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
+                "QcommerceTranslations": "Qubiqx\\QcommerceTranslations\\Facades\\QcommerceTranslations",
+                "Translation": "Qubiqx\\QcommerceCore\\Models\\Translation"
             }
         }
     },
