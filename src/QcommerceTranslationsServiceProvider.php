@@ -5,10 +5,8 @@ namespace Qubiqx\QcommerceTranslations;
 use Filament\PluginServiceProvider;
 use Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource;
 use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Qubiqx\QcommerceTranslations\Commands\QcommerceTranslationsCommand;
 
-class QcommerceCoreServiceProvider extends PluginServiceProvider
+class QcommerceTranslationsServiceProvider extends PluginServiceProvider
 {
     public static string $name = 'qcommerce-translations';
 
