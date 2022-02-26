@@ -54,7 +54,7 @@
             ],
             "aliases": {
                 "QcommerceTranslations": "Qubiqx\\QcommerceTranslations\\Facades\\QcommerceTranslations",
-                "Translation": "Qubiqx\\QcommerceCore\\Models\\Translation"
+                "Translation": "Qubiqx\\QcommerceTranslations\\Models\\Translation"
             }
         }
     },
