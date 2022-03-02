@@ -3,8 +3,8 @@
 namespace Qubiqx\QcommerceTranslations;
 
 use Filament\PluginServiceProvider;
-use Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource;
 use Spatie\LaravelPackageTools\Package;
+use Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource;
 
 class QcommerceTranslationsServiceProvider extends PluginServiceProvider
 {

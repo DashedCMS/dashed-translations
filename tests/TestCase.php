@@ -2,8 +2,8 @@
 
 namespace Qubiqx\QcommerceTranslations\Tests;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Qubiqx\QcommerceTranslations\QcommerceTranslationsServiceProvider;
 
 class TestCase extends Orchestra
