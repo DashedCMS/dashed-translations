@@ -20,6 +20,11 @@ class TranslationResource extends Resource
     protected static ?string $label = 'Vertaling';
     protected static ?string $pluralLabel = 'Vertalingen';
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [];
+    }
+
     public static function form(Form $form): Form
     {
         return [];
