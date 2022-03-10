@@ -33,7 +33,13 @@ class ListTranslations extends Page implements HasForms
         $translations = Translation::all();
         foreach ($translations as $translation) {
             foreach (Locales::getLocales() as $locale) {
-                $formData["translation_{$translation->id}_{$locale['id']}"] = $translation->getTranslation('value', $locale['id']);
+//                if ($translation->type == 'image') {
+//                    $formData["translation_{$translation->id}_{$locale['id']}"] = [
+//                        $translation->getTranslation('value', $locale['id'])
+//                    ];
+//                } else {
+                    $formData["translation_{$translation->id}_{$locale['id']}"] = $translation->getTranslation('value', $locale['id']);
+//                }
             }
         }
 
@@ -149,7 +155,7 @@ class ListTranslations extends Page implements HasForms
             foreach (Locales::getLocales() as $locale) {
                 if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
                     $this->notify('success', 'Afbeelding wordt opgeslagen');
-                    $imagePath = $value->store('/qcommerce/translations');
+                    $imagePath = $value->store('/qcommerce/translations', 'public');
                     $explode = explode('.', $path);
                     $explode = explode('_', $explode[1]);
                     $translationId = $explode[1];
