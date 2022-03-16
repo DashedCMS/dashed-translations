@@ -65,7 +65,7 @@ class Translation extends Model
         if ($default == null) {
             $default = $name;
         }
-        $translation = self::where('name', $name)->where('tag', $tag)->first();
+        $translation = self::where('name', $name)->where('tag', $tag)->where('type', $type)->first();
         if (! $translation) {
             $translation = self::withTrashed()->where('name', $name)->where('tag', $tag)->first();
             if (! $translation) {
