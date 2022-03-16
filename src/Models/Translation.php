@@ -53,7 +53,7 @@ class Translation extends Model
             return self::getByParams($name, $tag, $default, $type, $variables);
         }
 
-        $result = Cache::rememberForever(Str::slug($name . $tag . app()->getLocale()), function () use ($name, $tag, $default, $type, $variables) {
+        $result = Cache::rememberForever(Str::slug($name . $tag . app()->getLocale() . $type), function () use ($name, $tag, $default, $type, $variables) {
             return self::getByParams($name, $tag, $default, $type, $variables);
         });
 
