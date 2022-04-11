@@ -3,6 +3,7 @@
 namespace Qubiqx\QcommerceTranslations\Models;
 
 use Illuminate\Support\Str;
+use Spatie\Activitylog\LogOptions;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
@@ -44,7 +45,7 @@ class Translation extends Model
 
     public static function get($name, $tag, $default = null, $type = 'text', $variables = null)
     {
-        if ($name && ! $default) {
+        if ($name && !$default) {
             $default = $name;
             $name = Str::slug($name);
         }
@@ -60,15 +61,20 @@ class Translation extends Model
         return $result;
     }
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults();
+    }
+
     public static function getByParams($name, $tag, $default, $type, $variables)
     {
         if ($default == null) {
             $default = $name;
         }
         $translation = self::where('name', $name)->where('tag', $tag)->where('type', $type)->first();
-        if (! $translation) {
+        if (!$translation) {
             $translation = self::withTrashed()->where('name', $name)->where('tag', $tag)->first();
-            if (! $translation) {
+            if (!$translation) {
                 $translation = self::updateOrCreate(
                     ['name' => $name, 'tag' => $tag],
                     ['default' => $default, 'type' => $type, 'variables' => $variables]
