@@ -86,7 +86,7 @@ class ListTranslations extends Page implements HasForms
                                 $translation = Translation::find($translationId);
                                 $translation->setTranslation("value", $locale, $state);
                                 $translation->save();
-                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale));
+                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                                 $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
                             });
                     } elseif ($translation->type == 'editor') {
@@ -103,7 +103,7 @@ class ListTranslations extends Page implements HasForms
                                 $translation = Translation::find($translationId);
                                 $translation->setTranslation("value", $locale, $state);
                                 $translation->save();
-                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale));
+                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                                 $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
                             });
                     } elseif ($translation->type == 'image') {
@@ -127,7 +127,7 @@ class ListTranslations extends Page implements HasForms
                                 $translation = Translation::find($translationId);
                                 $translation->setTranslation("value", $locale, $state);
                                 $translation->save();
-                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale));
+                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                                 $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
                             });
                     }
@@ -163,7 +163,7 @@ class ListTranslations extends Page implements HasForms
                     $translation = Translation::find($translationId);
                     $translation->setTranslation("value", $locale, $imagePath);
                     $translation->save();
-                    Cache::forget(Str::slug($translation->name . $translation->tag . $locale));
+                    Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                     $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
                 }
             }
