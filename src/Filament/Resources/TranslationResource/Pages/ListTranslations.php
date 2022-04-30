@@ -38,6 +38,7 @@ class ListTranslations extends Page implements HasForms
 //                        $translation->getTranslation('value', $locale['id'])
 //                    ];
 //                } else {
+                dump($translation->getTranslation('value', $locale['id']), $locale['id']);
                 $formData["translation_{$translation->id}_{$locale['id']}"] = $translation->getTranslation('value', $locale['id']);
 //                }
             }
