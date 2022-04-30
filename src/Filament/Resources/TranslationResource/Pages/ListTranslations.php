@@ -116,7 +116,7 @@ class ListTranslations extends Page implements HasForms
                     } else {
                         $schema[] = TextInput::make("translation_{$translation->id}_{$locale['id']}")
                             ->default($translation->default)
-                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
+                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . ' ' . $locale['id'])
                             ->helperText($helperText ?? '')
                             ->default($translation->getTranslation('value', $locale['id']))
                             ->reactive()
