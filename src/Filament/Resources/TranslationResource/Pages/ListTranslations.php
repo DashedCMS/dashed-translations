@@ -93,7 +93,7 @@ class ListTranslations extends Page implements HasForms
                         $schema[] = TinyEditor::make("translation_{$translation->id}_{$locale['id']}")
                             ->fileAttachmentsDirectory('/qcommerce/orders/images')
                             ->default($translation->default)
-                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
+                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . ' ' . $locale['id'])
                             ->helperText($helperText ?? '')
                             ->reactive()
                             ->afterStateUpdated(function (TinyEditor $component, Closure $set, $state) {
