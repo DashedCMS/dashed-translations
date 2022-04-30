@@ -38,7 +38,6 @@ class ListTranslations extends Page implements HasForms
 //                        $translation->getTranslation('value', $locale['id'])
 //                    ];
 //                } else {
-                dump($translation->getTranslation('value', $locale['id']), $locale['id']);
                 $formData["translation_{$translation->id}_{$locale['id']}"] = $translation->getTranslation('value', $locale['id']);
 //                }
             }
@@ -94,7 +93,7 @@ class ListTranslations extends Page implements HasForms
                         $schema[] = TinyEditor::make("translation_{$translation->id}_{$locale['id']}")
                             ->fileAttachmentsDirectory('/qcommerce/orders/images')
                             ->default($translation->default)
-                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . ' ' . $locale['id'])
+                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->reactive()
                             ->afterStateUpdated(function (TinyEditor $component, Closure $set, $state) {
@@ -117,7 +116,7 @@ class ListTranslations extends Page implements HasForms
                     } else {
                         $schema[] = TextInput::make("translation_{$translation->id}_{$locale['id']}")
                             ->default($translation->default)
-                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . ' ' . $locale['id'])
+                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->default($translation->getTranslation('value', $locale['id']))
                             ->reactive()
