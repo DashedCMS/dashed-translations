@@ -79,6 +79,7 @@ class ListTranslations extends Page implements HasForms
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->reactive()
+                            ->lazy()
                             ->afterStateUpdated(function (Textarea $component, Closure $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
                                 $translationId = $explode[1];
@@ -120,6 +121,7 @@ class ListTranslations extends Page implements HasForms
                             ->helperText($helperText ?? '')
                             ->default($translation->getTranslation('value', $locale['id']))
                             ->reactive()
+                            ->lazy()
                             ->afterStateUpdated(function (TextInput $component, Closure $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
                                 $translationId = $explode[1];

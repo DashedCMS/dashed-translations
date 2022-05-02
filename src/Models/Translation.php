@@ -43,6 +43,11 @@ class Translation extends Model
 
     protected $table = 'qcommerce__translations';
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults();
+    }
+
     public static function get($name, $tag, $default = null, $type = 'text', $variables = null)
     {
         if ($name && ! $default) {
@@ -59,11 +64,6 @@ class Translation extends Model
         });
 
         return $result;
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults();
     }
 
     public static function getByParams($name, $tag, $default, $type, $variables)
