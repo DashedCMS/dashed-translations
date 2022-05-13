@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Page;
+use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Mohamedsabil83\FilamentFormsTinyeditor\Components\TinyEditor;
@@ -91,8 +92,8 @@ class ListTranslations extends Page implements HasForms
                                 $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
                             });
                     } elseif ($translation->type == 'editor') {
-                        $schema[] = TinyEditor::make("translation_{$translation->id}_{$locale['id']}")
-                            ->fileAttachmentsDirectory('/qcommerce/orders/images')
+                        $schema[] = TiptapEditor::make("translation_{$translation->id}_{$locale['id']}")
+//                            ->fileAttachmentsDirectory('/qcommerce/orders/images')
                             ->default($translation->default)
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
