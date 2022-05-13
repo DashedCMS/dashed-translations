@@ -98,7 +98,7 @@ class ListTranslations extends Page implements HasForms
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->reactive()
-                            ->afterStateUpdated(function (TinyEditor $component, Closure $set, $state) {
+                            ->afterStateUpdated(function (TiptapEditor $component, Closure $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
                                 $translationId = $explode[1];
                                 $locale = $explode[2];
