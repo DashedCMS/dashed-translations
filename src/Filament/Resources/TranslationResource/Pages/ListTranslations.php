@@ -15,7 +15,6 @@ use Filament\Resources\Pages\Page;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use Mohamedsabil83\FilamentFormsTinyeditor\Components\TinyEditor;
 use Qubiqx\QcommerceCore\Classes\Locales;
 use Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource;
 use Qubiqx\QcommerceTranslations\Models\Translation;
