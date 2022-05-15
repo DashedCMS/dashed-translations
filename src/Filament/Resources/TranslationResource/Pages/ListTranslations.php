@@ -99,14 +99,14 @@ class ListTranslations extends Page implements HasForms
                             ->helperText($helperText ?? '')
                             ->reactive()
                             ->afterStateUpdated(function (TiptapEditor $component, Closure $set, $state) {
-                                $explode = explode('_', $component->getStatePath());
-                                $translationId = $explode[1];
-                                $locale = $explode[2];
-                                $translation = Translation::find($translationId);
-                                $translation->setTranslation("value", $locale, $state);
-                                $translation->save();
-                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
-                                $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
+//                                $explode = explode('_', $component->getStatePath());
+//                                $translationId = $explode[1];
+//                                $locale = $explode[2];
+//                                $translation = Translation::find($translationId);
+//                                $translation->setTranslation("value", $locale, $state);
+//                                $translation->save();
+//                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
+//                                $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
                             });
                     } elseif ($translation->type == 'image') {
                         $schema[] = FileUpload::make("translation_{$translation->id}_{$locale['id']}")
@@ -165,6 +165,21 @@ class ListTranslations extends Page implements HasForms
                     $locale = $explode[2];
                     $translation = Translation::find($translationId);
                     $translation->setTranslation("value", $locale, $imagePath);
+                    $translation->save();
+                    Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
+                    $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
+                }
+            }
+        }
+
+        foreach (Translation::where('type', 'editor')->get() as $translation) {
+            foreach (Locales::getLocales() as $locale) {
+                if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
+                    $explode = explode('_', $path);
+                    $translationId = $explode[1];
+                    $locale = $explode[2];
+                    $translation = Translation::find($translationId);
+                    $translation->setTranslation("value", $locale, $value);
                     $translation->save();
                     Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                     $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
