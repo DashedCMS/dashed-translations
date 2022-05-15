@@ -78,7 +78,6 @@ class ListTranslations extends Page implements HasForms
                             ->rows(5)
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
-                            ->reactive()
                             ->lazy()
                             ->afterStateUpdated(function (Textarea $component, Closure $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
@@ -92,27 +91,22 @@ class ListTranslations extends Page implements HasForms
                             });
                     } elseif ($translation->type == 'editor') {
                         $schema[] = TiptapEditor::make("translation_{$translation->id}_{$locale['id']}")
-//                            ->fileAttachmentsDirectory('/qcommerce/orders/images')
                             ->default($translation->default)
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
-                            ->lazy()
-                            ->afterStateUpdated(function (TiptapEditor $component, Closure $set, $state) {
-                            });
+                            ->lazy();
                     } elseif ($translation->type == 'image') {
                         $schema[] = FileUpload::make("translation_{$translation->id}_{$locale['id']}")
                             ->disk('public')
                             ->default($translation->default)
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
-                            ->helperText($helperText ?? '')
-                            ->reactive();
+                            ->helperText($helperText ?? '');
                     } else {
                         $schema[] = TextInput::make("translation_{$translation->id}_{$locale['id']}")
                             ->default($translation->default)
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->default($translation->getTranslation('value', $locale['id']))
-                            ->reactive()
                             ->lazy()
                             ->afterStateUpdated(function (TextInput $component, Closure $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
@@ -177,17 +171,4 @@ class ListTranslations extends Page implements HasForms
             }
         }
     }
-
-//    public function submit()
-//    {
-//        $translations = Translation::all();
-//        foreach ($translations as $translation) {
-//            foreach (Locales::getLocales() as $locale) {
-//                $translation->setTranslation("value", $locale['id'], $this->form->getState()["translation_{$translation->id}_{$locale['id']}"]);
-//            }
-//            $translation->save();
-//        }
-//
-//        $this->notify('success', 'De vertalingen zijn opgeslagen');
-//    }
 }
