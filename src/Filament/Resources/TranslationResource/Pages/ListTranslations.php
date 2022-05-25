@@ -64,6 +64,7 @@ class ListTranslations extends Page implements HasForms
                 $schema = [];
 
                 foreach ($translations as $translation) {
+                    $helperText = '';
                     if ($translation->variables) {
                         $helperText = 'Beschikbare variablen: <br>';
 
