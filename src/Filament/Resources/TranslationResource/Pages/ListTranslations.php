@@ -2,6 +2,7 @@
 
 namespace Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource\Pages;
 
+use Carbon\Carbon;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -34,13 +35,11 @@ class ListTranslations extends Page implements HasForms
         $translations = Translation::all();
         foreach ($translations as $translation) {
             foreach (Locales::getLocales() as $locale) {
-//                if ($translation->type == 'image') {
-//                    $formData["translation_{$translation->id}_{$locale['id']}"] = [
-//                        $translation->getTranslation('value', $locale['id'])
-//                    ];
-//                } else {
-                $formData["translation_{$translation->id}_{$locale['id']}"] = $translation->getTranslation('value', $locale['id']);
-//                }
+                if ($translation->type == 'datetime') {
+                    $formData["translation_{$translation->id}_{$locale['id']}"] = Carbon::parse($translation->getTranslation('value', $locale['id']) ?: $translation->default)->format('Y-m-d H:i:s');
+                } else {
+                    $formData["translation_{$translation->id}_{$locale['id']}"] = $translation->getTranslation('value', $locale['id']);
+                }
             }
         }
 
@@ -92,11 +91,11 @@ class ListTranslations extends Page implements HasForms
                             });
                     } elseif ($translation->type == 'datetime') {
                         $schema[] = DateTimePicker::make("translation_{$translation->id}_{$locale['id']}")
-                            ->default($translation->default)
+                            ->default(Carbon::parse($translation->default)->format('Y-m-d H:i:s'))
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
-                            ->lazy()
-                            ->afterStateUpdated(function (Textarea $component, Closure $set, $state) {
+                            ->reactive()
+                            ->afterStateUpdated(function (DateTimePicker $component, Closure $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
                                 $translationId = $explode[1];
                                 $locale = $explode[2];
