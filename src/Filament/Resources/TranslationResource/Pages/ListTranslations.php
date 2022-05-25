@@ -3,6 +3,7 @@
 namespace Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource\Pages;
 
 use Closure;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
@@ -89,6 +90,22 @@ class ListTranslations extends Page implements HasForms
                                 Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                                 $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
                             });
+                    } elseif ($translation->type == 'datetime') {
+                        $schema[] = DateTimePicker::make("translation_{$translation->id}_{$locale['id']}")
+                            ->default($translation->default)
+                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
+                            ->helperText($helperText ?? '')
+                            ->lazy()
+                            ->afterStateUpdated(function (Textarea $component, Closure $set, $state) {
+                                $explode = explode('_', $component->getStatePath());
+                                $translationId = $explode[1];
+                                $locale = $explode[2];
+                                $translation = Translation::find($translationId);
+                                $translation->setTranslation("value", $locale, $state);
+                                $translation->save();
+                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
+                                $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
+                            });
                     } elseif ($translation->type == 'editor') {
                         $schema[] = TiptapEditor::make("translation_{$translation->id}_{$locale['id']}")
                             ->default($translation->default)
@@ -156,6 +173,7 @@ class ListTranslations extends Page implements HasForms
                 }
             }
         }
+
         foreach (Translation::where('type', 'editor')->get() as $translation) {
             foreach (Locales::getLocales() as $locale) {
                 if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
