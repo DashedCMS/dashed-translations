@@ -65,7 +65,7 @@ class ListTranslations extends Page implements HasForms
 
                 foreach ($translations as $translation) {
                     $helperText = '';
-                    if ($translation->variables) {
+                    if ($translation->variables && is_array($translation->variables)) {
                         $helperText = 'Beschikbare variablen: <br>';
 
                         foreach ($translation->variables as $key => $value) {
