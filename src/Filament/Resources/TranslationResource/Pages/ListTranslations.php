@@ -75,7 +75,7 @@ class ListTranslations extends Page implements HasForms
 
                     if ($translation->type == 'textarea') {
                         $schema[] = Textarea::make("translation_{$translation->id}_{$locale['id']}")
-                            ->default($translation->default)
+                            ->placeholder($translation->default)
                             ->rows(5)
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
@@ -92,7 +92,7 @@ class ListTranslations extends Page implements HasForms
                             });
                     } elseif ($translation->type == 'datetime') {
                         $schema[] = DateTimePicker::make("translation_{$translation->id}_{$locale['id']}")
-                            ->default(Carbon::parse($translation->default)->format('Y-m-d H:i:s'))
+                            ->placeholder(Carbon::parse($translation->default)->format('Y-m-d H:i:s'))
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->reactive()
@@ -108,7 +108,7 @@ class ListTranslations extends Page implements HasForms
                             });
                     } elseif ($translation->type == 'editor') {
                         $schema[] = TiptapEditor::make("translation_{$translation->id}_{$locale['id']}")
-                            ->default($translation->default)
+                            ->placeholder($translation->default)
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->lazy();
@@ -120,10 +120,9 @@ class ListTranslations extends Page implements HasForms
                             ->helperText($helperText ?? '');
                     } else {
                         $schema[] = TextInput::make("translation_{$translation->id}_{$locale['id']}")
-                            ->default($translation->default)
+                            ->placeholder($translation->default)
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
-                            ->default($translation->getTranslation('value', $locale['id']))
                             ->lazy()
                             ->afterStateUpdated(function (TextInput $component, Closure $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
