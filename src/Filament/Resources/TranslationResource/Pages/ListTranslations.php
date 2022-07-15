@@ -108,7 +108,7 @@ class ListTranslations extends Page implements HasForms
                             });
                     } elseif ($translation->type == 'editor') {
                         $schema[] = TiptapEditor::make("translation_{$translation->id}_{$locale['id']}")
-                            ->placeholder($translation->default)
+//                            ->placeholder($translation->default)
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->lazy();
