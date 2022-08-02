@@ -125,6 +125,7 @@ class ListTranslations extends Page implements HasForms
                             ->schema(cms()->builder('translationRepeaters')[$translation->name] ?? [])
                             ->helperText($helperText ?? '')
                             ->orderable()
+                            ->cloneable()
                             ->reactive();
                     } else {
                         $schema[] = TextInput::make("translation_{$translation->id}_{$locale['id']}")
