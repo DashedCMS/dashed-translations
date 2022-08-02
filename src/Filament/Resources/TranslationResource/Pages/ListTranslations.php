@@ -124,6 +124,7 @@ class ListTranslations extends Page implements HasForms
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->schema(cms()->builder('translationRepeaters')[$translation->name] ?? [])
                             ->helperText($helperText ?? '')
+                            ->orderable()
                             ->reactive();
                     } else {
                         $schema[] = TextInput::make("translation_{$translation->id}_{$locale['id']}")
