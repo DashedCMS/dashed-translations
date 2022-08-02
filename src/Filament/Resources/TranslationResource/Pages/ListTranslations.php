@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Closure;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
@@ -118,6 +119,12 @@ class ListTranslations extends Page implements HasForms
                             ->default($translation->default)
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '');
+                    } elseif ($translation->type == 'repeater') {
+                        $schema[] = Repeater::make("translation_{$translation->id}_{$locale['id']}")
+                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
+                            ->schema(cms()->builder('translationRepeaters')[$translation->name] ?? [])
+                            ->helperText($helperText ?? '')
+                            ->reactive();
                     } else {
                         $schema[] = TextInput::make("translation_{$translation->id}_{$locale['id']}")
                             ->placeholder($translation->default)
@@ -181,6 +188,21 @@ class ListTranslations extends Page implements HasForms
                     $locale = $explode[2];
                     $translation = Translation::find($translationId);
                     $translation->setTranslation("value", $locale, $value);
+                    $translation->save();
+                    Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
+                    $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
+                }
+            }
+        }
+
+        foreach (Translation::where('type', 'repeater')->get() as $translation) {
+            foreach (Locales::getLocales() as $locale) {
+                if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
+                    $explode = explode('_', $path);
+                    $translationId = $explode[1];
+                    $locale = explode('.', $explode[2])[0];
+                    $translation = Translation::find($translationId);
+                    $translation->setTranslation("value", $locale, $this->data["translation_{$translation->id}_{$locale}"]);
                     $translation->save();
                     Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                     $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
