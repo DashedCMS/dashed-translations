@@ -50,7 +50,7 @@ class Translation extends Model
 
     public static function get($name, $tag, $default = null, $type = 'text', $variables = null)
     {
-        if ($name && ! $default) {
+        if ($name && $default === null) {
             $default = $name;
             $name = Str::slug($name);
         }
@@ -68,9 +68,10 @@ class Translation extends Model
 
     public static function getByParams($name, $tag, $default, $type, $variables)
     {
-        if ($default == null) {
+        if ($default === null) {
             $default = $name;
         }
+
         $translation = self::where('name', $name)->where('tag', $tag)->where('type', $type)->first();
         if (! $translation) {
             $translation = self::withTrashed()->where('name', $name)->where('tag', $tag)->first();
@@ -97,10 +98,11 @@ class Translation extends Model
             $translation->save();
         }
 
-        if ($translation && $default && $translation->default != $default) {
+        if ($translation && $default && $translation->default != $default && $default != $name) {
             $translation->default = $default;
             $translation->save();
         }
+
         if ($translation && $translation->value) {
             if ($variables) {
                 foreach ($variables as $key => $variable) {
