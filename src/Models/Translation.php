@@ -50,9 +50,9 @@ class Translation extends Model
 
     public static function get($name, $tag, $default = null, $type = 'text', $variables = null)
     {
-        if (! \Illuminate\Support\Facades\Schema::hasTable('translations')) {
-            return $default;
-        }
+//        if (! \Illuminate\Support\Facades\Schema::hasTable('qcommerce__translations')) {
+//            return $default;
+//        }
 
         if ($name && $default === null) {
             $default = $name;
