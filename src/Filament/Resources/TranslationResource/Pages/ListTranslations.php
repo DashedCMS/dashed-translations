@@ -2,25 +2,25 @@
 
 namespace Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource\Pages;
 
-use Carbon\Carbon;
 use Closure;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Section;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
+use Filament\Resources\Pages\Page;
 use Filament\Forms\Components\Tabs;
+use Illuminate\Support\Facades\Cache;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Contracts\HasForms;
+use FilamentTiptapEditor\TiptapEditor;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Resources\Pages\Page;
-use FilamentTiptapEditor\TiptapEditor;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
+use Filament\Forms\Components\FileUpload;
 use Qubiqx\QcommerceCore\Classes\Locales;
-use Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Concerns\InteractsWithForms;
 use Qubiqx\QcommerceTranslations\Models\Translation;
+use Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource;
 
 class ListTranslations extends Page implements HasForms
 {
@@ -56,6 +56,7 @@ class ListTranslations extends Page implements HasForms
     {
         $tags = Translation::distinct('tag')->orderBy('tag', 'ASC')->pluck('tag');
         $sections = [];
+
 
         foreach ($tags as $tag) {
             $translations = Translation::where('tag', $tag)->orderBy('name', 'ASC')->get();
