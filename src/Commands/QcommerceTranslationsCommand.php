@@ -1,12 +1,12 @@
 <?php
 
-namespace Qubiqx\QcommerceTranslations\Commands;
+namespace Dashed\DashedTranslations\Commands;
 
 use Illuminate\Console\Command;
 
 class QcommerceTranslationsCommand extends Command
 {
-    public $signature = 'qcommerce-translations';
+    public $signature = 'dashed-translations';
 
     public $description = 'My command';
 

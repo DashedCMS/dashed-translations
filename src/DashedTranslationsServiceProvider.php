@@ -1,21 +1,21 @@
 <?php
 
-namespace Qubiqx\QcommerceTranslations;
+namespace Dashed\DashedTranslations;
 
 use Filament\PluginServiceProvider;
-use Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource;
+use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 use Spatie\LaravelPackageTools\Package;
 
-class QcommerceTranslationsServiceProvider extends PluginServiceProvider
+class DashedTranslationsServiceProvider extends PluginServiceProvider
 {
-    public static string $name = 'qcommerce-translations';
+    public static string $name = 'dashed-translations';
 
     public function configurePackage(Package $package): void
     {
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         $package
-            ->name('qcommerce-translations')
+            ->name('dashed-translations')
             ->hasViews();
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Qubiqx\QcommerceTranslations\Database\Factories;
+namespace Dashed\DashedTranslations\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 

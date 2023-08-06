@@ -1,6 +1,6 @@
 <?php
 
-namespace Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource\Pages;
+namespace Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages;
 
 use Carbon\Carbon;
 use Closure;
@@ -18,16 +18,16 @@ use Filament\Resources\Pages\Page;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use Qubiqx\QcommerceCore\Classes\Locales;
-use Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource;
-use Qubiqx\QcommerceTranslations\Models\Translation;
+use Dashed\DashedCore\Classes\Locales;
+use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
+use Dashed\DashedTranslations\Models\Translation;
 
 class ListTranslations extends Page implements HasForms
 {
     use InteractsWithForms;
 
     protected static string $resource = TranslationResource::class;
-    protected static string $view = 'qcommerce-translations::translations.pages.list-translations';
+    protected static string $view = 'dashed-translations::translations.pages.list-translations';
     public $data;
 
     public function mount(): void
@@ -170,7 +170,7 @@ class ListTranslations extends Page implements HasForms
             foreach (Locales::getLocales() as $locale) {
                 if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
                     $this->notify('success', 'Afbeelding wordt opgeslagen');
-                    $imagePath = $value->store('/qcommerce/translations', 'public');
+                    $imagePath = $value->store('/dashed/translations', 'public');
                     $explode = explode('.', $path);
                     $explode = explode('_', $explode[1]);
                     $translationId = $explode[1];

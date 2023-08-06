@@ -1,17 +1,17 @@
 {
-    "name": "qubiqx/qcommerce-translations",
-    "description": "This is my package qcommerce-translations",
+    "name": "dashed/dashed-translations",
+    "description": "This is my package dashed-translations",
     "keywords": [
-        "Qubiqx",
+        "Dashed",
         "laravel",
-        "qcommerce-translations"
+        "dashed-translations"
     ],
-    "homepage": "https://github.com/qubiqx/qcommerce-translations",
+    "homepage": "https://github.com/Dashed-DEV/dashed-translations",
     "license": "MIT",
     "authors": [
         {
             "name": "Robin van Maasakker",
-            "email": "robin@qubiqx.com",
+            "email": "robin@dashed.nl",
             "role": "Developer"
         }
     ],
@@ -29,13 +29,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Qubiqx\\QcommerceTranslations\\": "src",
-            "Qubiqx\\QcommerceTranslations\\Database\\Factories\\": "database/factories"
+            "Dashed\\DashedTranslations\\": "src",
+            "Dashed\\DashedTranslations\\Database\\Factories\\": "database/factories"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Qubiqx\\QcommerceTranslations\\Tests\\": "tests"
+            "Dashed\\DashedTranslations\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -52,11 +52,11 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Qubiqx\\QcommerceTranslations\\QcommerceTranslationsServiceProvider"
+                "Dashed\\DashedTranslations\\DashedTranslationsServiceProvider"
             ],
             "aliases": {
-                "QcommerceTranslations": "Qubiqx\\QcommerceTranslations\\Facades\\QcommerceTranslations",
-                "Translation": "Qubiqx\\QcommerceTranslations\\Models\\Translation"
+                "DashedTranslations": "Dashed\\DashedTranslations\\Facades\\DashedTranslations",
+                "Translation": "Dashed\\DashedTranslations\\Models\\Translation"
             }
         }
     },

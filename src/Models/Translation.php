@@ -1,6 +1,6 @@
 <?php
 
-namespace Qubiqx\QcommerceTranslations\Models;
+namespace Dashed\DashedTranslations\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -41,7 +41,7 @@ class Translation extends Model
         'variables' => 'array',
     ];
 
-    protected $table = 'qcommerce__translations';
+    protected $table = 'dashed__translations';
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -50,7 +50,7 @@ class Translation extends Model
 
     public static function get($name, $tag, $default = null, $type = 'text', $variables = null)
     {
-        if (! \Illuminate\Support\Facades\Schema::hasTable('qcommerce__translations')) {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('dashed__translations')) {
             return $default;
         }
 

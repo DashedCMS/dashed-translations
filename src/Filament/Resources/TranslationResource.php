@@ -1,12 +1,12 @@
 <?php
 
-namespace Qubiqx\QcommerceTranslations\Filament\Resources;
+namespace Dashed\DashedTranslations\Filament\Resources;
 
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
-use Qubiqx\QcommerceTranslations\Filament\Resources\TranslationResource\Pages\ListTranslations;
-use Qubiqx\QcommerceTranslations\Models\Translation;
+use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\ListTranslations;
+use Dashed\DashedTranslations\Models\Translation;
 
 class TranslationResource extends Resource
 {

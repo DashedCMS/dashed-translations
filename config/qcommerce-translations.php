@@ -1,5 +1,5 @@
 <?php
-// config for Qubiqx/QcommerceTranslations
+// config for Dashed/QcommerceTranslations
 return [
 
 ];

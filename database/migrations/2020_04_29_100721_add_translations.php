@@ -13,7 +13,7 @@ class AddTranslations extends Migration
      */
     public function up()
     {
-        Schema::create('qcommerce__translations', function (Blueprint $table) {
+        Schema::create('dashed__translations', function (Blueprint $table) {
             $table->increments('id');
 
             $table->string('tag')->default('general');
