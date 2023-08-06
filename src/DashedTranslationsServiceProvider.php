@@ -2,8 +2,8 @@
 
 namespace Dashed\DashedTranslations;
 
-use Filament\PluginServiceProvider;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
+use Filament\PluginServiceProvider;
 use Spatie\LaravelPackageTools\Package;
 
 class DashedTranslationsServiceProvider extends PluginServiceProvider

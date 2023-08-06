@@ -4,6 +4,9 @@ namespace Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages
 
 use Carbon\Carbon;
 use Closure;
+use Dashed\DashedCore\Classes\Locales;
+use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
+use Dashed\DashedTranslations\Models\Translation;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -18,9 +21,6 @@ use Filament\Resources\Pages\Page;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use Dashed\DashedCore\Classes\Locales;
-use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
-use Dashed\DashedTranslations\Models\Translation;
 
 class ListTranslations extends Page implements HasForms
 {
