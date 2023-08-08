@@ -31,12 +31,6 @@ class Translation extends Model
         'value',
     ];
 
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'deleted_at',
-    ];
-
     protected $casts = [
         'variables' => 'array',
     ];

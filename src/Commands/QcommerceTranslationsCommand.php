@@ -4,7 +4,7 @@ namespace Dashed\DashedTranslations\Commands;
 
 use Illuminate\Console\Command;
 
-class QcommerceTranslationsCommand extends Command
+class DashedTranslationsCommand extends Command
 {
     public $signature = 'dashed-translations';
 
