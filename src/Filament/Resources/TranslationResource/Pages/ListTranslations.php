@@ -116,7 +116,7 @@ class ListTranslations extends Page implements HasForms
                             ->lazy();
                     } elseif ($translation->type == 'image') {
                         $schema[] = FileUpload::make("translation_{$translation->id}_{$locale['id']}")
-                            ->disk('public')
+                            ->disk('dashed')
                             ->default($translation->default)
                             ->enableDownload()
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
@@ -170,7 +170,7 @@ class ListTranslations extends Page implements HasForms
             foreach (Locales::getLocales() as $locale) {
                 if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
                     $this->notify('success', 'Afbeelding wordt opgeslagen');
-                    $imagePath = $value->store('/dashed/translations', 'public');
+                    $imagePath = $value->store('/dashed/translations', 'dashed');
                     $explode = explode('.', $path);
                     $explode = explode('_', $explode[1]);
                     $translationId = $explode[1];
