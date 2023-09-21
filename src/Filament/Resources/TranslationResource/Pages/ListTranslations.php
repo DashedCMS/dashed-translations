@@ -119,6 +119,7 @@ class ListTranslations extends Page implements HasForms
                             ->disk('dashed')
                             ->default($translation->default)
                             ->enableDownload()
+                            ->enableOpen()
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '');
                     } elseif ($translation->type == 'repeater') {
