@@ -169,7 +169,7 @@ class ListTranslations extends Page implements HasForms
         foreach (Translation::where('type', 'image')->get() as $translation) {
             foreach (Locales::getLocales() as $locale) {
                 if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
-                    $this->notify('success', 'Afbeelding wordt opgeslagen');
+                    $this->notify('success', 'Media wordt opgeslagen');
                     $imagePath = $value->store('/dashed/translations', 'dashed');
                     $explode = explode('.', $path);
                     $explode = explode('_', $explode[1]);
