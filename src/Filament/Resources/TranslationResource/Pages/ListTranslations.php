@@ -3,29 +3,26 @@
 namespace Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages;
 
 use Carbon\Carbon;
-use Closure;
-use Dashed\DashedCore\Classes\Locales;
-use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
-use Dashed\DashedTranslations\Models\Translation;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Section;
+use Filament\Forms\Set;
+use Illuminate\Support\Str;
+use Filament\Resources\Pages\Page;
 use Filament\Forms\Components\Tabs;
+use Illuminate\Support\Facades\Cache;
+use Dashed\DashedCore\Classes\Locales;
+use Filament\Forms\Components\Section;
+use FilamentTiptapEditor\TiptapEditor;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Resources\Pages\Page;
-use FilamentTiptapEditor\TiptapEditor;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\DateTimePicker;
+use Dashed\DashedTranslations\Models\Translation;
+use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 
-class ListTranslations extends Page implements HasForms
+class ListTranslations extends Page
 {
-    use InteractsWithForms;
-
     protected static string $resource = TranslationResource::class;
     protected static string $view = 'dashed-translations::translations.pages.list-translations';
     public $data;
@@ -47,7 +44,7 @@ class ListTranslations extends Page implements HasForms
         $this->form->fill($formData);
     }
 
-    protected function getFormStatePath(): ?string
+    public function getFormStatePath(): ?string
     {
         return 'data';
     }
@@ -82,7 +79,7 @@ class ListTranslations extends Page implements HasForms
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->lazy()
-                            ->afterStateUpdated(function (Textarea $component, Closure $set, $state) {
+                            ->afterStateUpdated(function (Textarea $component, Set $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
                                 $translationId = $explode[1];
                                 $locale = $explode[2];
@@ -90,7 +87,10 @@ class ListTranslations extends Page implements HasForms
                                 $translation->setTranslation("value", $locale, $state);
                                 $translation->save();
                                 Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
-                                $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
+                                Notification::make()
+                                    ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                    ->success()
+                                    ->send();
                             });
                     } elseif ($translation->type == 'datetime') {
                         $schema[] = DateTimePicker::make("translation_{$translation->id}_{$locale['id']}")
@@ -98,7 +98,7 @@ class ListTranslations extends Page implements HasForms
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->reactive()
-                            ->afterStateUpdated(function (DateTimePicker $component, Closure $set, $state) {
+                            ->afterStateUpdated(function (DateTimePicker $component, Set $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
                                 $translationId = $explode[1];
                                 $locale = $explode[2];
@@ -106,20 +106,35 @@ class ListTranslations extends Page implements HasForms
                                 $translation->setTranslation("value", $locale, $state);
                                 $translation->save();
                                 Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
-                                $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
+                                Notification::make()
+                                    ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                    ->success()
+                                    ->send();
                             });
                     } elseif ($translation->type == 'editor') {
                         $schema[] = TiptapEditor::make("translation_{$translation->id}_{$locale['id']}")
 //                            ->placeholder($translation->default)
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
-                            ->lazy();
+                            ->afterStateUpdated(function (TiptapEditor $component, Set $set, $state) {
+                                $explode = explode('_', $component->getStatePath());
+                                $translationId = $explode[1];
+                                $locale = $explode[2];
+                                $translation = Translation::find($translationId);
+                                $translation->setTranslation("value", $locale, $state);
+                                $translation->save();
+                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
+                                Notification::make()
+                                    ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                    ->success()
+                                    ->send();
+                            });
                     } elseif ($translation->type == 'image') {
                         $schema[] = FileUpload::make("translation_{$translation->id}_{$locale['id']}")
                             ->disk('dashed')
                             ->default($translation->default)
-                            ->enableDownload()
-                            ->enableOpen()
+                            ->downloadable()
+                            ->openable()
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '');
                     } elseif ($translation->type == 'repeater') {
@@ -127,7 +142,7 @@ class ListTranslations extends Page implements HasForms
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->schema(cms()->builder('translationRepeaters')[$translation->name] ?? [])
                             ->helperText($helperText ?? '')
-                            ->orderable()
+                            ->reorderable()
                             ->cloneable()
                             ->reactive();
                     } else {
@@ -136,7 +151,7 @@ class ListTranslations extends Page implements HasForms
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->lazy()
-                            ->afterStateUpdated(function (TextInput $component, Closure $set, $state) {
+                            ->afterStateUpdated(function (TextInput $component, Set $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
                                 $translationId = $explode[1];
                                 $locale = $explode[2];
@@ -144,7 +159,10 @@ class ListTranslations extends Page implements HasForms
                                 $translation->setTranslation("value", $locale, $state);
                                 $translation->save();
                                 Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
-                                $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
+                                Notification::make()
+                                    ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                    ->success()
+                                    ->send();
                             });
                     }
                 }
@@ -170,7 +188,10 @@ class ListTranslations extends Page implements HasForms
         foreach (Translation::where('type', 'image')->get() as $translation) {
             foreach (Locales::getLocales() as $locale) {
                 if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
-                    $this->notify('success', 'Media wordt opgeslagen');
+                    Notification::make()
+                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " wordt opgeslagen")
+                        ->success()
+                        ->send();
                     $imagePath = $value->store('/dashed/translations', 'dashed');
                     $explode = explode('.', $path);
                     $explode = explode('_', $explode[1]);
@@ -180,25 +201,31 @@ class ListTranslations extends Page implements HasForms
                     $translation->setTranslation("value", $locale, $imagePath);
                     $translation->save();
                     Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
-                    $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
+                    Notification::make()
+                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                        ->success()
+                        ->send();
                 }
             }
         }
 
-        foreach (Translation::where('type', 'editor')->get() as $translation) {
-            foreach (Locales::getLocales() as $locale) {
-                if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
-                    $explode = explode('_', $path);
-                    $translationId = $explode[1];
-                    $locale = $explode[2];
-                    $translation = Translation::find($translationId);
-                    $translation->setTranslation("value", $locale, $value);
-                    $translation->save();
-                    Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
-                    $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
-                }
-            }
-        }
+        //        foreach (Translation::where('type', 'editor')->get() as $translation) {
+        //            foreach (Locales::getLocales() as $locale) {
+        //                if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
+        //                    $explode = explode('_', $path);
+        //                    $translationId = $explode[1];
+        //                    $locale = $explode[2];
+        //                    $translation = Translation::find($translationId);
+        //                    $translation->setTranslation("value", $locale, $value);
+        //                    $translation->save();
+        //                    Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
+        //                    Notification::make()
+        //                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+        //                        ->success()
+        //                        ->send();
+        //                }
+        //            }
+        //        }
 
         foreach (Translation::where('type', 'repeater')->get() as $translation) {
             foreach (Locales::getLocales() as $locale) {
@@ -210,7 +237,10 @@ class ListTranslations extends Page implements HasForms
                     $translation->setTranslation("value", $locale, $this->data["translation_{$translation->id}_{$locale}"]);
                     $translation->save();
                     Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
-                    $this->notify('success', Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen");
+                    Notification::make()
+                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                        ->success()
+                        ->send();
                 }
             }
         }

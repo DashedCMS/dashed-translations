@@ -2,11 +2,10 @@
 
 namespace Dashed\DashedTranslations;
 
-use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
-use Filament\PluginServiceProvider;
 use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class DashedTranslationsServiceProvider extends PluginServiceProvider
+class DashedTranslationsServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'dashed-translations';
 
@@ -17,12 +16,5 @@ class DashedTranslationsServiceProvider extends PluginServiceProvider
         $package
             ->name('dashed-translations')
             ->hasViews();
-    }
-
-    protected function getResources(): array
-    {
-        return array_merge(parent::getResources(), [
-            TranslationResource::class,
-        ]);
     }
 }

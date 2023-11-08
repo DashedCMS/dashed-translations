@@ -2,11 +2,11 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources;
 
-use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\ListTranslations;
-use Dashed\DashedTranslations\Models\Translation;
-use Filament\Resources\Form;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
 use Filament\Resources\Resource;
-use Filament\Resources\Table;
+use Dashed\DashedTranslations\Models\Translation;
+use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\ListTranslations;
 
 class TranslationResource extends Resource
 {
@@ -14,7 +14,7 @@ class TranslationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static ?string $navigationIcon = 'heroicon-o-translate';
+    protected static ?string $navigationIcon = 'heroicon-o-language';
     protected static ?string $navigationGroup = 'Content';
     protected static ?string $navigationLabel = 'Vertalingen';
     protected static ?string $label = 'Vertaling';
