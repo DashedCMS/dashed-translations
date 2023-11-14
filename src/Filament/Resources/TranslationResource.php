@@ -2,11 +2,11 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources;
 
-use Filament\Resources\Form;
-use Filament\Resources\Table;
-use Filament\Resources\Resource;
-use Dashed\DashedTranslations\Models\Translation;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\ListTranslations;
+use Dashed\DashedTranslations\Models\Translation;
+use Filament\Resources\Form;
+use Filament\Resources\Resource;
+use Filament\Resources\Table;
 
 class TranslationResource extends Resource
 {
