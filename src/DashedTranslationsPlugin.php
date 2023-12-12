@@ -2,9 +2,9 @@
 
 namespace Dashed\DashedTranslations;
 
-use Filament\Panel;
-use Filament\Contracts\Plugin;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
+use Filament\Contracts\Plugin;
+use Filament\Panel;
 
 class DashedTranslationsPlugin implements Plugin
 {
