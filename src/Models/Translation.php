@@ -44,7 +44,7 @@ class Translation extends Model
 
     public static function get($name, $tag, $default = null, $type = 'text', $variables = null)
     {
-        if (! \Illuminate\Support\Facades\Schema::hasTable('dashed__translations')) {
+        if (app()->runningInConsole()) {
             return $default;
         }
 
