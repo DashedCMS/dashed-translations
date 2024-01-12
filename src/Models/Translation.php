@@ -44,9 +44,10 @@ class Translation extends Model
 
     public static function get($name, $tag, $default = null, $type = 'text', $variables = null)
     {
-        if (app()->runningInConsole()) {
-            return $default;
-        }
+        //Cannot use this because this fails emails etc
+//        if (app()->runningInConsole()) {
+//            return $default;
+//        }
 
         if ($name && $default === null) {
             $default = $name;
