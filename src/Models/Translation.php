@@ -5,6 +5,7 @@ namespace Dashed\DashedTranslations\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -44,10 +45,13 @@ class Translation extends Model
 
     public static function get($name, $tag, $default = null, $type = 'text', $variables = null)
     {
-        //Cannot use this because this fails emails etc
-        //        if (app()->runningInConsole()) {
-        //            return $default;
-        //        }
+        $tableExists = Cache::remember('dashed__translations_table_exists', 60, function () {
+            return Schema::hasTable('dashed__translations');
+        });
+
+        if (!$tableExists) {
+            return $default;
+        }
 
         if ($name && $default === null) {
             $default = $name;
@@ -72,9 +76,9 @@ class Translation extends Model
         }
 
         $translation = self::where('name', $name)->where('tag', $tag)->where('type', $type)->first();
-        if (! $translation) {
+        if (!$translation) {
             $translation = self::withTrashed()->where('name', $name)->where('tag', $tag)->first();
-            if (! $translation) {
+            if (!$translation) {
                 $translation = self::updateOrCreate(
                     ['name' => $name, 'tag' => $tag],
                     ['default' => $default, 'type' => $type, 'variables' => $variables]
