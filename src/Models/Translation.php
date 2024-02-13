@@ -49,7 +49,7 @@ class Translation extends Model
             return Schema::hasTable('dashed__translations');
         });
 
-        if (!$tableExists) {
+        if (! $tableExists) {
             return $default;
         }
 
@@ -76,9 +76,9 @@ class Translation extends Model
         }
 
         $translation = self::where('name', $name)->where('tag', $tag)->where('type', $type)->first();
-        if (!$translation) {
+        if (! $translation) {
             $translation = self::withTrashed()->where('name', $name)->where('tag', $tag)->first();
-            if (!$translation) {
+            if (! $translation) {
                 $translation = self::updateOrCreate(
                     ['name' => $name, 'tag' => $tag],
                     ['default' => $default, 'type' => $type, 'variables' => $variables]
