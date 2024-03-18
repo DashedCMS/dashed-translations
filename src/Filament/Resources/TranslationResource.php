@@ -4,9 +4,15 @@ namespace Dashed\DashedTranslations\Filament\Resources;
 
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\ListTranslations;
 use Dashed\DashedTranslations\Models\Translation;
+<<<<<<< HEAD
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
+=======
+use Filament\Resources\Form;
+use Filament\Resources\Resource;
+use Filament\Resources\Table;
+>>>>>>> b79745b7f3b802274820f98a264a853f28cf727f
 
 class TranslationResource extends Resource
 {

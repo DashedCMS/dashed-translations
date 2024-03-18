@@ -3,6 +3,10 @@
 namespace Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages;
 
 use Carbon\Carbon;
+<<<<<<< HEAD
+=======
+use Closure;
+>>>>>>> b79745b7f3b802274820f98a264a853f28cf727f
 use Dashed\DashedCore\Classes\Locales;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 use Dashed\DashedTranslations\Models\Translation;
@@ -14,8 +18,13 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+<<<<<<< HEAD
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
+=======
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+>>>>>>> b79745b7f3b802274820f98a264a853f28cf727f
 use Filament\Resources\Pages\Page;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Support\Facades\Cache;
