@@ -4,7 +4,6 @@ namespace Dashed\DashedTranslations;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 
 class DashedTranslationsServiceProvider extends PackageServiceProvider
 {
