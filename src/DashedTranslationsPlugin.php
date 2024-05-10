@@ -2,6 +2,7 @@
 
 namespace Dashed\DashedTranslations;
 
+use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
@@ -16,6 +17,9 @@ class DashedTranslationsPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel
+            ->pages([
+                TranslationsSettingsPage::class,
+            ])
             ->resources([
                 TranslationResource::class,
             ]);

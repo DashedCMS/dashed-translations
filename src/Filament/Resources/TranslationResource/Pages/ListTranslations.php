@@ -4,16 +4,23 @@ namespace Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages
 
 use Carbon\Carbon;
 use Dashed\DashedCore\Classes\Locales;
+use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
+use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
 use Dashed\DashedTranslations\Models\Translation;
+use Dashed\Deepl\Facades\Deepl;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
@@ -49,17 +56,31 @@ class ListTranslations extends Page
         return 'data';
     }
 
+    protected function getActions(): array
+    {
+
+        return [
+            self::translateEverything()
+        ];
+    }
+
     protected function getFormSchema(): array
     {
-        $tags = Translation::distinct('tag')->orderBy('tag', 'ASC')->pluck('tag');
+        $tabs = Translation::distinct('tag')->orderBy('tag', 'ASC')->pluck('tag');
         $sections = [];
 
-
-        foreach ($tags as $tag) {
-            $translations = Translation::where('tag', $tag)->orderBy('name', 'ASC')->get();
+        foreach ($tabs as $tab) {
+            $translations = Translation::where('tag', $tab)->orderBy('name', 'ASC')->get();
             $tabs = [];
 
             foreach (Locales::getLocales() as $locale) {
+                $otherLocales = [];
+                foreach (Locales::getLocales() as $localeLoop) {
+                    if ($locale['id'] != $localeLoop['id']) {
+                        $otherLocales[$localeLoop['id']] = $localeLoop['name'];
+                    }
+                }
+
                 $schema = [];
 
                 foreach ($translations as $translation) {
@@ -79,6 +100,7 @@ class ListTranslations extends Page
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->lazy()
+                            ->hintAction(self::translateSingleField($otherLocales, $locale))
                             ->afterStateUpdated(function (Textarea $component, Set $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
                                 $translationId = $explode[1];
@@ -117,6 +139,7 @@ class ListTranslations extends Page
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->live()
+                            ->hintAction(self::translateSingleField($otherLocales, $locale))
                             ->afterStateUpdated(function (TiptapEditor $component, Set $set, $state) {
                                 //                                $explode = explode('_', $component->getStatePath());
                                 //                                $translationId = $explode[1];
@@ -152,6 +175,7 @@ class ListTranslations extends Page
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->lazy()
+                            ->hintAction(self::translateSingleField($otherLocales, $locale))
                             ->afterStateUpdated(function (TextInput $component, Set $set, $state) {
                                 $explode = explode('_', $component->getStatePath());
                                 $translationId = $explode[1];
@@ -173,10 +197,13 @@ class ListTranslations extends Page
                     ->schema($schema);
             }
 
-            $sections[] = Section::make('Vertalingen voor ' . $tag)
+            $sections[] = Section::make('Vertalingen voor ' . $tab)
                 ->schema([
                     Tabs::make('Locales')
                         ->tabs($tabs),
+                ])
+                ->headerActions([
+                    self::translateTab($translations),
                 ])
                 ->collapsible();
         }
@@ -247,5 +274,144 @@ class ListTranslations extends Page
                 }
             }
         }
+    }
+
+    public static function translateTab($translations)
+    {
+        $translationSchema = [];
+
+        foreach ($translations as $translation) {
+            if (!in_array($translation->type, ['image', 'repeater'])) {
+                $translationSchema[] = Toggle::make('translate.' . $translation->id)
+                    ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
+                    ->default(true);
+            }
+        }
+
+        $allLocales = [];
+
+        foreach (Locales::getLocales() as $locale) {
+            $allLocales[$locale['id']] = $locale['name'];
+        }
+
+        return
+            Action::make('translate')
+                ->icon('heroicon-m-language')
+                ->label('Vertaal tab')
+                ->visible(AutomatedTranslation::automatedTranslationsEnabled())
+                ->form(array_merge([
+                    Select::make('from_locale')
+                        ->options($allLocales)
+                        ->required()
+                        ->label('Vanaf taal'),
+                    Select::make('to_locales')
+                        ->options($allLocales)
+//                        ->default(collect($allLocales)->keys()->toArray())
+                        ->required()
+                        ->helperText('Zorg dat je niet de taal kiest waar het vandaag vertaald wordt')
+                        ->label('Naar talen')
+                        ->multiple(),
+                ], $translationSchema))
+                ->action(function (array $data) {
+                    foreach ($data['translate'] as $id => $bool) {
+                        if ($bool === true) {
+                            $translation = Translation::find($id);
+                            $textToTranslate = $translation->getTranslation('value', $data['from_locale']) ?: $translation->default;
+                            foreach ($data['to_locales'] as $locale) {
+                                TranslateValueFromModel::dispatch($translation, 'value', $textToTranslate, $locale, $data['from_locale']);
+                            }
+                        }
+                    }
+
+                    Notification::make()
+                        ->title("De tab wordt vertaald")
+                        ->success()
+                        ->send();
+                });
+    }
+
+    public static function translateEverything()
+    {
+        $tabs = Translation::distinct('tag')->orderBy('tag', 'ASC')->pluck('tag');
+        $translationSchema = [];
+
+        foreach ($tabs as $tab) {
+            $translationSchema[] = Toggle::make('tabs.' . $tab)
+                ->label('Vertaal tab ' . Str::of($tab)->replace('_', ' ')->replace('-', ' ')->title())
+                ->default(true);
+        }
+
+        $allLocales = [];
+
+        foreach (Locales::getLocales() as $locale) {
+            $allLocales[$locale['id']] = $locale['name'];
+        }
+
+        return
+            \Filament\Actions\Action::make('translate')
+                ->icon('heroicon-m-language')
+                ->label('Vertaal alles')
+                ->visible(AutomatedTranslation::automatedTranslationsEnabled())
+                ->form(array_merge([
+                    Select::make('from_locale')
+                        ->options($allLocales)
+                        ->required()
+                        ->label('Vanaf taal'),
+                    Select::make('to_locales')
+                        ->options($allLocales)
+//                        ->default(collect($allLocales)->keys()->toArray())
+                        ->required()
+                        ->helperText('Zorg dat je niet de taal kiest waar het vandaag vertaald wordt')
+                        ->label('Naar talen')
+                        ->multiple(),
+                ], $translationSchema))
+                ->action(function (array $data) use ($tabs) {
+                    foreach ($data['tabs'] as $tab => $bool) {
+                        if ($bool === true) {
+                            $translations = Translation::where('tag', $tab)->get();
+                            foreach ($translations as $translation) {
+                                $textToTranslate = $translation->getTranslation('value', $data['from_locale']) ?: $translation->default;
+                                foreach ($data['to_locales'] as $locale) {
+                                    TranslateValueFromModel::dispatch($translation, 'value', $textToTranslate, $locale, $data['from_locale']);
+                                }
+                            }
+                        }
+                    }
+
+                    Notification::make()
+                        ->title("Alles wordt vertaald")
+                        ->success()
+                        ->send();
+                });
+    }
+
+    public static function translateSingleField($otherLocales, $locale)
+    {
+        return
+            Action::make('translate')
+                ->icon('heroicon-m-language')
+                ->label('Vertaal')
+                ->visible(AutomatedTranslation::automatedTranslationsEnabled())
+                ->form([
+                    Select::make('locales')
+                        ->options($otherLocales)
+                        ->default(collect($otherLocales)->keys()->toArray())
+                        ->required()
+                        ->label('Talen')
+                        ->multiple(),
+                ])
+                ->action(function (array $data, $livewire) use ($locale) {
+                    $id = explode('_', $livewire->mountedFormComponentActionsComponents[0])[1];
+                    $translation = Translation::find($id);
+                    $textToTranslate = $translation->getTranslation('value', $locale['id']) ?: $translation->default;
+                    foreach ($data['locales'] as $otherLocale) {
+                        TranslateValueFromModel::dispatch($translation, 'value', $textToTranslate, $otherLocale, $locale['id']);
+                    }
+
+                    Notification::make()
+                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " wordt vertaald")
+                        ->success()
+                        ->send();
+                });
     }
 }
