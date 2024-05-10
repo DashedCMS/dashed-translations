@@ -300,10 +300,14 @@ class ListTranslations extends Page
                 ->form(array_merge([
                     Select::make('from_locale')
                         ->options($allLocales)
+                        ->preload()
+                        ->searchable()
                         ->required()
                         ->label('Vanaf taal'),
                     Select::make('to_locales')
                         ->options($allLocales)
+                        ->preload()
+                        ->searchable()
 //                        ->default(collect($allLocales)->keys()->toArray())
                         ->required()
                         ->helperText('Zorg dat je niet de taal kiest waar het vandaag vertaald wordt')
@@ -353,10 +357,14 @@ class ListTranslations extends Page
                 ->form(array_merge([
                     Select::make('from_locale')
                         ->options($allLocales)
+                        ->preload()
+                        ->searchable()
                         ->required()
                         ->label('Vanaf taal'),
                     Select::make('to_locales')
                         ->options($allLocales)
+                        ->preload()
+                        ->searchable()
 //                        ->default(collect($allLocales)->keys()->toArray())
                         ->required()
                         ->helperText('Zorg dat je niet de taal kiest waar het vandaag vertaald wordt')
@@ -393,6 +401,8 @@ class ListTranslations extends Page
                 ->form([
                     Select::make('locales')
                         ->options($otherLocales)
+                        ->preload()
+                        ->searchable()
                         ->default(collect($otherLocales)->keys()->toArray())
                         ->required()
                         ->label('Talen')
