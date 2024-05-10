@@ -41,6 +41,10 @@ class TranslateValueFromModel implements ShouldQueue
      */
     public function handle(): void
     {
+        if($this->toLanguage === $this->fromLanguage) {
+            return;
+        }
+
         $translatedText = AutomatedTranslation::translate($this->value, $this->toLanguage, $this->fromLanguage);
         $this->model->setTranslation($this->column, $this->toLanguage, $translatedText);
         $this->model->save();
