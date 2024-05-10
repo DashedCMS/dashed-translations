@@ -8,7 +8,6 @@ use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
 use Dashed\DashedTranslations\Models\Translation;
-use Dashed\Deepl\Facades\Deepl;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -20,7 +19,6 @@ use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
@@ -60,7 +58,7 @@ class ListTranslations extends Page
     {
 
         return [
-            self::translateEverything()
+            self::translateEverything(),
         ];
     }
 
@@ -281,7 +279,7 @@ class ListTranslations extends Page
         $translationSchema = [];
 
         foreach ($translations as $translation) {
-            if (!in_array($translation->type, ['image', 'repeater'])) {
+            if (! in_array($translation->type, ['image', 'repeater'])) {
                 $translationSchema[] = Toggle::make('translate.' . $translation->id)
                     ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                     ->default(true);

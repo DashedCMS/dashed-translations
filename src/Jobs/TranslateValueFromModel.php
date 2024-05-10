@@ -2,10 +2,6 @@
 
 namespace Dashed\DashedTranslations\Jobs;
 
-use Dashed\DashedCore\Classes\Locales;
-use Dashed\DashedCore\Classes\Sites;
-use Dashed\DashedCore\Models\Redirect;
-use Dashed\DashedCore\Models\UrlHistory;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Exception;
 use Illuminate\Bus\Queueable;
@@ -16,7 +12,10 @@ use Illuminate\Queue\SerializesModels;
 
 class TranslateValueFromModel implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public $timeout = 300;
     public $model;
@@ -24,7 +23,6 @@ class TranslateValueFromModel implements ShouldQueue
     public $value;
     public $toLanguage;
     public $fromLanguage;
-
 
     /**
      * Create a new job instance.
