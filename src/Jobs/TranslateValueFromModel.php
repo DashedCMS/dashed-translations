@@ -4,6 +4,7 @@ namespace Dashed\DashedTranslations\Jobs;
 
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Exception;
+use Filament\Forms\Components\Select;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -41,11 +42,17 @@ class TranslateValueFromModel implements ShouldQueue
      */
     public function handle(): void
     {
-        if($this->toLanguage === $this->fromLanguage) {
+        if ($this->toLanguage === $this->fromLanguage) {
             return;
         }
 
-        $translatedText = AutomatedTranslation::translate($this->value, $this->toLanguage, $this->fromLanguage);
+        if (is_array($this->value)) {
+            $this->searchAndTranslate(array: $this->value);
+            $translatedText = $this->value;
+        } else {
+            $translatedText = $this->translate($this->value);
+        }
+
         $this->model->setTranslation($this->column, $this->toLanguage, $translatedText);
         $this->model->save();
     }
@@ -53,5 +60,65 @@ class TranslateValueFromModel implements ShouldQueue
     public function failed($exception)
     {
         throw new Exception('Translation failed: ' . $exception->getMessage());
+    }
+
+    private function searchAndTranslate(&$array, $parentKeys = [])
+    {
+        foreach ($array as $key => &$value) {
+            if (!is_int($key) && $key != 'data') {
+                $currentKeys = array_merge($parentKeys, [$key]);
+            } else {
+                $currentKeys = $parentKeys;
+            }
+
+            if (is_array($value)) {
+                if (array_key_exists('type', $value) && array_key_exists('data', $value)) {
+                    $currentKeys = array_merge($parentKeys, [$value['type']]);
+                }
+                $this->searchAndTranslate($value, $currentKeys);
+            } elseif (!str($key)->contains('type') && !str($key)->contains('url')) {
+
+                $builderBlock = $this->matchBuilderBlock($key, $parentKeys, cms()->builder('blocks'));
+                if ($builderBlock && $builderBlock instanceof Select) {
+                    continue;
+                }
+
+                $value = $this->translate($value);
+            }
+        }
+
+        unset($value);
+    }
+
+    private function matchBuilderBlock($key, $parentKeys, $blocks, $currentBlock = null, $test = 0)
+    {
+        if (count($parentKeys) || (!count($parentKeys) && $currentBlock)) {
+            foreach ($blocks as $block) {
+                if (count($parentKeys) && $block->getName() === $parentKeys[0]) {
+                    $currentBlock = $block;
+                } elseif ($currentBlock && method_exists($block, 'getName') && $block->getName() === $key) {
+                    return $block;
+                }
+            }
+        }
+
+        if ($currentBlock && count($parentKeys)) {
+            $currentBlock = $this->matchBuilderBlock($key, array_slice($parentKeys, 1), $currentBlock->getChildComponents(), $currentBlock, $test + 1);
+        }
+
+        if($currentBlock && $currentBlock->getName() === $key) {
+            return $currentBlock;
+        }
+
+        return null;
+    }
+
+    private function translate(?string $value = '')
+    {
+        if (!$value) {
+            return $value;
+        }
+
+        return AutomatedTranslation::translate($value, $this->toLanguage, $this->fromLanguage);
     }
 }

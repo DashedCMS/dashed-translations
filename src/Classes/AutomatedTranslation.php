@@ -30,8 +30,6 @@ class AutomatedTranslation
         $provider = self::getProvider();
 
         if (! $provider) {
-            dump($provider, Customsetting::get('deepl_translations_enabled') . ' ' . Customsetting::get('deepl_api_key'));
-
             throw new \Exception('No translation provider enabled');
         }
 
