@@ -25,6 +25,7 @@ use Filament\Resources\Pages\Page;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use RalphJSmit\Filament\MediaLibrary\Forms\Components\MediaPicker;
 
 class ListTranslations extends Page
 {
@@ -152,11 +153,10 @@ class ListTranslations extends Page
                                 //                                    ->send();
                             });
                     } elseif ($translation->type == 'image') {
-                        $schema[] = FileUpload::make("translation_{$translation->id}_{$locale['id']}")
-                            ->disk('dashed')
+                        $schema[] = MediaPicker::make("translation_{$translation->id}_{$locale['id']}")
                             ->default($translation->default)
                             ->downloadable()
-                            ->openable()
+                            ->showFileName()
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '');
                     } elseif ($translation->type == 'repeater') {
