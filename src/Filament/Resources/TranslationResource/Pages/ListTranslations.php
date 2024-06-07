@@ -10,6 +10,7 @@ use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
 use Dashed\DashedTranslations\Models\Translation;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -157,7 +158,20 @@ class ListTranslations extends Page
                             ->downloadable()
                             ->showFileName()
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
-                            ->helperText($helperText ?? '');
+                            ->helperText($helperText ?? '')
+                            ->afterStateUpdated(function (MediaPicker $component, Set $set, $state) {
+                                $explode = explode('_', $component->getStatePath());
+                                $translationId = $explode[1];
+                                $locale = $explode[2];
+                                $translation = Translation::find($translationId);
+                                $translation->setTranslation("value", $locale, $state);
+                                $translation->save();
+                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
+                                Notification::make()
+                                    ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                    ->success()
+                                    ->send();
+                            });
                     } elseif ($translation->type == 'repeater') {
                         $schema[] = Repeater::make("translation_{$translation->id}_{$locale['id']}")
                             ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
@@ -210,29 +224,29 @@ class ListTranslations extends Page
 
     public function updated($path, $value): void
     {
-        foreach (Translation::where('type', 'image')->get() as $translation) {
-            foreach (Locales::getLocales() as $locale) {
-                if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
-                    Notification::make()
-                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " wordt opgeslagen")
-                        ->success()
-                        ->send();
-                    $imagePath = $value->store('/dashed/translations', 'dashed');
-                    $explode = explode('.', $path);
-                    $explode = explode('_', $explode[1]);
-                    $translationId = $explode[1];
-                    $locale = $explode[2];
-                    $translation = Translation::find($translationId);
-                    $translation->setTranslation("value", $locale, $imagePath);
-                    $translation->save();
-                    Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
-                    Notification::make()
-                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
-                        ->success()
-                        ->send();
-                }
-            }
-        }
+//        foreach (Translation::where('type', 'image')->get() as $translation) {
+//            foreach (Locales::getLocales() as $locale) {
+//                if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
+//                    Notification::make()
+//                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " wordt opgeslagen")
+//                        ->success()
+//                        ->send();
+//                    $imagePath = $value->store('/dashed/translations', 'dashed');
+//                    $explode = explode('.', $path);
+//                    $explode = explode('_', $explode[1]);
+//                    $translationId = $explode[1];
+//                    $locale = $explode[2];
+//                    $translation = Translation::find($translationId);
+//                    $translation->setTranslation("value", $locale, $imagePath);
+//                    $translation->save();
+//                    Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
+//                    Notification::make()
+//                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+//                        ->success()
+//                        ->send();
+//                }
+//            }
+//        }
 
         foreach (Translation::where('type', 'editor')->get() as $translation) {
             foreach (Locales::getLocales() as $locale) {
