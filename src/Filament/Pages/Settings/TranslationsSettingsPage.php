@@ -46,8 +46,8 @@ class TranslationsSettingsPage extends Page implements HasForms
                 ->reactive(),
             TextInput::make("deepl_api_key")
                 ->label('DeepL API key')
-                ->required(fn(Get $get) => $get('deepl_translations_enabled'))
-                ->visible(fn(Get $get) => $get('deepl_translations_enabled')),
+                ->required(fn (Get $get) => $get('deepl_translations_enabled'))
+                ->visible(fn (Get $get) => $get('deepl_translations_enabled')),
         ];
 
         return $schema;
@@ -102,11 +102,11 @@ class TranslationsSettingsPage extends Page implements HasForms
                             ->required()
                             ->reactive()
                             ->label('Vanaf taal')
-                            ->afterStateUpdated(fn(Set $set, Get $get) => $set('to_locales', collect(Locales::getLocalesArrayWithoutCurrent($get('from_locale')))->keys()->toArray()));
+                            ->afterStateUpdated(fn (Set $set, Get $get) => $set('to_locales', collect(Locales::getLocalesArrayWithoutCurrent($get('from_locale')))->keys()->toArray()));
                     $form[] =
                         Select::make('to_locales')
-                            ->options(fn(Get $get) => Locales::getLocalesArrayWithoutCurrent($get('from_locale')))
-                            ->default(fn(Get $get) => collect(Locales::getLocalesArrayWithoutCurrent($get('from_locale')))->keys()->toArray())
+                            ->options(fn (Get $get) => Locales::getLocalesArrayWithoutCurrent($get('from_locale')))
+                            ->default(fn (Get $get) => collect(Locales::getLocalesArrayWithoutCurrent($get('from_locale')))->keys()->toArray())
                             ->preload()
                             ->searchable()
                             ->required()
