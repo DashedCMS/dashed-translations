@@ -13,6 +13,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
@@ -45,8 +46,8 @@ class TranslationsSettingsPage extends Page implements HasForms
                 ->reactive(),
             TextInput::make("deepl_api_key")
                 ->label('DeepL API key')
-                ->required(fn (Get $get) => $get('deepl_translations_enabled'))
-                ->visible(fn (Get $get) => $get('deepl_translations_enabled')),
+                ->required(fn(Get $get) => $get('deepl_translations_enabled'))
+                ->visible(fn(Get $get) => $get('deepl_translations_enabled')),
         ];
 
         return $schema;
@@ -79,6 +80,14 @@ class TranslationsSettingsPage extends Page implements HasForms
 
                                 return $options;
                             })
+                            ->visible($routeModel['class']::all()->pluck('id')->count())
+                            ->hintActions([
+                                \Filament\Forms\Components\Actions\Action::make('select-all')
+                                    ->label('Selecteer alles')
+                                    ->action(function (Set $set) use ($routeModel) {
+                                        $set($routeModel['name'], $routeModel['class']::all()->pluck('id')->toArray());
+                                    }),
+                            ])
                             ->multiple()
                             ->preload()
                             ->searchable();
@@ -87,17 +96,22 @@ class TranslationsSettingsPage extends Page implements HasForms
                     $form[] =
                         Select::make('from_locale')
                             ->options(Locales::getLocalesArray())
+                            ->default(Locales::getFirstLocale()['id'])
                             ->preload()
                             ->searchable()
                             ->required()
-                            ->label('Vanaf taal');
+                            ->reactive()
+                            ->label('Vanaf taal')
+                            ->afterStateUpdated(fn(Set $set, Get $get) => $set('to_locales', collect(Locales::getLocalesArrayWithoutCurrent($get('from_locale')))->keys()->toArray()));
                     $form[] =
                         Select::make('to_locales')
-                            ->options(Locales::getLocalesArray())
+                            ->options(fn(Get $get) => Locales::getLocalesArrayWithoutCurrent($get('from_locale')))
+                            ->default(fn(Get $get) => collect(Locales::getLocalesArrayWithoutCurrent($get('from_locale')))->keys()->toArray())
                             ->preload()
                             ->searchable()
                             ->required()
                             ->label('Naar talen')
+                            ->reactive()
                             ->multiple();
 
                     return $form;
