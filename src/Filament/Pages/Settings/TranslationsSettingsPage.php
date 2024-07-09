@@ -7,7 +7,6 @@ use Dashed\DashedCore\Classes\Sites;
 use Dashed\DashedCore\Models\Customsetting;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -46,8 +45,8 @@ class TranslationsSettingsPage extends Page implements HasForms
                 ->reactive(),
             TextInput::make("deepl_api_key")
                 ->label('DeepL API key')
-                ->required(fn(Get $get) => $get('deepl_translations_enabled'))
-                ->visible(fn(Get $get) => $get('deepl_translations_enabled')),
+                ->required(fn (Get $get) => $get('deepl_translations_enabled'))
+                ->visible(fn (Get $get) => $get('deepl_translations_enabled')),
         ];
 
         return $schema;
