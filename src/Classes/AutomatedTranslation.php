@@ -3,14 +3,16 @@
 namespace Dashed\DashedTranslations\Classes;
 
 use Dashed\DashedCore\Models\Customsetting;
+use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
 use Dashed\Deepl\Facades\Deepl;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 
 class AutomatedTranslation
 {
     public static function automatedTranslationsEnabled()
     {
-        return ! is_null(self::getProvider());
+        return !is_null(self::getProvider());
     }
 
     public static function getProvider(): ?array
@@ -29,14 +31,56 @@ class AutomatedTranslation
     {
         $provider = self::getProvider();
 
-        if (! $provider) {
+        if (!$provider) {
             throw new \Exception('No translation provider enabled');
         }
 
-        if($provider['provider'] === 'deepl') {
+        if ($provider['provider'] === 'deepl') {
             Config::set('deepl.api_key', $provider['api_key']);
 
             return Deepl::api()->translate($text, $targetLanguage, $sourceLanguage);
+        }
+    }
+
+    public static function translateModel(Model $model, string $fromLocale, array $toLocales): void
+    {
+        foreach ($model->translatable as $column) {
+            if (!method_exists($model, $column)) {
+                $textToTranslate = $model->getTranslation($column, $fromLocale);
+
+                foreach ($toLocales as $locale) {
+                    TranslateValueFromModel::dispatch($model, $column, $textToTranslate, $locale, $fromLocale);
+                }
+            }
+        }
+
+        if ($model->metadata) {
+            $translatableMetaColumns = [
+                'title',
+                'description',
+            ];
+
+            foreach ($translatableMetaColumns as $column) {
+                $textToTranslate = $model->metadata->getTranslation($column, $fromLocale);
+                foreach ($toLocales as $locale) {
+                    TranslateValueFromModel::dispatch($model->metadata, $column, $textToTranslate, $locale, $fromLocale);
+                }
+            }
+        }
+
+        if ($model->customBlocks) {
+            $translatableCustomBlockColumns = [
+                'blocks',
+            ];
+
+            foreach ($translatableCustomBlockColumns as $column) {
+                $textToTranslate = $model->customBlocks->getTranslation($column, $fromLocale);
+                foreach ($toLocales as $locale) {
+                    TranslateValueFromModel::dispatch($model->customBlocks, $column, $textToTranslate, $locale, $fromLocale, [
+                        'customBlock' => str($model::class . 'Blocks')->explode('\\')->last(),
+                    ]);
+                }
+            }
         }
     }
 }
