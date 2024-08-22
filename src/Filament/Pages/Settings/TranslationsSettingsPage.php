@@ -131,6 +131,8 @@ class TranslationsSettingsPage extends Page implements HasForms
                         ->title('De vertalingen zijn gestart, dit kan even duren')
                         ->warning()
                         ->send();
+
+//                    return redirect
                 }),
         ];
     }

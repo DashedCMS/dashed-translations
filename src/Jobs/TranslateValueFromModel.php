@@ -3,6 +3,7 @@
 namespace Dashed\DashedTranslations\Jobs;
 
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Exception;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -59,6 +60,15 @@ class TranslateValueFromModel implements ShouldQueue
 
         $this->model->setTranslation($this->column, $this->toLanguage, $translatedText);
         $this->model->save();
+
+        $automatedTranslationProgress = AutomatedTranslationProgress::where('model_id', $this->model->id)
+            ->where('model_type', $this->model::class)
+            ->where('column', $this->column)
+            ->where('from_language', $this->fromLanguage)
+            ->where('to_language', $this->toLanguage)
+            ->first();
+        $automatedTranslationProgress->total_columns_translated++;
+        $automatedTranslationProgress->save();
     }
 
     public function failed($exception)

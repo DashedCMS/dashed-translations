@@ -4,6 +4,7 @@ namespace Dashed\DashedTranslations\Classes;
 
 use Dashed\DashedCore\Models\Customsetting;
 use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Dashed\Deepl\Facades\Deepl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
@@ -12,7 +13,7 @@ class AutomatedTranslation
 {
     public static function automatedTranslationsEnabled()
     {
-        return ! is_null(self::getProvider());
+        return !is_null(self::getProvider());
     }
 
     public static function getProvider(): ?array
@@ -31,7 +32,7 @@ class AutomatedTranslation
     {
         $provider = self::getProvider();
 
-        if (! $provider) {
+        if (!$provider) {
             throw new \Exception('No translation provider enabled');
         }
 
@@ -44,8 +45,11 @@ class AutomatedTranslation
 
     public static function translateModel(Model $model, string $fromLocale, array $toLocales): void
     {
+        $totalColumnsToTranslate = 0;
+
         foreach ($model->translatable as $column) {
-            if (! method_exists($model, $column)) {
+            if (!method_exists($model, $column)) {
+                $totalColumnsToTranslate++;
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
                 foreach ($toLocales as $locale) {
@@ -61,6 +65,7 @@ class AutomatedTranslation
             ];
 
             foreach ($translatableMetaColumns as $column) {
+                $totalColumnsToTranslate++;
                 $textToTranslate = $model->metadata->getTranslation($column, $fromLocale);
                 foreach ($toLocales as $locale) {
                     TranslateValueFromModel::dispatch($model->metadata, $column, $textToTranslate, $locale, $fromLocale);
@@ -74,6 +79,7 @@ class AutomatedTranslation
             ];
 
             foreach ($translatableCustomBlockColumns as $column) {
+                $totalColumnsToTranslate++;
                 $textToTranslate = $model->customBlocks->getTranslation($column, $fromLocale);
                 foreach ($toLocales as $locale) {
                     TranslateValueFromModel::dispatch($model->customBlocks, $column, $textToTranslate, $locale, $fromLocale, [
@@ -81,6 +87,16 @@ class AutomatedTranslation
                     ]);
                 }
             }
+        }
+
+        foreach ($toLocales as $toLocale) {
+            $automatedTranslationProgress = new AutomatedTranslationProgress();
+            $automatedTranslationProgress->model_type = $model::class;
+            $automatedTranslationProgress->model_id = $model->id;
+            $automatedTranslationProgress->from_locale = $fromLocale;
+            $automatedTranslationProgress->to_locale = $toLocale;
+            $automatedTranslationProgress->total_columns_to_translate = $totalColumnsToTranslate;
+            $automatedTranslationProgress->save();
         }
     }
 }

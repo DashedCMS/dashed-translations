@@ -1,0 +1,80 @@
+<?php
+
+namespace Dashed\DashedTranslations\Filament\Resources;
+
+use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\ListAutomatedTranslationProgress;
+use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\ListTranslations;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Dashed\DashedTranslations\Models\Translation;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+
+class AutomatedTranslationProgressResource extends Resource
+{
+    protected static ?string $model = AutomatedTranslationProgress::class;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $navigationIcon = 'heroicon-o-language';
+    protected static ?string $navigationGroup = 'Content';
+    protected static ?string $navigationLabel = 'Automatische vertaling';
+    protected static ?string $label = 'Vertaling';
+    protected static ?string $pluralLabel = 'Automatische vertalingen';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [];
+    }
+
+    public static function form(Form $form): Form
+    {
+        return [];
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table->columns([
+            TextColumn::make('model')
+                ->label('Model')
+                ->getStateUsing(fn($record) => $record->model_type . ' - ' . $record->model_id),
+            TextColumn::make('from_locale')
+                ->label('Vanaf taal'),
+            TextColumn::make('to_locale')
+                ->label('Naar taal'),
+            TextColumn::make('total_columns_to_translate')
+                ->label('Voortgang')
+                ->formatStateUsing(fn($record) => $record->total_columns_translated . '/' . $record->total_columns_to_translate),
+            TextColumn::make('status')
+                ->label('Status')
+                ->formatStateUsing(fn($record) => match ($record->status) {
+                    'pending' => 'In afwachting',
+                    'in_progress' => 'Bezig',
+                    'finished' => 'Voltooid',
+                    default => 'Onbekend',
+                })
+                ->badge()
+                ->colors([
+                    'pending' => 'primary',
+                    'in_progress' => 'warning',
+                    'finished' => 'success',
+                ]),
+        ])
+            ->poll('5s');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListAutomatedTranslationProgress::route('/'),
+        ];
+    }
+}
