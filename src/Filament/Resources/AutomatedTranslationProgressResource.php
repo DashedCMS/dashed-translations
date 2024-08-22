@@ -34,7 +34,7 @@ class AutomatedTranslationProgressResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return [];
+        return $form;
     }
 
     public static function table(Table $table): Table
