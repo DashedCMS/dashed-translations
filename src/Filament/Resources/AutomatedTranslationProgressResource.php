@@ -59,11 +59,11 @@ class AutomatedTranslationProgressResource extends Resource
                     default => 'Onbekend',
                 })
                 ->badge()
-                ->colors([
+                ->color(fn (string $state): string => match ($state) {
                     'pending' => 'primary',
                     'in_progress' => 'warning',
                     'finished' => 'success',
-                ]),
+                }),
         ])
             ->poll('5s');
     }

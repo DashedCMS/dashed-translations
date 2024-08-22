@@ -28,11 +28,12 @@ class TranslateValueFromModel implements ShouldQueue
     public $toLanguage;
     public $fromLanguage;
     public array $attributes;
+    public AutomatedTranslationProgress $automatedTranslationProgress;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($model, $column, $value, $toLanguage, $fromLanguage, array $attributes = [])
+    public function __construct($model, $column, $value, $toLanguage, $fromLanguage, array $attributes = [], AutomatedTranslationProgress $automatedTranslationProgress)
     {
         $this->model = $model;
         $this->column = $column;
@@ -40,6 +41,7 @@ class TranslateValueFromModel implements ShouldQueue
         $this->toLanguage = $toLanguage;
         $this->fromLanguage = $fromLanguage;
         $this->attributes = $attributes;
+        $this->automatedTranslationProgress = $automatedTranslationProgress;
     }
 
     /**
@@ -61,14 +63,8 @@ class TranslateValueFromModel implements ShouldQueue
         $this->model->setTranslation($this->column, $this->toLanguage, $translatedText);
         $this->model->save();
 
-        $automatedTranslationProgress = AutomatedTranslationProgress::where('model_id', $this->model->id)
-            ->where('model_type', $this->model::class)
-            ->where('column', $this->column)
-            ->where('from_language', $this->fromLanguage)
-            ->where('to_language', $this->toLanguage)
-            ->first();
-        $automatedTranslationProgress->total_columns_translated++;
-        $automatedTranslationProgress->save();
+        $this->automatedTranslationProgress->total_columns_translated = $automatedTranslationProgress->total_columns_translated + 1;
+        $this->automatedTranslationProgress->save();
     }
 
     public function failed($exception)
@@ -79,7 +75,7 @@ class TranslateValueFromModel implements ShouldQueue
     private function searchAndTranslate(&$array, $parentKeys = [])
     {
         foreach ($array as $key => &$value) {
-            if (! is_int($key) && $key != 'data') {
+            if (!is_int($key) && $key != 'data') {
                 $currentKeys = array_merge($parentKeys, [$key]);
             } else {
                 $currentKeys = $parentKeys;
@@ -90,7 +86,7 @@ class TranslateValueFromModel implements ShouldQueue
                     $currentKeys = array_merge($parentKeys, [$value['type']]);
                 }
                 $this->searchAndTranslate($value, $currentKeys);
-            } elseif (! str($key)->contains('type') && ! str($key)->contains('url')) {
+            } elseif (!str($key)->contains('type') && !str($key)->contains('url')) {
                 $builderBlock = $this->matchBuilderBlock($key, $parentKeys, cms()->builder('blocks')) || $this->matchCustomBlock($key, $parentKeys, cms()->builder($this->attributes['customBlock'] ?? 'blocks'));
                 if ($builderBlock && ($builderBlock instanceof Select || $builderBlock instanceof Toggle || $builderBlock instanceof FileUpload)) {
                     continue;
@@ -105,7 +101,7 @@ class TranslateValueFromModel implements ShouldQueue
 
     private function matchBuilderBlock($key, $parentKeys, $blocks, $currentBlock = null)
     {
-        if (count($parentKeys) || (! count($parentKeys) && $currentBlock)) {
+        if (count($parentKeys) || (!count($parentKeys) && $currentBlock)) {
             foreach ($blocks as $block) {
                 if (count($parentKeys) && $block->getName() === $parentKeys[0]) {
                     $currentBlock = $block;
@@ -128,7 +124,7 @@ class TranslateValueFromModel implements ShouldQueue
 
     private function matchCustomBlock($key, $parentKeys, $blocks, $currentBlock = null)
     {
-        if (count($parentKeys) || (! count($parentKeys) && $currentBlock)) {
+        if (count($parentKeys) || (!count($parentKeys) && $currentBlock)) {
             foreach ($blocks as $block) {
                 if (count($parentKeys) && $block->getName() === $parentKeys[0]) {
                     $currentBlock = $block;
@@ -151,7 +147,7 @@ class TranslateValueFromModel implements ShouldQueue
 
     private function translate(?string $value = '')
     {
-        if (! $value) {
+        if (!$value) {
             return $value;
         }
 
