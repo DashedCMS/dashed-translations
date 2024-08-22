@@ -21,6 +21,7 @@ class AutomatedTranslationProgressResource extends Resource
     protected static ?string $navigationLabel = 'Automatische vertaling';
     protected static ?string $label = 'Vertaling';
     protected static ?string $pluralLabel = 'Automatische vertalingen';
+
     public static function shouldRegisterNavigation(): bool
     {
         return AutomatedTranslation::automatedTranslationsEnabled();
