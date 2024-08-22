@@ -5,6 +5,7 @@ namespace Dashed\DashedTranslations\Filament\Resources;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\ListAutomatedTranslationProgress;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
@@ -72,6 +73,9 @@ class AutomatedTranslationProgressResource extends Resource
                 ->sortable()
                 ->dateTime(),
         ])
+            ->actions([
+                DeleteAction::make(),
+            ])
             ->defaultSort('created_at', 'desc')
             ->poll('5s');
     }
