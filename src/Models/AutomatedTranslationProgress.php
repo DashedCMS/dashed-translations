@@ -12,11 +12,11 @@ class AutomatedTranslationProgress extends Model
     {
         static::saved(function (AutomatedTranslationProgress $automatedTranslationProgress) {
             if($automatedTranslationProgress->total_columns_to_translate == $automatedTranslationProgress->total_columns_translated) {
-                $this->status = 'finished';
+                $automatedTranslationProgress->status = 'finished';
             } elseif($automatedTranslationProgress->total_columns_translated > 0) {
-                $this->status = 'in_progress';
+                $automatedTranslationProgress->status = 'in_progress';
             }
-            $this->saveQuietly();
+            $automatedTranslationProgress->saveQuietly();
         });
     }
 }
