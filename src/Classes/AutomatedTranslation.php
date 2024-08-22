@@ -13,7 +13,7 @@ class AutomatedTranslation
 {
     public static function automatedTranslationsEnabled()
     {
-        return !is_null(self::getProvider());
+        return ! is_null(self::getProvider());
     }
 
     public static function getProvider(): ?array
@@ -32,7 +32,7 @@ class AutomatedTranslation
     {
         $provider = self::getProvider();
 
-        if (!$provider) {
+        if (! $provider) {
             throw new \Exception('No translation provider enabled');
         }
 
@@ -48,7 +48,7 @@ class AutomatedTranslation
         $totalColumnsToTranslate = 0;
 
         foreach ($model->translatable as $column) {
-            if (!method_exists($model, $column)) {
+            if (! method_exists($model, $column)) {
                 $totalColumnsToTranslate++;
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 

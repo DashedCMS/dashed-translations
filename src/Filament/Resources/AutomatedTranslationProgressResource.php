@@ -3,9 +3,7 @@
 namespace Dashed\DashedTranslations\Filament\Resources;
 
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\ListAutomatedTranslationProgress;
-use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\ListTranslations;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
-use Dashed\DashedTranslations\Models\Translation;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
@@ -38,17 +36,17 @@ class AutomatedTranslationProgressResource extends Resource
         return $table->columns([
             TextColumn::make('model')
                 ->label('Model')
-                ->getStateUsing(fn($record) => $record->model_type . ' - ' . $record->model_id),
+                ->getStateUsing(fn ($record) => $record->model_type . ' - ' . $record->model_id),
             TextColumn::make('from_locale')
                 ->label('Vanaf taal'),
             TextColumn::make('to_locale')
                 ->label('Naar taal'),
             TextColumn::make('total_columns_to_translate')
                 ->label('Voortgang')
-                ->formatStateUsing(fn($record) => $record->total_columns_translated . '/' . $record->total_columns_to_translate),
+                ->formatStateUsing(fn ($record) => $record->total_columns_translated . '/' . $record->total_columns_to_translate),
             TextColumn::make('status')
                 ->label('Status')
-                ->formatStateUsing(fn($record) => match ($record->status) {
+                ->formatStateUsing(fn ($record) => match ($record->status) {
                     'pending' => 'In afwachting',
                     'in_progress' => 'Bezig',
                     'finished' => 'Voltooid',

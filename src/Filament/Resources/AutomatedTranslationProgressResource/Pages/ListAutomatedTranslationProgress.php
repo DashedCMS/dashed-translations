@@ -5,7 +5,6 @@ namespace Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgr
 use Carbon\Carbon;
 use Dashed\DashedCore\Classes\Locales;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
-use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Dashed\DashedTranslations\Models\Translation;
