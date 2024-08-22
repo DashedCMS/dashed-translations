@@ -63,6 +63,7 @@ class TranslateValueFromModel implements ShouldQueue
         $this->model->setTranslation($this->column, $this->toLanguage, $translatedText);
         $this->model->save();
 
+        $this->automatedTranslationProgress->refresh();
         $this->automatedTranslationProgress->total_columns_translated++;
         $this->automatedTranslationProgress->save();
     }

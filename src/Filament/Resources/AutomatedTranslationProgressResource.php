@@ -42,29 +42,37 @@ class AutomatedTranslationProgressResource extends Resource
         return $table->columns([
             TextColumn::make('model')
                 ->label('Model')
-                ->getStateUsing(fn ($record) => $record->model_type . ' - ' . $record->model_id),
+                ->getStateUsing(fn($record) => $record->model_type . ' - ' . $record->model_id),
             TextColumn::make('from_locale')
-                ->label('Vanaf taal'),
+                ->label('Vanaf taal')
+                ->sortable(),
             TextColumn::make('to_locale')
-                ->label('Naar taal'),
+                ->label('Naar taal')
+                ->sortable(),
             TextColumn::make('total_columns_to_translate')
                 ->label('Voortgang')
-                ->formatStateUsing(fn ($record) => $record->total_columns_translated . '/' . $record->total_columns_to_translate),
+                ->formatStateUsing(fn($record) => $record->total_columns_translated . '/' . $record->total_columns_to_translate),
             TextColumn::make('status')
                 ->label('Status')
-                ->formatStateUsing(fn ($record) => match ($record->status) {
+                ->formatStateUsing(fn($record) => match ($record->status) {
                     'pending' => 'In afwachting',
                     'in_progress' => 'Bezig',
                     'finished' => 'Voltooid',
                     default => 'Onbekend',
                 })
+                ->sortable()
                 ->badge()
-                ->color(fn (string $state): string => match ($state) {
+                ->color(fn(string $state): string => match ($state) {
                     'pending' => 'primary',
                     'in_progress' => 'warning',
                     'finished' => 'success',
                 }),
+            TextColumn::make('created_at')
+                ->label('Aangemaakt op')
+                ->sortable()
+                ->dateTime(),
         ])
+            ->defaultSort('created_at', 'desc')
             ->poll('5s');
     }
 

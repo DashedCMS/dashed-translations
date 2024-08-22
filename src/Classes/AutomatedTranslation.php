@@ -46,6 +46,7 @@ class AutomatedTranslation
     public static function translateModel(Model $model, string $fromLocale, array $toLocales): void
     {
         $totalColumnsToTranslate = 0;
+        $automatedTranslationProgresses = [];
 
         foreach ($toLocales as $toLocale) {
             $automatedTranslationProgress = new AutomatedTranslationProgress();
@@ -54,6 +55,7 @@ class AutomatedTranslation
             $automatedTranslationProgress->from_locale = $fromLocale;
             $automatedTranslationProgress->to_locale = $toLocale;
             $automatedTranslationProgress->save();
+            $automatedTranslationProgresses[$toLocale] = $automatedTranslationProgress;
         }
 
         foreach ($model->translatable as $column) {
@@ -62,7 +64,7 @@ class AutomatedTranslation
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
                 foreach ($toLocales as $locale) {
-                    TranslateValueFromModel::dispatch($model, $column, $textToTranslate, $locale, $fromLocale);
+                    TranslateValueFromModel::dispatch($model, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale]);
                 }
             }
         }
@@ -77,7 +79,7 @@ class AutomatedTranslation
                 $totalColumnsToTranslate++;
                 $textToTranslate = $model->metadata->getTranslation($column, $fromLocale);
                 foreach ($toLocales as $locale) {
-                    TranslateValueFromModel::dispatch($model->metadata, $column, $textToTranslate, $locale, $fromLocale);
+                    TranslateValueFromModel::dispatch($model->metadata, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale]);
                 }
             }
         }
@@ -93,7 +95,7 @@ class AutomatedTranslation
                 foreach ($toLocales as $locale) {
                     TranslateValueFromModel::dispatch($model->customBlocks, $column, $textToTranslate, $locale, $fromLocale, [
                         'customBlock' => str($model::class . 'Blocks')->explode('\\')->last(),
-                    ]);
+                    ], $automatedTranslationProgresses[$locale]);
                 }
             }
         }
