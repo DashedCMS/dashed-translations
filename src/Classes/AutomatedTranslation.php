@@ -43,7 +43,7 @@ class AutomatedTranslation
         }
     }
 
-    public static function translateModel(Model $model, string $fromLocale, array $toLocales): void
+    public static function translateModel(Model $model, string $fromLocale, array $toLocales, array $overwriteColumns = []): void
     {
         $totalColumnsToTranslate = 0;
         $automatedTranslationProgresses = [];
@@ -59,7 +59,7 @@ class AutomatedTranslation
         }
 
         foreach ($model->translatable as $column) {
-            if (! method_exists($model, $column)) {
+            if (! method_exists($model, $column) || in_array($column, $overwriteColumns)) {
                 $totalColumnsToTranslate++;
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
