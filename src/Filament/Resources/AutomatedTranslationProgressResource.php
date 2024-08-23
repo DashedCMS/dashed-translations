@@ -42,6 +42,9 @@ class AutomatedTranslationProgressResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
+            TextColumn::make('id')
+                ->label('ID')
+                ->sortable(),
             TextColumn::make('model')
                 ->label('Model')
                 ->getStateUsing(fn ($record) => $record->model_type . ' - ' . $record->model_id),
@@ -53,7 +56,7 @@ class AutomatedTranslationProgressResource extends Resource
                 ->sortable(),
             TextColumn::make('total_columns_to_translate')
                 ->label('Voortgang')
-                ->formatStateUsing(fn ($record) => $record->total_columns_translated . '/' . $record->total_columns_to_translate),
+                ->formatStateUsing(fn ($record) => (100 / $record->total_columns_to_translate * $record->columns_translated) . '%'),
             TextColumn::make('status')
                 ->label('Status')
                 ->formatStateUsing(fn ($record) => match ($record->status) {
@@ -80,7 +83,7 @@ class AutomatedTranslationProgressResource extends Resource
             ->bulkActions([
                 DeleteBulkAction::make(),
             ])
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('id', 'desc')
             ->poll('5s');
     }
 
