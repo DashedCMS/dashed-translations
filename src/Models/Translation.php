@@ -2,14 +2,14 @@
 
 namespace Dashed\DashedTranslations\Models;
 
-use Illuminate\Support\Str;
-use Spatie\Activitylog\LogOptions;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Eloquent\Model;
-use Spatie\Translatable\HasTranslations;
+use Illuminate\Support\Str;
+use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Translatable\HasTranslations;
 
 class Translation extends Model
 {
