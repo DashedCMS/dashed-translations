@@ -3,28 +3,28 @@
 namespace Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages;
 
 use Carbon\Carbon;
-use Filament\Forms\Set;
-use Illuminate\Support\Str;
-use Filament\Resources\Pages\Page;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Illuminate\Support\Facades\Cache;
 use Dashed\DashedCore\Classes\Locales;
-use Filament\Forms\Components\Section;
-use FilamentTiptapEditor\TiptapEditor;
+use Dashed\DashedTranslations\Classes\AutomatedTranslation;
+use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
+use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
+use Dashed\DashedTranslations\Models\Translation;
+use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Set;
 use Filament\Notifications\Notification;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\DateTimePicker;
-use Dashed\DashedTranslations\Models\Translation;
-use Dashed\DashedTranslations\Classes\AutomatedTranslation;
-use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
+use Filament\Resources\Pages\Page;
+use FilamentTiptapEditor\TiptapEditor;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use RalphJSmit\Filament\MediaLibrary\Forms\Components\MediaPicker;
-use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 
 class ListTranslations extends Page
 {
@@ -174,17 +174,17 @@ class ListTranslations extends Page
                                         ->send();
                                 }))
                             ->afterStateUpdated(function (MediaPicker $component, $state) {
-//                                $explode = explode('_', $component->getStatePath());
-//                                $translationId = $explode[1];
-//                                $locale = $explode[2];
-//                                $translation = Translation::find($translationId);
-//                                $translation->setTranslation("value", $locale, $state);
-//                                $translation->save();
-//                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
-//                                Notification::make()
-//                                    ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
-//                                    ->success()
-//                                    ->send();
+                                //                                $explode = explode('_', $component->getStatePath());
+                                //                                $translationId = $explode[1];
+                                //                                $locale = $explode[2];
+                                //                                $translation = Translation::find($translationId);
+                                //                                $translation->setTranslation("value", $locale, $state);
+                                //                                $translation->save();
+                                //                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
+                                //                                Notification::make()
+                                //                                    ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                //                                    ->success()
+                                //                                    ->send();
                             });
                     } elseif ($translation->type == 'repeater') {
                         $schema[] = Repeater::make("translation_{$translation->id}_{$locale['id']}")
@@ -238,18 +238,18 @@ class ListTranslations extends Page
 
     public function updated($path, $value): void
     {
-//        foreach (Translation::where('type', 'image')->get() as $translation) {
-//            foreach (Locales::getLocales() as $locale) {
-//                if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
-//                    Notification::make()
-//                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
-//                        ->success()
-//                        ->send();
-//                }
-//            }
-//        }
-//
-//        dump($path, $value);
+        //        foreach (Translation::where('type', 'image')->get() as $translation) {
+        //            foreach (Locales::getLocales() as $locale) {
+        //                if (Str::contains($path, "translation_{$translation->id}_{$locale['id']}")) {
+        //                    Notification::make()
+        //                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+        //                        ->success()
+        //                        ->send();
+        //                }
+        //            }
+        //        }
+        //
+        //        dump($path, $value);
 
         foreach (Translation::where('type', 'editor')->get() as $translation) {
             foreach (Locales::getLocales() as $locale) {
@@ -295,7 +295,7 @@ class ListTranslations extends Page
         $translationSchema = [];
 
         foreach ($translations as $translation) {
-            if (!in_array($translation->type, ['image', 'repeater'])) {
+            if (! in_array($translation->type, ['image', 'repeater'])) {
                 $translationSchema[] = Toggle::make('translate.' . $translation->id)
                     ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                     ->default(true);
