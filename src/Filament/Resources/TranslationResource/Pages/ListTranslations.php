@@ -194,6 +194,27 @@ class ListTranslations extends Page
                             ->reorderable()
                             ->cloneable()
                             ->reactive();
+                    } elseif (in_array($translation->type, ['number', 'numeric'])) {
+                        $schema[] = TextInput::make("translation_{$translation->id}_{$locale['id']}")
+                            ->placeholder($translation->default)
+                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
+                            ->helperText($helperText ?? '')
+                            ->lazy()
+                            ->numeric()
+//                            ->hintAction(self::translateSingleField($otherLocales, $locale))
+                            ->afterStateUpdated(function (TextInput $component, Set $set, $state) {
+                                $explode = explode('_', $component->getStatePath());
+                                $translationId = $explode[1];
+                                $locale = $explode[2];
+                                $translation = Translation::find($translationId);
+                                $translation->setTranslation("value", $locale, $state);
+                                $translation->save();
+                                Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
+                                Notification::make()
+                                    ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                    ->success()
+                                    ->send();
+                            });
                     } else {
                         $schema[] = TextInput::make("translation_{$translation->id}_{$locale['id']}")
                             ->placeholder($translation->default)
@@ -295,7 +316,7 @@ class ListTranslations extends Page
         $translationSchema = [];
 
         foreach ($translations as $translation) {
-            if (! in_array($translation->type, ['image', 'repeater'])) {
+            if (!in_array($translation->type, ['image', 'repeater'])) {
                 $translationSchema[] = Toggle::make('translate.' . $translation->id)
                     ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                     ->default(true);
