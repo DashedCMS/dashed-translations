@@ -316,7 +316,7 @@ class ListTranslations extends Page
         $translationSchema = [];
 
         foreach ($translations as $translation) {
-            if (!in_array($translation->type, ['image', 'repeater'])) {
+            if (! in_array($translation->type, ['image', 'repeater'])) {
                 $translationSchema[] = Toggle::make('translate.' . $translation->id)
                     ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                     ->default(true);
