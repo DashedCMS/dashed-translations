@@ -5,7 +5,6 @@ namespace Dashed\DashedTranslations\Filament\Resources;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\ListAutomatedTranslationProgress;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -14,10 +13,8 @@ use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class AutomatedTranslationProgressResource extends Resource
 {
@@ -54,10 +51,10 @@ class AutomatedTranslationProgressResource extends Resource
                 ->sortable(),
             TextColumn::make('model.name')
                 ->label('Naam')
-                ->formatStateUsing(fn($record) => str($record->model->name)->limit(30)),
+                ->formatStateUsing(fn ($record) => str($record->model->name)->limit(30)),
             TextColumn::make('model')
                 ->label('Model')
-                ->getStateUsing(fn($record) => str($record->model_type)->explode('\\')->last())
+                ->getStateUsing(fn ($record) => str($record->model_type)->explode('\\')->last())
                 ->sortable()
                 ->searchable(),
             TextColumn::make('model_id')
@@ -72,10 +69,10 @@ class AutomatedTranslationProgressResource extends Resource
                 ->sortable(),
             TextColumn::make('total_columns_to_translate')
                 ->label('Voortgang')
-                ->formatStateUsing(fn($record) => !$record->total_columns_translated ? '0%' : ((100 / $record->total_columns_to_translate * $record->total_columns_translated) . '%')),
+                ->formatStateUsing(fn ($record) => ! $record->total_columns_translated ? '0%' : ((100 / $record->total_columns_to_translate * $record->total_columns_translated) . '%')),
             TextColumn::make('status')
                 ->label('Status')
-                ->formatStateUsing(fn($record) => match ($record->status) {
+                ->formatStateUsing(fn ($record) => match ($record->status) {
                     'pending' => 'In afwachting',
                     'in_progress' => 'Bezig',
                     'finished' => 'Voltooid',
@@ -83,7 +80,7 @@ class AutomatedTranslationProgressResource extends Resource
                 })
                 ->sortable()
                 ->badge()
-                ->color(fn(string $state): string => match ($state) {
+                ->color(fn (string $state): string => match ($state) {
                     'pending' => 'primary',
                     'in_progress' => 'warning',
                     'finished' => 'success',

@@ -13,7 +13,7 @@ class AutomatedTranslation
 {
     public static function automatedTranslationsEnabled()
     {
-        return !is_null(self::getProvider());
+        return ! is_null(self::getProvider());
     }
 
     public static function getProvider(): ?array
@@ -32,7 +32,7 @@ class AutomatedTranslation
     {
         $provider = self::getProvider();
 
-        if (!$provider) {
+        if (! $provider) {
             throw new \Exception('No translation provider enabled');
         }
 
@@ -48,9 +48,9 @@ class AutomatedTranslation
         $totalColumnsToTranslate = 0;
         $automatedTranslationProgresses = [];
 
-        if(count($toLocales) == 1 && $automatedTranslationProgress) {
+        if (count($toLocales) == 1 && $automatedTranslationProgress) {
             $automatedTranslationProgresses[$toLocales[array_key_first($toLocales)]] = $automatedTranslationProgress;
-        }else{
+        } else {
             foreach ($toLocales as $toLocale) {
                 $automatedTranslationProgress = AutomatedTranslationProgress::where('model_type', $model::class)
                     ->where('model_id', $model->id)
@@ -59,7 +59,7 @@ class AutomatedTranslation
                     ->where('status', '!=', 'finished')
                     ->latest()
                     ->first();
-                if (!$automatedTranslationProgress) {
+                if (! $automatedTranslationProgress) {
                     $automatedTranslationProgress = new AutomatedTranslationProgress();
                     $automatedTranslationProgress->model_type = $model::class;
                     $automatedTranslationProgress->model_id = $model->id;
@@ -72,7 +72,7 @@ class AutomatedTranslation
         }
 
         foreach ($model->translatable as $column) {
-            if (!method_exists($model, $column) || in_array($column, $overwriteColumns)) {
+            if (! method_exists($model, $column) || in_array($column, $overwriteColumns)) {
                 $totalColumnsToTranslate++;
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
