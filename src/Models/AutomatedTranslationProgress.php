@@ -21,4 +21,9 @@ class AutomatedTranslationProgress extends Model
             $automatedTranslationProgress->saveQuietly();
         });
     }
+
+    public function model()
+    {
+        return $this->morphTo();
+    }
 }
