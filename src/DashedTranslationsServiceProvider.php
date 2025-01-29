@@ -2,7 +2,6 @@
 
 namespace Dashed\DashedTranslations;
 
-use Dashed\DashedCore\DashedCorePlugin;
 use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
