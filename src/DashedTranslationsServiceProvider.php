@@ -14,17 +14,7 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
-        cms()->builder(
-            'settingPages',
-            array_merge(cms()->builder('settingPages'), [
-                'translations' => [
-                    'name' => 'Vertalingen',
-                    'description' => 'Instellingen voor AI vertalingen',
-                    'icon' => 'language',
-                    'page' => TranslationsSettingsPage::class,
-                ],
-            ])
-        );
+        cms()->registerSettingsPage(TranslationsSettingsPage::class, 'Vertalingen', 'language', 'Instellingen voor AI vertalingen');
 
         $package
             ->name('dashed-translations')
