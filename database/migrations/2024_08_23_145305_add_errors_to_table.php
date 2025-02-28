@@ -12,6 +12,7 @@ return new class () extends Migration {
     {
         Schema::table('dashed__automated_translation_progress', function (Blueprint $table) {
             $table->string('error')
+                ->nullable()
                 ->after('status');
         });
     }
