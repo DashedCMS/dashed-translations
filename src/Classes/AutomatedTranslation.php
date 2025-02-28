@@ -45,6 +45,8 @@ class AutomatedTranslation
 
     public static function translateModel(Model $model, string $fromLocale, array $toLocales, array $overwriteColumns = [], ?AutomatedTranslationProgress $automatedTranslationProgress = null): void
     {
+        $waitMinutes = 0;
+
         $totalColumnsToTranslate = 0;
         if ($automatedTranslationProgress) {
             $automatedTranslationProgress->total_columns_translated = 0;
@@ -82,7 +84,9 @@ class AutomatedTranslation
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
                 foreach ($toLocales as $locale) {
-                    TranslateValueFromModel::dispatch($model, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale]);
+                    TranslateValueFromModel::dispatch($model, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale])
+                    ->delay(now()->addMinutes($waitMinutes));
+                    $waitMinutes++;
                 }
             }
         }
@@ -97,7 +101,9 @@ class AutomatedTranslation
                 $totalColumnsToTranslate++;
                 $textToTranslate = $model->metadata->getTranslation($column, $fromLocale);
                 foreach ($toLocales as $locale) {
-                    TranslateValueFromModel::dispatch($model->metadata, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale]);
+                    TranslateValueFromModel::dispatch($model->metadata, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale])
+                    ->delay(now()->addMinutes($waitMinutes));
+                    $waitMinutes++;
                 }
             }
         }
@@ -113,7 +119,9 @@ class AutomatedTranslation
                 foreach ($toLocales as $locale) {
                     TranslateValueFromModel::dispatch($model->customBlocks, $column, $textToTranslate, $locale, $fromLocale, [
                         'customBlock' => str($model::class . 'Blocks')->explode('\\')->last(),
-                    ], $automatedTranslationProgresses[$locale]);
+                    ], $automatedTranslationProgresses[$locale])
+                    ->delay(now()->addMinutes($waitMinutes));
+                    $waitMinutes++;
                 }
             }
         }
