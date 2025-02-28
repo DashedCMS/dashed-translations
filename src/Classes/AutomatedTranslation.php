@@ -46,6 +46,8 @@ class AutomatedTranslation
     public static function translateModel(Model $model, string $fromLocale, array $toLocales, array $overwriteColumns = [], ?AutomatedTranslationProgress $automatedTranslationProgress = null): void
     {
         $totalColumnsToTranslate = 0;
+        $automatedTranslationProgress->total_columns_translated = 0;
+        $automatedTranslationProgress->save();
         $automatedTranslationProgresses = [];
 
         if (count($toLocales) == 1 && $automatedTranslationProgress) {

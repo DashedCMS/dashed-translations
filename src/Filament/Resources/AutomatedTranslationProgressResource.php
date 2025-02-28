@@ -69,13 +69,14 @@ class AutomatedTranslationProgressResource extends Resource
                 ->sortable(),
             TextColumn::make('total_columns_to_translate')
                 ->label('Voortgang')
-                ->formatStateUsing(fn ($record) => ! $record->total_columns_translated ? '0%' : ((100 / $record->total_columns_to_translate * $record->total_columns_translated) . '%')),
+                ->formatStateUsing(fn ($record) => ! $record->total_columns_translated ? '0%' : ((number_format(100 / $record->total_columns_to_translate * $record->total_columns_translated, 0)) . '%')),
             TextColumn::make('status')
                 ->label('Status')
                 ->formatStateUsing(fn ($record) => match ($record->status) {
                     'pending' => 'In afwachting',
                     'in_progress' => 'Bezig',
                     'finished' => 'Voltooid',
+                    'error' => 'Foutmelding',
                     default => 'Onbekend',
                 })
                 ->sortable()
@@ -84,7 +85,12 @@ class AutomatedTranslationProgressResource extends Resource
                     'pending' => 'primary',
                     'in_progress' => 'warning',
                     'finished' => 'success',
+                    'error' => 'danger',
                 }),
+            TextColumn::make('error')
+                ->label('Foutmelding')
+                ->getStateUsing(fn ($record) => $record->error ?: '-')
+                ->sortable(),
             TextColumn::make('created_at')
                 ->label('Aangemaakt op')
                 ->sortable()

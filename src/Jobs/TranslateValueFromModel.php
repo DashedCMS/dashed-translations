@@ -70,7 +70,9 @@ class TranslateValueFromModel implements ShouldQueue
 
     public function failed($exception)
     {
-        throw new Exception('Translation failed: ' . $exception->getMessage());
+        $this->automatedTranslationProgress->status = 'error';
+        $this->automatedTranslationProgress->error = $exception->getMessage();
+        $this->automatedTranslationProgress->save();
     }
 
     private function searchAndTranslate(&$array, $parentKeys = [])
