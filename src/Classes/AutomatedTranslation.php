@@ -13,7 +13,7 @@ class AutomatedTranslation
 {
     public static function automatedTranslationsEnabled()
     {
-        return ! is_null(self::getProvider());
+        return !is_null(self::getProvider());
     }
 
     public static function getProvider(): ?array
@@ -32,7 +32,7 @@ class AutomatedTranslation
     {
         $provider = self::getProvider();
 
-        if (! $provider) {
+        if (!$provider) {
             throw new \Exception('No translation provider enabled');
         }
 
@@ -66,20 +66,21 @@ class AutomatedTranslation
                     ->where('status', '!=', 'finished')
                     ->latest()
                     ->first();
-                if (! $automatedTranslationProgress) {
+                if (!$automatedTranslationProgress) {
                     $automatedTranslationProgress = new AutomatedTranslationProgress();
                     $automatedTranslationProgress->model_type = $model::class;
                     $automatedTranslationProgress->model_id = $model->id;
                     $automatedTranslationProgress->from_locale = $fromLocale;
                     $automatedTranslationProgress->to_locale = $toLocale;
-                    $automatedTranslationProgress->save();
                 }
+                $automatedTranslationProgress->total_columns_translated = 0;
+                $automatedTranslationProgress->save();
                 $automatedTranslationProgresses[$toLocale] = $automatedTranslationProgress;
             }
         }
 
         foreach ($model->translatable as $column) {
-            if (! method_exists($model, $column) || in_array($column, $overwriteColumns)) {
+            if (!method_exists($model, $column) || in_array($column, $overwriteColumns)) {
                 $totalColumnsToTranslate++;
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
