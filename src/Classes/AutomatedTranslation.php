@@ -73,6 +73,7 @@ class AutomatedTranslation
                     $automatedTranslationProgress->from_locale = $fromLocale;
                     $automatedTranslationProgress->to_locale = $toLocale;
                 }
+                $automatedTranslationProgress->error = null;
                 $automatedTranslationProgress->total_columns_translated = 0;
                 $automatedTranslationProgress->save();
                 $automatedTranslationProgresses[$toLocale] = $automatedTranslationProgress;
