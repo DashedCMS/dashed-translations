@@ -20,7 +20,7 @@ class TranslateValueFromModel implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public $timeout = 300;
+    public $timeout = 3000;
     public $tries = 5;
     public $model;
     public $column;
