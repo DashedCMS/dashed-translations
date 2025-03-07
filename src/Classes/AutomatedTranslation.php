@@ -13,7 +13,7 @@ class AutomatedTranslation
 {
     public static function automatedTranslationsEnabled()
     {
-        return ! is_null(self::getProvider());
+        return !is_null(self::getProvider());
     }
 
     public static function getProvider(): ?array
@@ -32,7 +32,7 @@ class AutomatedTranslation
     {
         $provider = self::getProvider();
 
-        if (! $provider) {
+        if (!$provider) {
             throw new \Exception('No translation provider enabled');
         }
 
@@ -66,7 +66,7 @@ class AutomatedTranslation
                     ->where('status', '!=', 'finished')
                     ->latest()
                     ->first();
-                if (! $automatedTranslationProgress) {
+                if (!$automatedTranslationProgress) {
                     $automatedTranslationProgress = new AutomatedTranslationProgress();
                     $automatedTranslationProgress->model_type = $model::class;
                     $automatedTranslationProgress->model_id = $model->id;
@@ -79,13 +79,14 @@ class AutomatedTranslation
         }
 
         foreach ($model->translatable as $column) {
-            if (! method_exists($model, $column) || in_array($column, $overwriteColumns)) {
+            if (!method_exists($model, $column) || in_array($column, $overwriteColumns)) {
                 $totalColumnsToTranslate++;
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
                 foreach ($toLocales as $locale) {
                     TranslateValueFromModel::dispatch($model, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale])
-                    ->delay(now()->addMinutes($waitMinutes));
+                        ->delay(now()->addMinutes($waitMinutes))
+                        ->onQueue('translations');
                     $waitMinutes++;
                 }
             }
@@ -102,7 +103,7 @@ class AutomatedTranslation
                 $textToTranslate = $model->metadata->getTranslation($column, $fromLocale);
                 foreach ($toLocales as $locale) {
                     TranslateValueFromModel::dispatch($model->metadata, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale])
-                    ->delay(now()->addMinutes($waitMinutes));
+                        ->delay(now()->addMinutes($waitMinutes));
                     $waitMinutes++;
                 }
             }
@@ -120,7 +121,7 @@ class AutomatedTranslation
                     TranslateValueFromModel::dispatch($model->customBlocks, $column, $textToTranslate, $locale, $fromLocale, [
                         'customBlock' => str($model::class . 'Blocks')->explode('\\')->last(),
                     ], $automatedTranslationProgresses[$locale])
-                    ->delay(now()->addMinutes($waitMinutes));
+                        ->delay(now()->addMinutes($waitMinutes));
                     $waitMinutes++;
                 }
             }

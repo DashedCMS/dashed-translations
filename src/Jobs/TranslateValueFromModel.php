@@ -76,12 +76,18 @@ class TranslateValueFromModel implements ShouldQueue
         $this->automatedTranslationProgress->status = 'error';
         $this->automatedTranslationProgress->error = $exception->getMessage();
         $this->automatedTranslationProgress->save();
+
+        if (str($this->automatedTranslationProgress->error)->contains('Too many requests')) {
+            TranslateValueFromModel::dispatch($this->model, $this->column, $this->textToTranslate, $this->locale, $this->fromLocale, $this->attributes, $this->automatedTranslationProgresses)
+                ->delay(now()->addMinutes(2))
+                ->onQueue('translations');
+        }
     }
 
     private function searchAndTranslate(&$array, $parentKeys = [])
     {
         foreach ($array as $key => &$value) {
-            if (! is_int($key) && $key != 'data') {
+            if (!is_int($key) && $key != 'data') {
                 $currentKeys = array_merge($parentKeys, [$key]);
             } else {
                 $currentKeys = $parentKeys;
@@ -92,7 +98,7 @@ class TranslateValueFromModel implements ShouldQueue
                     $currentKeys = array_merge($parentKeys, [$value['type']]);
                 }
                 $this->searchAndTranslate($value, $currentKeys);
-            } elseif (! str($key)->contains('type') && ! str($key)->contains('url')) {
+            } elseif (!str($key)->contains('type') && !str($key)->contains('url')) {
                 $builderBlock = $this->matchBuilderBlock($key, $parentKeys, cms()->builder('blocks')) || $this->matchCustomBlock($key, $parentKeys, cms()->builder($this->attributes['customBlock'] ?? 'blocks'));
                 if ($builderBlock && ($builderBlock instanceof Select || $builderBlock instanceof Toggle || $builderBlock instanceof FileUpload)) {
                     continue;
@@ -107,7 +113,7 @@ class TranslateValueFromModel implements ShouldQueue
 
     private function matchBuilderBlock($key, $parentKeys, $blocks, $currentBlock = null)
     {
-        if (count($parentKeys) || (! count($parentKeys) && $currentBlock)) {
+        if (count($parentKeys) || (!count($parentKeys) && $currentBlock)) {
             foreach ($blocks as $block) {
                 if (count($parentKeys) && $block->getName() === $parentKeys[0]) {
                     $currentBlock = $block;
@@ -130,7 +136,7 @@ class TranslateValueFromModel implements ShouldQueue
 
     private function matchCustomBlock($key, $parentKeys, $blocks, $currentBlock = null)
     {
-        if (count($parentKeys) || (! count($parentKeys) && $currentBlock)) {
+        if (count($parentKeys) || (!count($parentKeys) && $currentBlock)) {
             foreach ($blocks as $block) {
                 if (count($parentKeys) && $block->getName() === $parentKeys[0]) {
                     $currentBlock = $block;
@@ -153,7 +159,7 @@ class TranslateValueFromModel implements ShouldQueue
 
     private function translate(?string $value = '')
     {
-        if (! $value) {
+        if (!$value) {
             return $value;
         }
 
