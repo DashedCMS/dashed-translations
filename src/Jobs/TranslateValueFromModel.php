@@ -165,6 +165,8 @@ class TranslateValueFromModel implements ShouldQueue
             return $value;
         }
 
+        sleep(5);
+
         return AutomatedTranslation::translate($value, $this->toLanguage, $this->fromLanguage);
     }
 }
