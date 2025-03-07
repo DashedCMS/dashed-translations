@@ -79,8 +79,7 @@ class TranslateValueFromModel implements ShouldQueue
 
         if (str($this->automatedTranslationProgress->error)->contains('Too many requests')) {
             TranslateValueFromModel::dispatch($this->model, $this->column, $this->textToTranslate, $this->locale, $this->fromLocale, $this->attributes, $this->automatedTranslationProgresses)
-                ->delay(now()->addMinutes(2))
-                ->onQueue('translations');
+                ->delay(now()->addMinutes(2));
         }
     }
 

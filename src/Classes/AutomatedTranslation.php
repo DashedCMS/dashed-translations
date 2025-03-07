@@ -85,8 +85,7 @@ class AutomatedTranslation
 
                 foreach ($toLocales as $locale) {
                     TranslateValueFromModel::dispatch($model, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale])
-                        ->delay(now()->addMinutes($waitMinutes))
-                        ->onQueue('translations');
+                        ->delay(now()->addMinutes($waitMinutes));
                     $waitMinutes++;
                 }
             }
