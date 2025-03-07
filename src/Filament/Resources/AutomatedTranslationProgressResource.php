@@ -55,8 +55,7 @@ class AutomatedTranslationProgressResource extends Resource
             TextColumn::make('model')
                 ->label('Model')
                 ->getStateUsing(fn ($record) => str($record->model_type)->explode('\\')->last())
-                ->sortable()
-                ->searchable(),
+                ->sortable(),
             TextColumn::make('model_id')
                 ->label('Model ID')
                 ->sortable()
