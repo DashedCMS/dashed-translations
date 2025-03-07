@@ -50,6 +50,7 @@ class AutomatedTranslation
         $totalColumnsToTranslate = 0;
         if ($automatedTranslationProgress) {
             $automatedTranslationProgress->total_columns_translated = 0;
+            $automatedTranslationProgress->error = null;
             $automatedTranslationProgress->save();
         }
 
