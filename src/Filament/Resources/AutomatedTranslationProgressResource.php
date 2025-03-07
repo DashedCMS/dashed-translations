@@ -76,6 +76,7 @@ class AutomatedTranslationProgressResource extends Resource
                     'in_progress' => 'Bezig',
                     'finished' => 'Voltooid',
                     'error' => 'Foutmelding',
+                    'retrying' => 'Opnieuw proberen',
                     default => 'Onbekend',
                 })
                 ->sortable()
@@ -85,6 +86,7 @@ class AutomatedTranslationProgressResource extends Resource
                     'in_progress' => 'warning',
                     'finished' => 'success',
                     'error' => 'danger',
+                    'retrying' => 'warning',
                 }),
             TextColumn::make('error')
                 ->label('Foutmelding')
