@@ -21,7 +21,7 @@ class TranslateValueFromModel implements ShouldQueue
     use SerializesModels;
 
     public $timeout = 3000;
-    public $tries = 5;
+    public $tries = 1000;
     public $model;
     public $column;
     public $value;
