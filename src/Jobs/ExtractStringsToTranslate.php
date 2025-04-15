@@ -52,6 +52,7 @@ class ExtractStringsToTranslate implements ShouldQueue
         //        return;
         //        try {
         if ($this->toLanguage === $this->fromLanguage) {
+            $this->automatedTranslationProgress->delete();
             return;
         }
 
