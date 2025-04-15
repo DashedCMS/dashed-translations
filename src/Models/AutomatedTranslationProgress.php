@@ -48,7 +48,7 @@ class AutomatedTranslationProgress extends Model
         }
         $this->saveQuietly();
 
-        foreach($this->strings as $automatedTranslationString) {
+        foreach ($this->strings as $automatedTranslationString) {
             if (! $automatedTranslationString->pivot->replaced) {
                 $textToReplaceIn = $this->model->getTranslation(
                     $automatedTranslationString->pivot->column,
