@@ -4,7 +4,6 @@ namespace Dashed\DashedTranslations\Commands;
 
 use Dashed\DashedTranslations\Models\Translation;
 use Illuminate\Console\Command;
-use Dashed\DashedForms\Models\FormInput;
 
 class RemoveUnusedTranslations extends Command
 {
@@ -44,11 +43,12 @@ class RemoveUnusedTranslations extends Command
             foreach (json_decode($translation->getRawOriginal('value') ?: '{}', true) as $value) {
                 if ($value) {
                     $hasValue = true;
+
                     break;
                 }
             }
 
-            if (!$hasValue) {
+            if (! $hasValue) {
                 $translation->delete();
             }
         }
