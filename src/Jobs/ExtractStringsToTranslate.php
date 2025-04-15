@@ -4,6 +4,8 @@ namespace Dashed\DashedTranslations\Jobs;
 
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Dashed\DashedTranslations\Models\AutomatedTranslationString;
+use Dashed\DashedTranslations\Models\AutomatedTranslationStrings;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -13,7 +15,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class TranslateValueFromModel implements ShouldQueue
+class ExtractStringsToTranslate implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -49,25 +51,24 @@ class TranslateValueFromModel implements ShouldQueue
      */
     public function handle(): void
     {
+//        return;
 //        try {
-            if ($this->toLanguage === $this->fromLanguage) {
-                return;
-            }
+        if ($this->toLanguage === $this->fromLanguage) {
+            return;
+        }
 
-            if (is_array($this->value)) {
-                $this->searchAndTranslate(array: $this->value);
-                $translatedText = $this->value;
-            } else {
-                $translatedText = $this->translate($this->value);
-            }
-//            dump($translatedText);
+        $this->model->setTranslation($this->column, $this->toLanguage, $this->model->getTranslation($this->column, $this->fromLanguage));
+        $this->model->save();
 
-//            $this->model->setTranslation($this->column, $this->toLanguage, $translatedText);
-//            $this->model->save();
+        if (is_array($this->value)) {
+            $this->searchAndTranslate(array: $this->value);
+//            $translatedText = $this->value;
+        } else {
+            $this->addString($this->value);
+//            $translatedText = $this->addString($this->value);
+        }
 
-//            $this->automatedTranslationProgress->refresh();
-//            $this->automatedTranslationProgress->total_columns_translated++;
-//            $this->automatedTranslationProgress->save();
+        $this->automatedTranslationProgress->updateStats();
 //        } catch (\Exception $exception) {
 //            $this->failed($exception);
 //        }
@@ -79,7 +80,7 @@ class TranslateValueFromModel implements ShouldQueue
 //            $this->automatedTranslationProgress->status = 'retrying';
 //            $this->automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
 //            $this->automatedTranslationProgress->save();
-//            TranslateValueFromModel::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $this->automatedTranslationProgress)
+//            ExtractStringsToTranslate::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $this->automatedTranslationProgress)
 //                ->delay(now()->addMinutes(2));
 //        } else {
 //            $this->automatedTranslationProgress->status = 'error';
@@ -91,7 +92,7 @@ class TranslateValueFromModel implements ShouldQueue
     private function searchAndTranslate(&$array, $parentKeys = [])
     {
         foreach ($array as $key => &$value) {
-            if (! is_int($key) && $key != 'data') {
+            if (!is_int($key) && $key != 'data') {
                 $currentKeys = array_merge($parentKeys, [$key]);
             } else {
                 $currentKeys = $parentKeys;
@@ -101,16 +102,15 @@ class TranslateValueFromModel implements ShouldQueue
                 if (array_key_exists('type', $value) && array_key_exists('data', $value)) {
                     $currentKeys = array_merge($parentKeys, [$value['type']]);
                 }
-                ray('array', $value);
                 $this->searchAndTranslate($value, $currentKeys);
-            } elseif (! str($key)->contains('type') && ! str($key)->contains('url')) {
+            } elseif (!str($key)->contains('type') && !str($key)->contains('url')) {
                 $builderBlock = $this->matchBuilderBlock($key, $parentKeys, cms()->builder('blocks')) || $this->matchCustomBlock($key, $parentKeys, cms()->builder($this->attributes['customBlock'] ?? 'blocks'));
                 if ($builderBlock && ($builderBlock instanceof Select || $builderBlock instanceof Toggle || $builderBlock instanceof FileUpload)) {
                     continue;
                 }
 
-                ray('value', $value);
-//                $value = $this->translate($value);
+                $this->addString($value);
+//                $value = $this->addString($value);
             }
         }
 
@@ -119,7 +119,7 @@ class TranslateValueFromModel implements ShouldQueue
 
     private function matchBuilderBlock($key, $parentKeys, $blocks, $currentBlock = null)
     {
-        if (count($parentKeys) || (! count($parentKeys) && $currentBlock)) {
+        if (count($parentKeys) || (!count($parentKeys) && $currentBlock)) {
             foreach ($blocks as $block) {
                 if (count($parentKeys) && method_exists($block, 'getName') && $block->getName() === $parentKeys[0]) {
                     $currentBlock = $block;
@@ -142,7 +142,7 @@ class TranslateValueFromModel implements ShouldQueue
 
     private function matchCustomBlock($key, $parentKeys, $blocks, $currentBlock = null)
     {
-        if (count($parentKeys) || (! count($parentKeys) && $currentBlock)) {
+        if (count($parentKeys) || (!count($parentKeys) && $currentBlock)) {
             foreach ($blocks as $block) {
                 if (count($parentKeys) && $block->getName() === $parentKeys[0]) {
                     $currentBlock = $block;
@@ -163,14 +163,32 @@ class TranslateValueFromModel implements ShouldQueue
         return null;
     }
 
-    private function translate(?string $value = '')
+    private function addString(?string $value = '')
     {
-        if (! $value) {
+        if (!$value) {
             return $value;
         }
 
-        sleep(5);
+        $string = AutomatedTranslationString::where('from_locale', $this->fromLanguage)
+            ->where('to_locale', $this->toLanguage)
+            ->where('from_string', $value)
+            ->first();
 
-        return AutomatedTranslation::translate($value, $this->toLanguage, $this->fromLanguage);
+        if (!$string) {
+            $string = new AutomatedTranslationString();
+            $string->from_locale = $this->fromLanguage;
+            $string->to_locale = $this->toLanguage;
+            $string->from_string = $value;
+            $string->save();
+        }
+
+        if (!$this->automatedTranslationProgress->strings()->where('automated_translation_string_id', $string->id)->wherePivot('column', $this->column)->exists()) {
+            $this->automatedTranslationProgress->strings()->attach($string->id, [
+                'column' => $this->column,
+            ]);
+            $this->automatedTranslationProgress->updateStats();
+        }
+
+        TranslateAndReplaceString::dispatch($string);
     }
 }
