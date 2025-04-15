@@ -66,7 +66,7 @@ class AutomatedTranslationProgressResource extends Resource
             TextColumn::make('to_locale')
                 ->label('Naar taal')
                 ->sortable(),
-            TextColumn::make('total_columns_to_translate')
+            TextColumn::make('total_strings_to_translate')
                 ->label('Voortgang')
                 ->formatStateUsing(fn ($record) => (! $record->total_strings_to_translate || ! $record->total_strings_translated) ? '0%' : ((number_format(100 / $record->total_strings_to_translate * $record->total_strings_translated, 0)) . '%')),
             TextColumn::make('status')
