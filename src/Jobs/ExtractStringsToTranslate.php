@@ -2,10 +2,8 @@
 
 namespace Dashed\DashedTranslations\Jobs;
 
-use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Dashed\DashedTranslations\Models\AutomatedTranslationString;
-use Dashed\DashedTranslations\Models\AutomatedTranslationStrings;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -51,8 +49,8 @@ class ExtractStringsToTranslate implements ShouldQueue
      */
     public function handle(): void
     {
-//        return;
-//        try {
+        //        return;
+        //        try {
         if ($this->toLanguage === $this->fromLanguage) {
             return;
         }
@@ -62,37 +60,37 @@ class ExtractStringsToTranslate implements ShouldQueue
 
         if (is_array($this->value)) {
             $this->searchAndTranslate(array: $this->value);
-//            $translatedText = $this->value;
+            //            $translatedText = $this->value;
         } else {
             $this->addString($this->value);
-//            $translatedText = $this->addString($this->value);
+            //            $translatedText = $this->addString($this->value);
         }
 
         $this->automatedTranslationProgress->updateStats();
-//        } catch (\Exception $exception) {
-//            $this->failed($exception);
-//        }
+        //        } catch (\Exception $exception) {
+        //            $this->failed($exception);
+        //        }
     }
 
-//    public function failed($exception)
-//    {
-//        if (str($exception->getMessage())->contains('Too many requests')) {
-//            $this->automatedTranslationProgress->status = 'retrying';
-//            $this->automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
-//            $this->automatedTranslationProgress->save();
-//            ExtractStringsToTranslate::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $this->automatedTranslationProgress)
-//                ->delay(now()->addMinutes(2));
-//        } else {
-//            $this->automatedTranslationProgress->status = 'error';
-//            $this->automatedTranslationProgress->error = $exception->getMessage();
-//            $this->automatedTranslationProgress->save();
-//        }
-//    }
+    //    public function failed($exception)
+    //    {
+    //        if (str($exception->getMessage())->contains('Too many requests')) {
+    //            $this->automatedTranslationProgress->status = 'retrying';
+    //            $this->automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
+    //            $this->automatedTranslationProgress->save();
+    //            ExtractStringsToTranslate::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $this->automatedTranslationProgress)
+    //                ->delay(now()->addMinutes(2));
+    //        } else {
+    //            $this->automatedTranslationProgress->status = 'error';
+    //            $this->automatedTranslationProgress->error = $exception->getMessage();
+    //            $this->automatedTranslationProgress->save();
+    //        }
+    //    }
 
     private function searchAndTranslate(&$array, $parentKeys = [])
     {
         foreach ($array as $key => &$value) {
-            if (!is_int($key) && $key != 'data') {
+            if (! is_int($key) && $key != 'data') {
                 $currentKeys = array_merge($parentKeys, [$key]);
             } else {
                 $currentKeys = $parentKeys;
@@ -103,14 +101,14 @@ class ExtractStringsToTranslate implements ShouldQueue
                     $currentKeys = array_merge($parentKeys, [$value['type']]);
                 }
                 $this->searchAndTranslate($value, $currentKeys);
-            } elseif (!str($key)->contains('type') && !str($key)->contains('url')) {
+            } elseif (! str($key)->contains('type') && ! str($key)->contains('url')) {
                 $builderBlock = $this->matchBuilderBlock($key, $parentKeys, cms()->builder('blocks')) || $this->matchCustomBlock($key, $parentKeys, cms()->builder($this->attributes['customBlock'] ?? 'blocks'));
                 if ($builderBlock && ($builderBlock instanceof Select || $builderBlock instanceof Toggle || $builderBlock instanceof FileUpload)) {
                     continue;
                 }
 
                 $this->addString($value);
-//                $value = $this->addString($value);
+                //                $value = $this->addString($value);
             }
         }
 
@@ -119,7 +117,7 @@ class ExtractStringsToTranslate implements ShouldQueue
 
     private function matchBuilderBlock($key, $parentKeys, $blocks, $currentBlock = null)
     {
-        if (count($parentKeys) || (!count($parentKeys) && $currentBlock)) {
+        if (count($parentKeys) || (! count($parentKeys) && $currentBlock)) {
             foreach ($blocks as $block) {
                 if (count($parentKeys) && method_exists($block, 'getName') && $block->getName() === $parentKeys[0]) {
                     $currentBlock = $block;
@@ -142,7 +140,7 @@ class ExtractStringsToTranslate implements ShouldQueue
 
     private function matchCustomBlock($key, $parentKeys, $blocks, $currentBlock = null)
     {
-        if (count($parentKeys) || (!count($parentKeys) && $currentBlock)) {
+        if (count($parentKeys) || (! count($parentKeys) && $currentBlock)) {
             foreach ($blocks as $block) {
                 if (count($parentKeys) && $block->getName() === $parentKeys[0]) {
                     $currentBlock = $block;
@@ -165,7 +163,7 @@ class ExtractStringsToTranslate implements ShouldQueue
 
     private function addString(?string $value = '')
     {
-        if (!$value) {
+        if (! $value) {
             return $value;
         }
 
@@ -174,7 +172,7 @@ class ExtractStringsToTranslate implements ShouldQueue
             ->where('from_string', $value)
             ->first();
 
-        if (!$string) {
+        if (! $string) {
             $string = new AutomatedTranslationString();
             $string->from_locale = $this->fromLanguage;
             $string->to_locale = $this->toLanguage;
@@ -182,7 +180,7 @@ class ExtractStringsToTranslate implements ShouldQueue
             $string->save();
         }
 
-        if (!$this->automatedTranslationProgress->strings()->where('automated_translation_string_id', $string->id)->wherePivot('column', $this->column)->exists()) {
+        if (! $this->automatedTranslationProgress->strings()->where('automated_translation_string_id', $string->id)->wherePivot('column', $this->column)->exists()) {
             $this->automatedTranslationProgress->strings()->attach($string->id, [
                 'column' => $this->column,
             ]);

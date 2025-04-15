@@ -3,11 +3,7 @@
 namespace Dashed\DashedTranslations\Jobs;
 
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
-use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Dashed\DashedTranslations\Models\AutomatedTranslationString;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -39,14 +35,14 @@ class TranslateAndReplaceString implements ShouldQueue
     public function handle(): void
     {
         try {
-            if (!$this->automatedTranslationString->translated) {
+            if (! $this->automatedTranslationString->translated) {
                 $this->automatedTranslationString->to_string = AutomatedTranslation::translate($this->automatedTranslationString->from_string, $this->automatedTranslationString->to_locale, $this->automatedTranslationString->from_locale);
                 $this->automatedTranslationString->translated = true;
                 $this->automatedTranslationString->save();
             }
 
             foreach ($this->automatedTranslationString->progress as $automatedTranslationProgress) {
-                if (!$automatedTranslationProgress->pivot->replaced) {
+                if (! $automatedTranslationProgress->pivot->replaced) {
                     $textToReplaceIn = $automatedTranslationProgress->model->getTranslation(
                         $automatedTranslationProgress->pivot->column,
                         $this->automatedTranslationString->to_locale
@@ -91,7 +87,6 @@ class TranslateAndReplaceString implements ShouldQueue
 
         return $subject;
     }
-
 
     public function failed($exception)
     {

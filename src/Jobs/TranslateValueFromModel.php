@@ -49,44 +49,44 @@ class TranslateValueFromModel implements ShouldQueue
      */
     public function handle(): void
     {
-//        try {
-            if ($this->toLanguage === $this->fromLanguage) {
-                return;
-            }
+        //        try {
+        if ($this->toLanguage === $this->fromLanguage) {
+            return;
+        }
 
-            if (is_array($this->value)) {
-                $this->searchAndTranslate(array: $this->value);
-                $translatedText = $this->value;
-            } else {
-                $translatedText = $this->translate($this->value);
-            }
-//            dump($translatedText);
+        if (is_array($this->value)) {
+            $this->searchAndTranslate(array: $this->value);
+            $translatedText = $this->value;
+        } else {
+            $translatedText = $this->translate($this->value);
+        }
+        //            dump($translatedText);
 
-//            $this->model->setTranslation($this->column, $this->toLanguage, $translatedText);
-//            $this->model->save();
+        //            $this->model->setTranslation($this->column, $this->toLanguage, $translatedText);
+        //            $this->model->save();
 
-//            $this->automatedTranslationProgress->refresh();
-//            $this->automatedTranslationProgress->total_columns_translated++;
-//            $this->automatedTranslationProgress->save();
-//        } catch (\Exception $exception) {
-//            $this->failed($exception);
-//        }
+        //            $this->automatedTranslationProgress->refresh();
+        //            $this->automatedTranslationProgress->total_columns_translated++;
+        //            $this->automatedTranslationProgress->save();
+        //        } catch (\Exception $exception) {
+        //            $this->failed($exception);
+        //        }
     }
 
-//    public function failed($exception)
-//    {
-//        if (str($exception->getMessage())->contains('Too many requests')) {
-//            $this->automatedTranslationProgress->status = 'retrying';
-//            $this->automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
-//            $this->automatedTranslationProgress->save();
-//            TranslateValueFromModel::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $this->automatedTranslationProgress)
-//                ->delay(now()->addMinutes(2));
-//        } else {
-//            $this->automatedTranslationProgress->status = 'error';
-//            $this->automatedTranslationProgress->error = $exception->getMessage();
-//            $this->automatedTranslationProgress->save();
-//        }
-//    }
+    //    public function failed($exception)
+    //    {
+    //        if (str($exception->getMessage())->contains('Too many requests')) {
+    //            $this->automatedTranslationProgress->status = 'retrying';
+    //            $this->automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
+    //            $this->automatedTranslationProgress->save();
+    //            TranslateValueFromModel::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $this->automatedTranslationProgress)
+    //                ->delay(now()->addMinutes(2));
+    //        } else {
+    //            $this->automatedTranslationProgress->status = 'error';
+    //            $this->automatedTranslationProgress->error = $exception->getMessage();
+    //            $this->automatedTranslationProgress->save();
+    //        }
+    //    }
 
     private function searchAndTranslate(&$array, $parentKeys = [])
     {
@@ -110,7 +110,7 @@ class TranslateValueFromModel implements ShouldQueue
                 }
 
                 ray('value', $value);
-//                $value = $this->translate($value);
+                //                $value = $this->translate($value);
             }
         }
 

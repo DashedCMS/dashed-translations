@@ -4,7 +4,6 @@ namespace Dashed\DashedTranslations\Classes;
 
 use Dashed\DashedCore\Models\Customsetting;
 use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
-use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Dashed\Deepl\Facades\Deepl;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +13,7 @@ class AutomatedTranslation
 {
     public static function automatedTranslationsEnabled()
     {
-        return !is_null(self::getProvider());
+        return ! is_null(self::getProvider());
     }
 
     public static function getProvider(): ?array
@@ -33,7 +32,7 @@ class AutomatedTranslation
     {
         $provider = self::getProvider();
 
-        if (!$provider) {
+        if (! $provider) {
             throw new \Exception('No translation provider enabled');
         }
 
