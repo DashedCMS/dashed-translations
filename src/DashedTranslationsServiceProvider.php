@@ -2,6 +2,7 @@
 
 namespace Dashed\DashedTranslations;
 
+use Dashed\DashedTranslations\Commands\RemoveUnusedTranslations;
 use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -18,6 +19,9 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
 
         $package
             ->name('dashed-translations')
+            ->hasCommands([
+                RemoveUnusedTranslations::class,
+            ])
             ->hasViews();
 
         cms()->builder('plugins', [
