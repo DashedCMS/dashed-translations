@@ -91,7 +91,7 @@ class TranslateAndReplaceString implements ShouldQueue
     public function failed($exception)
     {
         if (str($exception->getMessage())->contains('Too many requests')) {
-            foreach($this->automatedTranslationString->progress as $automatedTranslationProgress) {
+            foreach ($this->automatedTranslationString->progress as $automatedTranslationProgress) {
                 $automatedTranslationProgress->status = 'retrying';
                 $automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
                 $automatedTranslationProgress->save();
@@ -99,7 +99,7 @@ class TranslateAndReplaceString implements ShouldQueue
             TranslateAndReplaceString::dispatch($this->automatedTranslationString)
                 ->delay(now()->addMinutes(2));
         } else {
-            foreach($this->automatedTranslationString->progress as $automatedTranslationProgress) {
+            foreach ($this->automatedTranslationString->progress as $automatedTranslationProgress) {
                 $automatedTranslationProgress->status = 'error';
                 $automatedTranslationProgress->error = $exception->getMessage();
                 $automatedTranslationProgress->save();
