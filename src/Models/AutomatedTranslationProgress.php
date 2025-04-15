@@ -47,5 +47,46 @@ class AutomatedTranslationProgress extends Model
             $this->status = 'pending';
         }
         $this->saveQuietly();
+
+        foreach($this->strings as $automatedTranslationString) {
+            if (! $automatedTranslationString->pivot->replaced) {
+                $textToReplaceIn = $this->model->getTranslation(
+                    $automatedTranslationString->pivot->column,
+                    $automatedTranslationString->to_locale
+                );
+
+                $textToReplaceIn = $this->recursiveReplace(
+                    $textToReplaceIn,
+                    $automatedTranslationString->from_string,
+                    $automatedTranslationString->to_string
+                );
+
+                $this->model->setTranslation(
+                    $automatedTranslationString->pivot->column,
+                    $automatedTranslationString->to_locale,
+                    $textToReplaceIn
+                );
+
+                $this->model->save();
+
+                $automatedTranslationString->pivot->replaced = true;
+                $automatedTranslationString->pivot->save();
+            }
+        }
+    }
+
+    private function recursiveReplace($subject, string $search, string $replace)
+    {
+        if (is_array($subject)) {
+            return array_map(function ($item) use ($search, $replace) {
+                return $this->recursiveReplace($item, $search, $replace);
+            }, $subject);
+        }
+
+        if (is_string($subject)) {
+            return str($subject)->replace($search, $replace)->toString();
+        }
+
+        return $subject;
     }
 }

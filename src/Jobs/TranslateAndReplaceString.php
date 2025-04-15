@@ -42,50 +42,11 @@ class TranslateAndReplaceString implements ShouldQueue
         }
 
         foreach ($this->automatedTranslationString->progress as $automatedTranslationProgress) {
-            if (! $automatedTranslationProgress->pivot->replaced) {
-                $textToReplaceIn = $automatedTranslationProgress->model->getTranslation(
-                    $automatedTranslationProgress->pivot->column,
-                    $this->automatedTranslationString->to_locale
-                );
-
-                $textToReplaceIn = $this->recursiveReplace(
-                    $textToReplaceIn,
-                    $this->automatedTranslationString->from_string,
-                    $this->automatedTranslationString->to_string
-                );
-
-                $automatedTranslationProgress->model->setTranslation(
-                    $automatedTranslationProgress->pivot->column,
-                    $this->automatedTranslationString->to_locale,
-                    $textToReplaceIn
-                );
-
-                $automatedTranslationProgress->model->save();
-
-                $automatedTranslationProgress->pivot->replaced = true;
-                $automatedTranslationProgress->pivot->save();
-            }
-
             $automatedTranslationProgress->updateStats();
         }
         //        } catch (\Exception $exception) {
         //            $this->failed($exception);
         //        }
-    }
-
-    private function recursiveReplace($subject, string $search, string $replace)
-    {
-        if (is_array($subject)) {
-            return array_map(function ($item) use ($search, $replace) {
-                return $this->recursiveReplace($item, $search, $replace);
-            }, $subject);
-        }
-
-        if (is_string($subject)) {
-            return str($subject)->replace($search, $replace)->toString();
-        }
-
-        return $subject;
     }
 
     //    public function failed($exception)
