@@ -2,11 +2,7 @@
 
 namespace Dashed\DashedTranslations\Jobs;
 
-use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
@@ -104,40 +100,40 @@ class StartTranslationOfModel implements ShouldQueue
             }
         }
 
-//        if ($model->metadata) {
-//            $translatableMetaColumns = [
-//                'title',
-//                'description',
-//            ];
-//
-//            foreach ($translatableMetaColumns as $column) {
-//                //                    $totalStringsToTranslate++;
-//                $textToTranslate = $model->metadata->getTranslation($column, $fromLocale);
-//                foreach ($toLocales as $locale) {
-//                    ExtractStringsToTranslate::dispatch($model->metadata, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale]);
-//                    //                            ->delay(now()->addMinutes($waitMinutes));
-//                    //                        $waitMinutes++;
-//                }
-//            }
-//        }
-//
-//        if ($model->customBlocks) {
-//            $translatableCustomBlockColumns = [
-//                'blocks',
-//            ];
-//
-//            foreach ($translatableCustomBlockColumns as $column) {
-//                //                    $totalStringsToTranslate++;
-//                $textToTranslate = $model->customBlocks->getTranslation($column, $fromLocale);
-//                foreach ($toLocales as $locale) {
-//                    ExtractStringsToTranslate::dispatch($model->customBlocks, $column, $textToTranslate, $locale, $fromLocale, [
-//                        'customBlock' => str($model::class . 'Blocks')->explode('\\')->last(),
-//                    ], $automatedTranslationProgresses[$locale]);
-//                    //                            ->delay(now()->addMinutes($waitMinutes));
-//                    //                        $waitMinutes++;
-//                }
-//            }
-//        }
+        //        if ($model->metadata) {
+        //            $translatableMetaColumns = [
+        //                'title',
+        //                'description',
+        //            ];
+        //
+        //            foreach ($translatableMetaColumns as $column) {
+        //                //                    $totalStringsToTranslate++;
+        //                $textToTranslate = $model->metadata->getTranslation($column, $fromLocale);
+        //                foreach ($toLocales as $locale) {
+        //                    ExtractStringsToTranslate::dispatch($model->metadata, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale]);
+        //                    //                            ->delay(now()->addMinutes($waitMinutes));
+        //                    //                        $waitMinutes++;
+        //                }
+        //            }
+        //        }
+        //
+        //        if ($model->customBlocks) {
+        //            $translatableCustomBlockColumns = [
+        //                'blocks',
+        //            ];
+        //
+        //            foreach ($translatableCustomBlockColumns as $column) {
+        //                //                    $totalStringsToTranslate++;
+        //                $textToTranslate = $model->customBlocks->getTranslation($column, $fromLocale);
+        //                foreach ($toLocales as $locale) {
+        //                    ExtractStringsToTranslate::dispatch($model->customBlocks, $column, $textToTranslate, $locale, $fromLocale, [
+        //                        'customBlock' => str($model::class . 'Blocks')->explode('\\')->last(),
+        //                    ], $automatedTranslationProgresses[$locale]);
+        //                    //                            ->delay(now()->addMinutes($waitMinutes));
+        //                    //                        $waitMinutes++;
+        //                }
+        //            }
+        //        }
 
         //            foreach ($toLocales as $toLocale) {
         //                $automatedTranslationProgress = AutomatedTranslationProgress::where('model_type', $model::class)

@@ -50,39 +50,39 @@ class AutomatedTranslation
 
         if ($model->metadata) {
             StartTranslationOfModel::dispatch($model->metadata, $fromLocale, $toLocales, $overwriteColumns, $automatedTranslationProgress);
-//            $translatableMetaColumns = [
-//                'title',
-//                'description',
-//            ];
+            //            $translatableMetaColumns = [
+            //                'title',
+            //                'description',
+            //            ];
 
-//            foreach ($translatableMetaColumns as $column) {
-//                //                    $totalStringsToTranslate++;
-//                $textToTranslate = $model->metadata->getTranslation($column, $fromLocale);
-//                foreach ($toLocales as $locale) {
-//                    ExtractStringsToTranslate::dispatch($model->metadata, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale]);
-//                    //                            ->delay(now()->addMinutes($waitMinutes));
-//                    //                        $waitMinutes++;
-//                }
-//            }
+            //            foreach ($translatableMetaColumns as $column) {
+            //                //                    $totalStringsToTranslate++;
+            //                $textToTranslate = $model->metadata->getTranslation($column, $fromLocale);
+            //                foreach ($toLocales as $locale) {
+            //                    ExtractStringsToTranslate::dispatch($model->metadata, $column, $textToTranslate, $locale, $fromLocale, [], $automatedTranslationProgresses[$locale]);
+            //                    //                            ->delay(now()->addMinutes($waitMinutes));
+            //                    //                        $waitMinutes++;
+            //                }
+            //            }
         }
 
         if ($model->customBlocks) {
             StartTranslationOfModel::dispatch($model->customBlocks, $fromLocale, $toLocales, $overwriteColumns, $automatedTranslationProgress);
-//            $translatableCustomBlockColumns = [
-//                'blocks',
-//            ];
+            //            $translatableCustomBlockColumns = [
+            //                'blocks',
+            //            ];
 
-//            foreach ($translatableCustomBlockColumns as $column) {
-//                //                    $totalStringsToTranslate++;
-//                $textToTranslate = $model->customBlocks->getTranslation($column, $fromLocale);
-//                foreach ($toLocales as $locale) {
-//                    ExtractStringsToTranslate::dispatch($model->customBlocks, $column, $textToTranslate, $locale, $fromLocale, [
-//                        'customBlock' => str($model::class . 'Blocks')->explode('\\')->last(),
-//                    ], $automatedTranslationProgresses[$locale]);
-//                    //                            ->delay(now()->addMinutes($waitMinutes));
-//                    //                        $waitMinutes++;
-//                }
-//            }
+            //            foreach ($translatableCustomBlockColumns as $column) {
+            //                //                    $totalStringsToTranslate++;
+            //                $textToTranslate = $model->customBlocks->getTranslation($column, $fromLocale);
+            //                foreach ($toLocales as $locale) {
+            //                    ExtractStringsToTranslate::dispatch($model->customBlocks, $column, $textToTranslate, $locale, $fromLocale, [
+            //                        'customBlock' => str($model::class . 'Blocks')->explode('\\')->last(),
+            //                    ], $automatedTranslationProgresses[$locale]);
+            //                    //                            ->delay(now()->addMinutes($waitMinutes));
+            //                    //                        $waitMinutes++;
+            //                }
+            //            }
         }
     }
 }

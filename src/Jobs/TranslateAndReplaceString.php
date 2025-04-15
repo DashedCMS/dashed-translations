@@ -34,7 +34,7 @@ class TranslateAndReplaceString implements ShouldQueue
      */
     public function handle(): void
     {
-//        try {
+        //        try {
         if (! $this->automatedTranslationString->translated) {
             $this->automatedTranslationString->to_string = AutomatedTranslation::translate($this->automatedTranslationString->from_string, $this->automatedTranslationString->to_locale, $this->automatedTranslationString->from_locale);
             $this->automatedTranslationString->translated = true;
@@ -68,9 +68,9 @@ class TranslateAndReplaceString implements ShouldQueue
 
             $automatedTranslationProgress->updateStats();
         }
-//        } catch (\Exception $exception) {
-//            $this->failed($exception);
-//        }
+        //        } catch (\Exception $exception) {
+        //            $this->failed($exception);
+        //        }
     }
 
     private function recursiveReplace($subject, string $search, string $replace)
@@ -88,23 +88,23 @@ class TranslateAndReplaceString implements ShouldQueue
         return $subject;
     }
 
-//    public function failed($exception)
-//    {
-//        dd($exception->getMessage());
-//        if (str($exception->getMessage())->contains('Too many requests')) {
-//            foreach($this->automatedTranslationString->progress as $automatedTranslationProgress) {
-//                $automatedTranslationProgress->status = 'retrying';
-//                $automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
-//                $automatedTranslationProgress->save();
-//            }
-//            TranslateAndReplaceString::dispatch($this->automatedTranslationString)
-//                ->delay(now()->addMinutes(2));
-//        } else {
-//            foreach($this->automatedTranslationString->progress as $automatedTranslationProgress) {
-//                $automatedTranslationProgress->status = 'error';
-//                $automatedTranslationProgress->error = $exception->getMessage();
-//                $automatedTranslationProgress->save();
-//            }
-//        }
-//    }
+    //    public function failed($exception)
+    //    {
+    //        dd($exception->getMessage());
+    //        if (str($exception->getMessage())->contains('Too many requests')) {
+    //            foreach($this->automatedTranslationString->progress as $automatedTranslationProgress) {
+    //                $automatedTranslationProgress->status = 'retrying';
+    //                $automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
+    //                $automatedTranslationProgress->save();
+    //            }
+    //            TranslateAndReplaceString::dispatch($this->automatedTranslationString)
+    //                ->delay(now()->addMinutes(2));
+    //        } else {
+    //            foreach($this->automatedTranslationString->progress as $automatedTranslationProgress) {
+    //                $automatedTranslationProgress->status = 'error';
+    //                $automatedTranslationProgress->error = $exception->getMessage();
+    //                $automatedTranslationProgress->save();
+    //            }
+    //        }
+    //    }
 }
