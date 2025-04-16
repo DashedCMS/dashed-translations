@@ -35,7 +35,7 @@ class TranslateAndReplaceString implements ShouldQueue
     public function handle(): void
     {
         try {
-            if (!$this->automatedTranslationString->translated) {
+            if (! $this->automatedTranslationString->translated) {
                 if (is_numeric($this->automatedTranslationString->from_string)) {
                     $this->automatedTranslationString->to_string = $this->automatedTranslationString->from_string;
                 } else {

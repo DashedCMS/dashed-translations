@@ -105,7 +105,7 @@ class AutomatedTranslationProgressResource extends Resource
                     ->button()
                     ->action(function (AutomatedTranslationProgress $record) {
                         StartTranslationOfModel::dispatch($record->model, $record->from_locale, [$record->to_locale], [], $record);
-//                        AutomatedTranslation::translateModel($record->model, $record->from_locale, [$record->to_locale], [], $record);
+                        //                        AutomatedTranslation::translateModel($record->model, $record->from_locale, [$record->to_locale], [], $record);
 
                         Notification::make()
                             ->success()
@@ -122,7 +122,7 @@ class AutomatedTranslationProgressResource extends Resource
                     ->action(function ($records) {
                         foreach ($records as $record) {
                             StartTranslationOfModel::dispatch($record->model, $record->from_locale, [$record->to_locale], [], $record);
-//                            AutomatedTranslation::translateModel($record->model, $record->from_locale, [$record->to_locale], [], $record);
+                            //                            AutomatedTranslation::translateModel($record->model, $record->from_locale, [$record->to_locale], [], $record);
                         }
 
                         Notification::make()

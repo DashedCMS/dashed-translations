@@ -48,7 +48,7 @@ class StartTranslationOfModel implements ShouldQueue
         $overwriteColumns = $this->overwriteColumns;
         $automatedTranslationProgress = $this->automatedTranslationProgress;
 
-//        try {
+        //        try {
         //            $waitMinutes = 0;
 
         //            $totalStringsToTranslate = 0;
@@ -73,7 +73,7 @@ class StartTranslationOfModel implements ShouldQueue
                     ->where('status', '!=', 'finished')
                     ->latest()
                     ->first();
-                if (!$automatedTranslationProgress) {
+                if (! $automatedTranslationProgress) {
                     $automatedTranslationProgress = new AutomatedTranslationProgress();
                     $automatedTranslationProgress->model_type = $model::class;
                     $automatedTranslationProgress->model_id = $model->id;
@@ -90,7 +90,7 @@ class StartTranslationOfModel implements ShouldQueue
         }
 
         foreach ($model->translatable as $column) {
-            if (!method_exists($model, $column) || in_array($column, $overwriteColumns)) {
+            if (! method_exists($model, $column) || in_array($column, $overwriteColumns)) {
                 //                    $totalStringsToTranslate++;
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
@@ -147,14 +147,14 @@ class StartTranslationOfModel implements ShouldQueue
         //                $automatedTranslationProgress->total_strings_to_translate = $totalStringsToTranslate;
         //                $automatedTranslationProgress->save();
         //            }
-//        } catch (\Exception $exception) {
-//            $this->failed($exception);
-//        }
+        //        } catch (\Exception $exception) {
+        //            $this->failed($exception);
+        //        }
     }
 
     public function failed($exception)
     {
-//        dd($exception->getMessage());
+        //        dd($exception->getMessage());
         if (str($exception->getMessage())->contains('Too many requests')) {
             $this->automatedTranslationProgress->status = 'retrying';
             $this->automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';

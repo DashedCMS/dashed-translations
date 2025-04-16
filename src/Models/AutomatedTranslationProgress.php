@@ -12,7 +12,7 @@ class AutomatedTranslationProgress extends Model
     public static function booted()
     {
         static::saved(function (AutomatedTranslationProgress $automatedTranslationProgress) {
-//            $automatedTranslationProgress->updateStats();
+            //            $automatedTranslationProgress->updateStats();
         });
     }
 
@@ -50,7 +50,7 @@ class AutomatedTranslationProgress extends Model
 
         if ($this->status == 'finished') {
             foreach ($this->strings as $automatedTranslationString) {
-                if (!$automatedTranslationString->pivot->replaced) {
+                if (! $automatedTranslationString->pivot->replaced) {
                     $textToReplaceIn = $this->model->getTranslation(
                         $automatedTranslationString->pivot->column,
                         $automatedTranslationString->to_locale
