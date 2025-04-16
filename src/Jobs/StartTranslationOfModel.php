@@ -18,7 +18,7 @@ class StartTranslationOfModel implements ShouldQueue
     use SerializesModels;
 
     public $timeout = 3000;
-    public $tries = 1000;
+    public $tries = 10;
     public $model;
     public $fromLocale;
     public $toLocales;
@@ -48,11 +48,12 @@ class StartTranslationOfModel implements ShouldQueue
         $overwriteColumns = $this->overwriteColumns;
         $automatedTranslationProgress = $this->automatedTranslationProgress;
 
-        //        try {
+//        try {
         //            $waitMinutes = 0;
 
         //            $totalStringsToTranslate = 0;
         if ($automatedTranslationProgress) {
+            $automatedTranslationProgress->status = 'in_progress';
             $automatedTranslationProgress->total_strings_to_translate = 0;
             $automatedTranslationProgress->total_strings_translated = 0;
             $automatedTranslationProgress->error = null;
@@ -72,13 +73,14 @@ class StartTranslationOfModel implements ShouldQueue
                     ->where('status', '!=', 'finished')
                     ->latest()
                     ->first();
-                if (! $automatedTranslationProgress) {
+                if (!$automatedTranslationProgress) {
                     $automatedTranslationProgress = new AutomatedTranslationProgress();
                     $automatedTranslationProgress->model_type = $model::class;
                     $automatedTranslationProgress->model_id = $model->id;
                     $automatedTranslationProgress->from_locale = $fromLocale;
                     $automatedTranslationProgress->to_locale = $toLocale;
                 }
+                $automatedTranslationProgress->status = 'in_progress';
                 $automatedTranslationProgress->error = null;
                 $automatedTranslationProgress->total_strings_to_translate = 0;
                 $automatedTranslationProgress->total_strings_translated = 0;
@@ -88,7 +90,7 @@ class StartTranslationOfModel implements ShouldQueue
         }
 
         foreach ($model->translatable as $column) {
-            if (! method_exists($model, $column) || in_array($column, $overwriteColumns)) {
+            if (!method_exists($model, $column) || in_array($column, $overwriteColumns)) {
                 //                    $totalStringsToTranslate++;
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
@@ -145,23 +147,24 @@ class StartTranslationOfModel implements ShouldQueue
         //                $automatedTranslationProgress->total_strings_to_translate = $totalStringsToTranslate;
         //                $automatedTranslationProgress->save();
         //            }
-        //        } catch (\Exception $exception) {
-        //            $this->failed($exception);
-        //        }
+//        } catch (\Exception $exception) {
+//            $this->failed($exception);
+//        }
     }
 
-    //    public function failed($exception)
-    //    {
-    //        if (str($exception->getMessage())->contains('Too many requests')) {
-    //            $this->automatedTranslationProgress->status = 'retrying';
-    //            $this->automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
-    //            $this->automatedTranslationProgress->save();
-    //            StartTranslationOfModel::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $this->automatedTranslationProgress)
-    //                ->delay(now()->addMinutes(2));
-    //        } else {
-    //            $this->automatedTranslationProgress->status = 'error';
-    //            $this->automatedTranslationProgress->error = $exception->getMessage();
-    //            $this->automatedTranslationProgress->save();
-    //        }
-    //    }
+    public function failed($exception)
+    {
+//        dd($exception->getMessage());
+        if (str($exception->getMessage())->contains('Too many requests')) {
+            $this->automatedTranslationProgress->status = 'retrying';
+            $this->automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
+            $this->automatedTranslationProgress->save();
+            StartTranslationOfModel::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $this->automatedTranslationProgress)
+                ->delay(now()->addMinutes(2));
+        } else {
+            $this->automatedTranslationProgress->status = 'error';
+            $this->automatedTranslationProgress->error = $exception->getMessage();
+            $this->automatedTranslationProgress->save();
+        }
+    }
 }

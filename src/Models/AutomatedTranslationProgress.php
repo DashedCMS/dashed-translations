@@ -12,7 +12,7 @@ class AutomatedTranslationProgress extends Model
     public static function booted()
     {
         static::saved(function (AutomatedTranslationProgress $automatedTranslationProgress) {
-            $automatedTranslationProgress->updateStats();
+//            $automatedTranslationProgress->updateStats();
         });
     }
 
@@ -48,29 +48,31 @@ class AutomatedTranslationProgress extends Model
         }
         $this->saveQuietly();
 
-        foreach ($this->strings as $automatedTranslationString) {
-            if (! $automatedTranslationString->pivot->replaced) {
-                $textToReplaceIn = $this->model->getTranslation(
-                    $automatedTranslationString->pivot->column,
-                    $automatedTranslationString->to_locale
-                );
+        if ($this->status == 'finished') {
+            foreach ($this->strings as $automatedTranslationString) {
+                if (!$automatedTranslationString->pivot->replaced) {
+                    $textToReplaceIn = $this->model->getTranslation(
+                        $automatedTranslationString->pivot->column,
+                        $automatedTranslationString->to_locale
+                    );
 
-                $textToReplaceIn = $this->recursiveReplace(
-                    $textToReplaceIn,
-                    $automatedTranslationString->from_string,
-                    $automatedTranslationString->to_string
-                );
+                    $textToReplaceIn = $this->recursiveReplace(
+                        $textToReplaceIn,
+                        $automatedTranslationString->from_string,
+                        $automatedTranslationString->to_string ?: $automatedTranslationString->from_string
+                    );
 
-                $this->model->setTranslation(
-                    $automatedTranslationString->pivot->column,
-                    $automatedTranslationString->to_locale,
-                    $textToReplaceIn
-                );
+                    $this->model->setTranslation(
+                        $automatedTranslationString->pivot->column,
+                        $automatedTranslationString->to_locale,
+                        $textToReplaceIn
+                    );
 
-                $this->model->save();
+                    $this->model->save();
 
-                $automatedTranslationString->pivot->replaced = true;
-                $automatedTranslationString->pivot->save();
+                    $automatedTranslationString->pivot->replaced = true;
+                    $automatedTranslationString->pivot->save();
+                }
             }
         }
     }

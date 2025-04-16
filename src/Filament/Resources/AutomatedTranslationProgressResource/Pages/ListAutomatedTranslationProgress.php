@@ -8,4 +8,9 @@ use Filament\Resources\Pages\ListRecords;
 class ListAutomatedTranslationProgress extends ListRecords
 {
     protected static string $resource = AutomatedTranslationProgressResource::class;
+
+    protected function getTablePollingInterval(): ?string
+    {
+        return '1s';
+    }
 }

@@ -17,8 +17,8 @@ class TranslateAndReplaceString implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public $timeout = 3000;
-    public $tries = 1000;
+    public $timeout = 300;
+    public $tries = 10;
     public AutomatedTranslationString $automatedTranslationString;
 
     /**
@@ -34,38 +34,41 @@ class TranslateAndReplaceString implements ShouldQueue
      */
     public function handle(): void
     {
-        //        try {
-        if (! $this->automatedTranslationString->translated) {
-            $this->automatedTranslationString->to_string = AutomatedTranslation::translate($this->automatedTranslationString->from_string, $this->automatedTranslationString->to_locale, $this->automatedTranslationString->from_locale);
-            $this->automatedTranslationString->translated = true;
-            $this->automatedTranslationString->save();
-        }
+        try {
+            if (!$this->automatedTranslationString->translated) {
+                if (is_numeric($this->automatedTranslationString->from_string)) {
+                    $this->automatedTranslationString->to_string = $this->automatedTranslationString->from_string;
+                } else {
+                    $this->automatedTranslationString->to_string = AutomatedTranslation::translate($this->automatedTranslationString->from_string, $this->automatedTranslationString->to_locale, $this->automatedTranslationString->from_locale);
+                }
+                $this->automatedTranslationString->translated = true;
+                $this->automatedTranslationString->save();
+            }
 
-        foreach ($this->automatedTranslationString->progress as $automatedTranslationProgress) {
-            $automatedTranslationProgress->updateStats();
+            foreach ($this->automatedTranslationString->progress as $automatedTranslationProgress) {
+                $automatedTranslationProgress->updateStats();
+            }
+        } catch (\Exception $exception) {
+            $this->failed($exception);
         }
-        //        } catch (\Exception $exception) {
-        //            $this->failed($exception);
-        //        }
     }
 
-    //    public function failed($exception)
-    //    {
-    //        dd($exception->getMessage());
-    //        if (str($exception->getMessage())->contains('Too many requests')) {
-    //            foreach($this->automatedTranslationString->progress as $automatedTranslationProgress) {
-    //                $automatedTranslationProgress->status = 'retrying';
-    //                $automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
-    //                $automatedTranslationProgress->save();
-    //            }
-    //            TranslateAndReplaceString::dispatch($this->automatedTranslationString)
-    //                ->delay(now()->addMinutes(2));
-    //        } else {
-    //            foreach($this->automatedTranslationString->progress as $automatedTranslationProgress) {
-    //                $automatedTranslationProgress->status = 'error';
-    //                $automatedTranslationProgress->error = $exception->getMessage();
-    //                $automatedTranslationProgress->save();
-    //            }
-    //        }
-    //    }
+    public function failed($exception)
+    {
+        if (str($exception->getMessage())->contains('Too many requests')) {
+            foreach ($this->automatedTranslationString->progress as $automatedTranslationProgress) {
+                $automatedTranslationProgress->status = 'retrying';
+                $automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
+                $automatedTranslationProgress->save();
+            }
+            TranslateAndReplaceString::dispatch($this->automatedTranslationString)
+                ->delay(now()->addMinutes(2));
+        } else {
+            foreach ($this->automatedTranslationString->progress as $automatedTranslationProgress) {
+                $automatedTranslationProgress->status = 'error';
+                $automatedTranslationProgress->error = $exception->getMessage();
+                $automatedTranslationProgress->save();
+            }
+        }
+    }
 }
