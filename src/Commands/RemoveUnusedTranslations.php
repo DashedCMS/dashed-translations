@@ -53,7 +53,7 @@ class RemoveUnusedTranslations extends Command
                 }
             }
 
-            if (!$hasValue) {
+            if (! $hasValue) {
                 $translation->delete();
             }
         }
