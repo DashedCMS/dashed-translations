@@ -4,6 +4,7 @@ namespace Dashed\DashedTranslations\Commands;
 
 use Dashed\DashedTranslations\Models\Translation;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 
 class RemoveUnusedTranslations extends Command
 {
@@ -13,6 +14,10 @@ class RemoveUnusedTranslations extends Command
      * @var string
      */
     protected $signature = 'dashed:remove-unused-translations';
+
+    protected $aliases = [
+        'dashed:delete-unused-translations',
+    ];
 
     /**
      * The console command description.
@@ -48,10 +53,12 @@ class RemoveUnusedTranslations extends Command
                 }
             }
 
-            if (! $hasValue) {
+            if (!$hasValue) {
                 $translation->delete();
             }
         }
+
+        Artisan::call('cache:clear');
 
         return 0;
     }
