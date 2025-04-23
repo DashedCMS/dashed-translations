@@ -69,6 +69,11 @@ class ExtractStringsToTranslate implements ShouldQueue
         }
 
         $this->automatedTranslationProgress->updateStats();
+
+        if($this->automatedTranslationProgress->total_strings_to_translate == 0){
+            $this->automatedTranslationProgress->status = 'finished';
+            $this->automatedTranslationProgress->save();
+        }
         //        } catch (\Exception $exception) {
         //            $this->failed($exception);
         //        }
