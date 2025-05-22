@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Dashed\DashedCore\Classes\Locales;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
+use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
 use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
 use Dashed\DashedTranslations\Models\Translation;
 use Filament\Forms\Components\Actions\Action;
@@ -355,10 +356,11 @@ class ListTranslations extends Page
                     foreach ($data['translate'] as $id => $bool) {
                         if ($bool === true) {
                             $translation = Translation::find($id);
-                            $textToTranslate = $translation->getTranslation('value', $data['from_locale']) ?: $translation->default;
-                            foreach ($data['to_locales'] as $locale) {
-                                TranslateValueFromModel::dispatch($translation, 'value', $textToTranslate, $locale, $data['from_locale']);
-                            }
+                            StartTranslationOfModel::dispatch($translation, $data['from_locale'], $data['to_locales']);
+//                            $textToTranslate = $translation->getTranslation('value', $data['from_locale']) ?: $translation->default;
+//                            foreach ($data['to_locales'] as $locale) {
+//                                TranslateValueFromModel::dispatch($translation, 'value', $textToTranslate, $locale, $data['from_locale']);
+//                            }
                         }
                     }
 
@@ -413,10 +415,11 @@ class ListTranslations extends Page
                         if ($bool === true) {
                             $translations = Translation::where('tag', $tab)->get();
                             foreach ($translations as $translation) {
-                                $textToTranslate = $translation->getTranslation('value', $data['from_locale']) ?: $translation->default;
-                                foreach ($data['to_locales'] as $locale) {
-                                    TranslateValueFromModel::dispatch($translation, 'value', $textToTranslate, $locale, $data['from_locale']);
-                                }
+//                                $textToTranslate = $translation->getTranslation('value', $data['from_locale']) ?: $translation->default;
+//                                foreach ($data['to_locales'] as $locale) {
+                                    StartTranslationOfModel::dispatch($translation, $data['from_locale'], $data['to_locales']);
+//                                    TranslateValueFromModel::dispatch($translation, 'value', $textToTranslate, $locale, $data['from_locale']);
+//                                }
                             }
                         }
                     }
@@ -448,10 +451,11 @@ class ListTranslations extends Page
                 ->action(function (array $data, $livewire) use ($locale) {
                     $id = explode('_', $livewire->mountedFormComponentActionsComponents[0])[1];
                     $translation = Translation::find($id);
-                    $textToTranslate = $translation->getTranslation('value', $locale['id']) ?: $translation->default;
-                    foreach ($data['locales'] as $otherLocale) {
-                        TranslateValueFromModel::dispatch($translation, 'value', $textToTranslate, $otherLocale, $locale['id']);
-                    }
+//                    $textToTranslate = $translation->getTranslation('value', $locale['id']) ?: $translation->default;
+                    StartTranslationOfModel::dispatch($translation, $data['locales'], $locale['id']);
+//                    foreach ($data['locales'] as $otherLocale) {
+//                        TranslateValueFromModel::dispatch($translation, 'value', $textToTranslate, $otherLocale, $locale['id']);
+//                    }
 
                     Notification::make()
                         ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " wordt vertaald")
