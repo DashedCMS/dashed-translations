@@ -137,9 +137,7 @@ class ListTranslations extends Page
                                     ->send();
                             });
                     } elseif ($translation->type == 'editor') {
-                        $schema[] = TiptapEditor::make("translation_{$translation->id}_{$locale['id']}")
-//                            ->placeholder($translation->default)
-                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
+                        $schema[] = cms()->editorField("translation_{$translation->id}_{$locale['id']}", Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->live()
                             ->hintAction(self::translateSingleField($otherLocales, $locale))
