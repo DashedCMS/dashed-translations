@@ -454,7 +454,7 @@ class ListTranslations extends Page
                     $id = explode('_', $livewire->mountedFormComponentActionsComponents[0])[1];
                     $translation = Translation::find($id);
                     //                    $textToTranslate = $translation->getTranslation('value', $locale['id']) ?: $translation->default;
-                    StartTranslationOfModel::dispatch($translation, $data['from_locale'], $data['locales']);
+                    StartTranslationOfModel::dispatch($translation, $locale, $data['locales']);
                     //                    foreach ($data['locales'] as $otherLocale) {
                     //                        TranslateValueFromModel::dispatch($translation, 'value', $textToTranslate, $otherLocale, $locale['id']);
                     //                    }
