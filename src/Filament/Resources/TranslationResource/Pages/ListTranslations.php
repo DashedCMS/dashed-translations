@@ -453,7 +453,7 @@ class ListTranslations extends Page
                 ->action(function (array $data, $livewire) use ($locale) {
                     $id = explode('_', $livewire->mountedFormComponentActionsComponents[0])[1];
                     $translation = Translation::find($id);
-                    if(!$translation->getTranslation('value', $locale['id']) && $translation->default) {
+                    if (! $translation->getTranslation('value', $locale['id']) && $translation->default) {
                         $translation->setTranslation('value', $locale['id'], $translation->default);
                         $translation->save();
                         Cache::forget(Str::slug($translation->name . $translation->tag . $locale['id'] . $translation->type));
