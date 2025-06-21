@@ -453,6 +453,12 @@ class ListTranslations extends Page
                 ->action(function (array $data, $livewire) use ($locale) {
                     $id = explode('_', $livewire->mountedFormComponentActionsComponents[0])[1];
                     $translation = Translation::find($id);
+                    if(!$translation->getTranslation('value', $locale['id']) && $translation->default) {
+                        $translation->setTranslation('value', $locale['id'], $translation->default);
+                        $translation->save();
+                        Cache::forget(Str::slug($translation->name . $translation->tag . $locale['id'] . $translation->type));
+                        $translation->refresh();
+                    }
                     //                    $textToTranslate = $translation->getTranslation('value', $locale['id']) ?: $translation->default;
                     StartTranslationOfModel::dispatch($translation, $locale['id'], $data['locales']);
                     //                    foreach ($data['locales'] as $otherLocale) {
