@@ -2,13 +2,13 @@
 
 namespace Dashed\DashedTranslations\Classes;
 
-use Dashed\DashedCore\Models\Customsetting;
-use Dashed\DashedTranslations\Jobs\ExtractStringsToTranslate;
-use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
-use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Dashed\Deepl\Facades\Deepl;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\Model;
+use Dashed\DashedCore\Models\Customsetting;
+use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
+use Dashed\DashedTranslations\Jobs\ExtractStringsToTranslate;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 
 class AutomatedTranslation
 {

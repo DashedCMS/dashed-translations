@@ -27,19 +27,19 @@ return new class () extends Migration {
         Schema::create('dashed__automated_translation_progress_string', function (Blueprint $table) {
             $table->id();
 
-             $table->unsignedBigInteger('automated_translation_progress_id');
-             $table->foreign('automated_translation_progress_id', 'fk_progress_id')
-                 ->references('id')->on('dashed__automated_translation_progress')
-                 ->onDelete('cascade');
+            $table->unsignedBigInteger('automated_translation_progress_id');
+            $table->foreign('automated_translation_progress_id', 'fk_progress_id')
+                ->references('id')->on('dashed__automated_translation_progress')
+                ->onDelete('cascade');
 
-             $table->unsignedBigInteger('automated_translation_string_id');
-             $table->foreign('automated_translation_string_id', 'fk_string_id')
-                 ->references('id')->on('dashed__automated_translation_strings')
-                 ->onDelete('cascade');
+            $table->unsignedBigInteger('automated_translation_string_id');
+            $table->foreign('automated_translation_string_id', 'fk_string_id')
+                ->references('id')->on('dashed__automated_translation_strings')
+                ->onDelete('cascade');
 
-             $table->boolean('replaced')
-             ->default(false);
-             $table->string('column');
+            $table->boolean('replaced')
+            ->default(false);
+            $table->string('column');
         });
 
         Schema::table('dashed__automated_translation_progress', function (Blueprint $table) {

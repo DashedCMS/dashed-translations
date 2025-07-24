@@ -2,16 +2,16 @@
 
 namespace Dashed\DashedTranslations\Jobs;
 
-use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
-use Dashed\DashedTranslations\Models\AutomatedTranslationString;
-use Filament\Forms\Components\FileUpload;
+use Illuminate\Bus\Queueable;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Filament\Forms\Components\FileUpload;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use Dashed\DashedTranslations\Models\AutomatedTranslationString;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 
 class ExtractStringsToTranslate implements ShouldQueue
 {

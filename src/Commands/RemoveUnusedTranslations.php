@@ -2,9 +2,9 @@
 
 namespace Dashed\DashedTranslations\Commands;
 
-use Dashed\DashedTranslations\Models\Translation;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Dashed\DashedTranslations\Models\Translation;
 
 class RemoveUnusedTranslations extends Command
 {

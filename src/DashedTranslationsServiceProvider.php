@@ -2,10 +2,10 @@
 
 namespace Dashed\DashedTranslations;
 
-use Dashed\DashedTranslations\Commands\RemoveUnusedTranslations;
-use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Dashed\DashedTranslations\Commands\RemoveUnusedTranslations;
+use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 
 class DashedTranslationsServiceProvider extends PackageServiceProvider
 {

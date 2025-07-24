@@ -2,8 +2,8 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages;
 
-use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource;
 use Filament\Resources\Pages\ListRecords;
+use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource;
 
 class ListAutomatedTranslationProgress extends ListRecords
 {
