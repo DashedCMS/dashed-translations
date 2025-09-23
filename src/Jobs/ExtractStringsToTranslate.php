@@ -108,12 +108,16 @@ class ExtractStringsToTranslate implements ShouldQueue
                     $currentKeys = array_merge($parentKeys, [$value['type']]);
                 }
                 $this->searchAndTranslate($value, $currentKeys);
-            } elseif (! str($key)->contains('type') && ! str($key)->contains('url')) {
+            } elseif (! str($key)->contains(array_merge(['type', 'url', 'icon', 'background'], cms()->builder('ignorableKeysForTranslations'))) && !is_numeric($value) && !is_int($value)) {
                 $builderBlock = $this->matchBuilderBlock($key, $parentKeys, cms()->builder('blocks')) || $this->matchCustomBlock($key, $parentKeys, cms()->builder($this->attributes['customBlock'] ?? 'blocks'));
                 if ($builderBlock && ($builderBlock instanceof Select || $builderBlock instanceof Toggle || $builderBlock instanceof FileUpload)) {
                     continue;
                 }
 
+
+                if($value == 'image'){
+                    dump($value, $parentKeys, $key, $builderBlock, 'here');
+                }
                 $this->addString($value);
                 //                $value = $this->addString($value);
             }
@@ -149,7 +153,7 @@ class ExtractStringsToTranslate implements ShouldQueue
     {
         if (count($parentKeys) || (! count($parentKeys) && $currentBlock)) {
             foreach ($blocks as $block) {
-                if (count($parentKeys) && $block->getName() === $parentKeys[0]) {
+                if (count($parentKeys) && method_exists($block, 'getName') && $block->getName() === $parentKeys[0]) {
                     $currentBlock = $block;
                 } elseif ($currentBlock && method_exists($block, 'getName') && $block->getName() === $key) {
                     return $block;
@@ -193,7 +197,6 @@ class ExtractStringsToTranslate implements ShouldQueue
             ]);
             $this->automatedTranslationProgress->updateStats();
         }
-
         TranslateAndReplaceString::dispatch($string);
     }
 }
