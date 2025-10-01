@@ -2,8 +2,10 @@
 
 namespace Dashed\DashedTranslations\Models;
 
+use Dashed\DashedTranslations\Jobs\ReplaceStringsInModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\DB;
 
 class AutomatedTranslationProgress extends Model
 {
@@ -27,7 +29,7 @@ class AutomatedTranslationProgress extends Model
             ->withPivot('replaced', 'column');
     }
 
-    public function updateStats()
+    public function updateStats($startReplacingStrings = false)
     {
         $this->total_strings_to_translate = $this->strings->count();
         $totalStringsTranslated = 0;
@@ -39,7 +41,8 @@ class AutomatedTranslationProgress extends Model
         }
         $this->total_strings_translated = $totalStringsTranslated;
 
-        if ($this->total_strings_to_translate > 0 && $this->total_strings_to_translate == $this->total_strings_translated) {
+        if ($this->total_strings_to_translate == $this->total_strings_translated) {
+//        if ($this->total_strings_to_translate > 0 && $this->total_strings_to_translate == $this->total_strings_translated) {
             $this->status = 'finished';
         } elseif ($this->total_strings_translated > 0) {
             $this->status = 'in_progress';
@@ -48,36 +51,15 @@ class AutomatedTranslationProgress extends Model
         }
         $this->saveQuietly();
 
-        if ($this->status == 'finished') {
-            foreach ($this->strings as $automatedTranslationString) {
-                if (! $automatedTranslationString->pivot->replaced) {
-                    $textToReplaceIn = $this->model->getTranslation(
-                        $automatedTranslationString->pivot->column,
-                        $automatedTranslationString->to_locale
-                    );
-
-                    $textToReplaceIn = $this->recursiveReplace(
-                        $textToReplaceIn,
-                        $automatedTranslationString->from_string,
-                        $automatedTranslationString->to_string ?: $automatedTranslationString->from_string
-                    );
-
-                    $this->model->setTranslation(
-                        $automatedTranslationString->pivot->column,
-                        $automatedTranslationString->to_locale,
-                        $textToReplaceIn
-                    );
-
-                    $this->model->save();
-
-                    $automatedTranslationString->pivot->replaced = true;
-                    $automatedTranslationString->pivot->save();
-                }
+        if ($startReplacingStrings && $this->status == 'finished') {
+            if (!self::where('model_type', $this->model_type)->where('model_id', $this->model_id)->where('status', '!=', 'finished')->count()) {
+                dd('asdf');
+//                ReplaceStringsInModel::dispatch($this);
             }
         }
     }
 
-    private function recursiveReplace($subject, string $search, string $replace)
+    public function recursiveReplace($subject, string $search, string $replace)
     {
         if (is_array($subject)) {
             return array_map(function ($item) use ($search, $replace) {
@@ -86,6 +68,9 @@ class AutomatedTranslationProgress extends Model
         }
 
         if (is_string($subject)) {
+            if((str($subject)->contains('choose Norsup prefab pools') || str($search)->contains('choose Norsup prefab pools')) && $this->to_locale == 'de'){
+//                dump($subject, $search, $replace, str($subject)->replace($search, $replace)->toString());
+            }
             return str($subject)->replace($search, $replace)->toString();
         }
 

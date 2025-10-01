@@ -68,7 +68,7 @@ class ExtractStringsToTranslate implements ShouldQueue
             //            $translatedText = $this->addString($this->value);
         }
 
-        $this->automatedTranslationProgress->updateStats();
+//        $this->automatedTranslationProgress->updateStats();
 
         if ($this->automatedTranslationProgress->total_strings_to_translate == 0) {
             $this->automatedTranslationProgress->status = 'finished';
@@ -115,9 +115,9 @@ class ExtractStringsToTranslate implements ShouldQueue
                 }
 
 
-                if($value == 'image'){
-                    dump($value, $parentKeys, $key, $builderBlock, 'here');
-                }
+//                if($value == 'image'){
+//                    dump($value, $parentKeys, $key, $builderBlock, 'here');
+//                }
                 $this->addString($value);
                 //                $value = $this->addString($value);
             }
@@ -197,6 +197,6 @@ class ExtractStringsToTranslate implements ShouldQueue
             ]);
             $this->automatedTranslationProgress->updateStats();
         }
-        TranslateAndReplaceString::dispatch($string);
+//        TranslateAndReplaceString::dispatch($string);
     }
 }

@@ -10,7 +10,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Models\AutomatedTranslationString;
 
-class TranslateAndReplaceString implements ShouldQueue
+class TranslateString implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -29,6 +29,22 @@ class TranslateAndReplaceString implements ShouldQueue
         $this->automatedTranslationString = $automatedTranslationString;
     }
 
+//    public function middleware(): array
+//    {
+//        $key = sprintf(
+//            'translate:%s:%s:%s',
+//            $this->automatedTranslationString->from_locale,
+//            $this->automatedTranslationString->to_locale,
+//            md5($this->automatedTranslationString->from_string) // kort & stabiel
+//        );
+//
+//        return [
+//            (new WithoutOverlapping($key))
+//                ->expireAfter(600)     // failsafe lock expiry (seconden)
+//                ->dontRelease(),       // niet direct terug in de queue duwen
+//        ];
+//    }
+
     /**
      * Execute the job.
      */
@@ -36,7 +52,7 @@ class TranslateAndReplaceString implements ShouldQueue
     {
         try {
             if (! $this->automatedTranslationString->translated) {
-                if (is_numeric($this->automatedTranslationString->from_string)) {
+                if (is_numeric($this->automatedTranslationString->from_string) || is_bool($this->automatedTranslationString->from_string)) {
                     $this->automatedTranslationString->to_string = $this->automatedTranslationString->from_string;
                 } else {
                     $this->automatedTranslationString->to_string = AutomatedTranslation::translate($this->automatedTranslationString->from_string, $this->automatedTranslationString->to_locale, $this->automatedTranslationString->from_locale);
