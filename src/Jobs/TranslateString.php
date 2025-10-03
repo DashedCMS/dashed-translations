@@ -29,21 +29,21 @@ class TranslateString implements ShouldQueue
         $this->automatedTranslationString = $automatedTranslationString;
     }
 
-//    public function middleware(): array
-//    {
-//        $key = sprintf(
-//            'translate:%s:%s:%s',
-//            $this->automatedTranslationString->from_locale,
-//            $this->automatedTranslationString->to_locale,
-//            md5($this->automatedTranslationString->from_string) // kort & stabiel
-//        );
-//
-//        return [
-//            (new WithoutOverlapping($key))
-//                ->expireAfter(600)     // failsafe lock expiry (seconden)
-//                ->dontRelease(),       // niet direct terug in de queue duwen
-//        ];
-//    }
+    //    public function middleware(): array
+    //    {
+    //        $key = sprintf(
+    //            'translate:%s:%s:%s',
+    //            $this->automatedTranslationString->from_locale,
+    //            $this->automatedTranslationString->to_locale,
+    //            md5($this->automatedTranslationString->from_string) // kort & stabiel
+    //        );
+    //
+    //        return [
+    //            (new WithoutOverlapping($key))
+    //                ->expireAfter(600)     // failsafe lock expiry (seconden)
+    //                ->dontRelease(),       // niet direct terug in de queue duwen
+    //        ];
+    //    }
 
     /**
      * Execute the job.

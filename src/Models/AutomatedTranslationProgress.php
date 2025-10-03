@@ -2,10 +2,9 @@
 
 namespace Dashed\DashedTranslations\Models;
 
-use Dashed\DashedTranslations\Jobs\ReplaceStringsInModel;
 use Illuminate\Database\Eloquent\Model;
+use Dashed\DashedTranslations\Jobs\ReplaceStringsInModel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\DB;
 
 class AutomatedTranslationProgress extends Model
 {
@@ -42,7 +41,7 @@ class AutomatedTranslationProgress extends Model
         $this->total_strings_translated = $totalStringsTranslated;
 
         if ($this->total_strings_to_translate == $this->total_strings_translated) {
-//        if ($this->total_strings_to_translate > 0 && $this->total_strings_to_translate == $this->total_strings_translated) {
+            //        if ($this->total_strings_to_translate > 0 && $this->total_strings_to_translate == $this->total_strings_translated) {
             $this->status = 'finished';
         } elseif ($this->total_strings_translated > 0) {
             $this->status = 'in_progress';
@@ -52,9 +51,9 @@ class AutomatedTranslationProgress extends Model
         $this->saveQuietly();
 
         if ($startReplacingStrings && $this->status == 'finished') {
-            if (!self::where('model_type', $this->model_type)->where('model_id', $this->model_id)->where('status', '!=', 'finished')->count()) {
+            if (! self::where('model_type', $this->model_type)->where('model_id', $this->model_id)->where('status', '!=', 'finished')->count()) {
                 dd('asdf');
-//                ReplaceStringsInModel::dispatch($this);
+                //                ReplaceStringsInModel::dispatch($this);
             }
         }
     }
@@ -68,9 +67,10 @@ class AutomatedTranslationProgress extends Model
         }
 
         if (is_string($subject)) {
-            if((str($subject)->contains('choose Norsup prefab pools') || str($search)->contains('choose Norsup prefab pools')) && $this->to_locale == 'de'){
-//                dump($subject, $search, $replace, str($subject)->replace($search, $replace)->toString());
+            if ((str($subject)->contains('choose Norsup prefab pools') || str($search)->contains('choose Norsup prefab pools')) && $this->to_locale == 'de') {
+                //                dump($subject, $search, $replace, str($subject)->replace($search, $replace)->toString());
             }
+
             return str($subject)->replace($search, $replace)->toString();
         }
 

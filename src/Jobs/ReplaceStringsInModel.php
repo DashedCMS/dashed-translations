@@ -3,17 +3,13 @@
 namespace Dashed\DashedTranslations\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
-use Filament\Forms\Components\FileUpload;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Dashed\DashedTranslations\Models\AutomatedTranslationString;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 
 class ReplaceStringsInModel implements ShouldQueue
@@ -35,55 +31,56 @@ class ReplaceStringsInModel implements ShouldQueue
         $this->automatedTranslationProgress = $automatedTranslationProgress;
     }
 
-//    /**
-//     * Middleware die overlap voorkomt per model_type + model_id.
-//     */
-//    public function middleware(): array
-//    {
-//        return [
-//            (new WithoutOverlapping($this->uniqueKey()))
-//                ->expireAfter(1800) // failsafe: 30 min
-//                ->dontRelease(),    // niet meteen herplannen; laat de worker 'm afhandelen
-//        ];
-//    }
+    //    /**
+    //     * Middleware die overlap voorkomt per model_type + model_id.
+    //     */
+    //    public function middleware(): array
+    //    {
+    //        return [
+    //            (new WithoutOverlapping($this->uniqueKey()))
+    //                ->expireAfter(1800) // failsafe: 30 min
+    //                ->dontRelease(),    // niet meteen herplannen; laat de worker 'm afhandelen
+    //        ];
+    //    }
 
     /**
      * Unieke sleutel voor zowel middleware als ShouldBeUnique*.
      */
-//    private function uniqueKey(): string
-//    {
-//        // compacte, stabiele key
-//        return sprintf(
-//            'replace:%s:%s',
-//            $this->automatedTranslationProgress->model_type,
-//            $this->automatedTranslationProgress->model_id
-//        );
-//    }
+    //    private function uniqueKey(): string
+    //    {
+    //        // compacte, stabiele key
+    //        return sprintf(
+    //            'replace:%s:%s',
+    //            $this->automatedTranslationProgress->model_type,
+    //            $this->automatedTranslationProgress->model_id
+    //        );
+    //    }
 
     /**
      * Voor ShouldBeUniqueUntilProcessing: dezelfde sleutel gebruiken.
      */
-//    public function uniqueId(): string
-//    {
-//        return $this->uniqueKey();
-//    }
+    //    public function uniqueId(): string
+    //    {
+    //        return $this->uniqueKey();
+    //    }
 
-//    /**
-//     * (Optioneel) hoelang de uniqueness-lock mag blijven bestaan vóór start.
-//     */
-//    public $uniqueFor = 3600; // 1 uur
+    //    /**
+    //     * (Optioneel) hoelang de uniqueness-lock mag blijven bestaan vóór start.
+    //     */
+    //    public $uniqueFor = 3600; // 1 uur
 
     /**
      * Execute the job.
      */
     public function handle(): void
     {
-        if(AutomatedTranslationProgress::where('model_type', $this->automatedTranslationProgress->model_type)
+        if (AutomatedTranslationProgress::where('model_type', $this->automatedTranslationProgress->model_type)
             ->where('model_id', $this->automatedTranslationProgress->model_id)
             ->where('status', '!=', 'finished')
-            ->count()){
+            ->count()) {
             ReplaceStringsInModel::dispatch($this->automatedTranslationProgress)
                 ->delay(now()->addSeconds(5));
+
             return;
         }
 
@@ -94,17 +91,17 @@ class ReplaceStringsInModel implements ShouldQueue
 
         $model = $this->automatedTranslationProgress->model;
         $model->refresh();
-//        foreach ($automatedTranslationProgresses->pluck('to_locale')->toArray() as $locale) {
-//            $model->setTranslation($this->automatedTranslationProgress->strings()->first()->pivot->column, $locale, $model->getTranslation($this->automatedTranslationProgress->strings()->first()->pivot->column, $this->automatedTranslationProgress->from_locale));
-//        }
-//        $model->save();
+        //        foreach ($automatedTranslationProgresses->pluck('to_locale')->toArray() as $locale) {
+        //            $model->setTranslation($this->automatedTranslationProgress->strings()->first()->pivot->column, $locale, $model->getTranslation($this->automatedTranslationProgress->strings()->first()->pivot->column, $this->automatedTranslationProgress->from_locale));
+        //        }
+        //        $model->save();
 
-//        dd('asdf');
+        //        dd('asdf');
         foreach ($automatedTranslationProgresses as $automatedTranslationProgress) {
-//            foreach ($automatedTranslationProgress->strings as $automatedTranslationString) {
+            //            foreach ($automatedTranslationProgress->strings as $automatedTranslationString) {
             $strings = $automatedTranslationProgress->strings()->orderByRaw('CHAR_LENGTH(COALESCE(from_string, "")) DESC')->get();
             foreach ($strings as $automatedTranslationString) {
-                if (!$automatedTranslationString->pivot->replaced) {
+                if (! $automatedTranslationString->pivot->replaced) {
                     $textToReplaceIn = $model->getTranslation(
                         $automatedTranslationString->pivot->column,
                         $automatedTranslationString->to_locale
@@ -115,18 +112,18 @@ class ReplaceStringsInModel implements ShouldQueue
                         $textToReplaceInString = json_encode($textToReplaceIn);
                     }
                     if (str($textToReplaceInString)->contains('Norsup prefab pools') && str($automatedTranslationString->from_string)->contains('Norsup prefab pools') && $automatedTranslationProgress->to_locale == 'de') {
-//                        dump($automatedTranslationProgress->id);
-//                        dump($textToReplaceIn, $automatedTranslationString, $strings);
-//                        foreach($strings as $string){
-//                            dump($string);
-//                            dump($string->id . ' - ' . $string->from_string . ' - replaced: ' . $string->pivot->replaced);
-//                        }
-//                        dd('done');
+                        //                        dump($automatedTranslationProgress->id);
+                        //                        dump($textToReplaceIn, $automatedTranslationString, $strings);
+                        //                        foreach($strings as $string){
+                        //                            dump($string);
+                        //                            dump($string->id . ' - ' . $string->from_string . ' - replaced: ' . $string->pivot->replaced);
+                        //                        }
+                        //                        dd('done');
                     }
 
-//                    if(is_array($textToReplaceIn)){
-//                        dd($strings);
-//                    }
+                    //                    if(is_array($textToReplaceIn)){
+                    //                        dd($strings);
+                    //                    }
                     $textToReplaceIn = $automatedTranslationProgress->recursiveReplace(
                         $textToReplaceIn,
                         $automatedTranslationString->from_string,
@@ -134,7 +131,7 @@ class ReplaceStringsInModel implements ShouldQueue
                     );
 
                     if (str($textToReplaceInString)->contains('Why choose Norsup') && str($automatedTranslationString->from_string)->contains('Why choose Norsup') && $automatedTranslationProgress->to_locale == 'de') {
-//                        dd($textToReplaceIn);
+                        //                        dd($textToReplaceIn);
                     }
 
                     $model->setTranslation(

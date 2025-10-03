@@ -2,13 +2,13 @@
 
 namespace Dashed\DashedTranslations\Jobs;
 
-use Dashed\DashedTranslations\Models\AutomatedTranslationString;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Dashed\DashedTranslations\Models\AutomatedTranslationString;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 
 class StartTranslationOfModel implements ShouldQueue
@@ -54,40 +54,40 @@ class StartTranslationOfModel implements ShouldQueue
         //            $waitMinutes = 0;
 
         //            $totalStringsToTranslate = 0;
-//        if ($automatedTranslationProgress) {
-//            $automatedTranslationProgress->status = 'in_progress';
-//            $automatedTranslationProgress->total_strings_to_translate = 0;
-//            $automatedTranslationProgress->total_strings_translated = 0;
-//            $automatedTranslationProgress->error = null;
-//            $automatedTranslationProgress->save();
-//        }
+        //        if ($automatedTranslationProgress) {
+        //            $automatedTranslationProgress->status = 'in_progress';
+        //            $automatedTranslationProgress->total_strings_to_translate = 0;
+        //            $automatedTranslationProgress->total_strings_translated = 0;
+        //            $automatedTranslationProgress->error = null;
+        //            $automatedTranslationProgress->save();
+        //        }
 
         $this->automatedTranslationProgresses = [];
 
         if (count($toLocales) == 1) {
-            if (!$automatedTranslationProgress) {
+            if (! $automatedTranslationProgress) {
                 $automatedTranslationProgress = AutomatedTranslationProgress::where('model_type', $model::class)
                     ->where('model_id', $model->id)
                     ->where('from_locale', $fromLocale)
                     ->where('to_locale', $toLocales[array_key_first($toLocales)])
                     ->delete();
-//                    ->where('status', '!=', 'finished')
-//                    ->latest()
-//                    ->first();
-//                if (! $automatedTranslationProgress) {
+                //                    ->where('status', '!=', 'finished')
+                //                    ->latest()
+                //                    ->first();
+                //                if (! $automatedTranslationProgress) {
                 $automatedTranslationProgress = new AutomatedTranslationProgress();
                 $automatedTranslationProgress->model_type = $model::class;
                 $automatedTranslationProgress->model_id = $model->id;
                 $automatedTranslationProgress->from_locale = $fromLocale;
                 $automatedTranslationProgress->to_locale = $toLocales[array_key_first($toLocales)];
-//                }
+                //                }
             }
             $automatedTranslationProgress->status = 'in_progress';
             $automatedTranslationProgress->error = null;
             $automatedTranslationProgress->total_strings_to_translate = 0;
             $automatedTranslationProgress->total_strings_translated = 0;
             $automatedTranslationProgress->save();
-//            $automatedTranslationProgress->strings()->delete();
+            //            $automatedTranslationProgress->strings()->delete();
 
             $this->automatedTranslationProgresses[$toLocales[array_key_first($toLocales)]] = $automatedTranslationProgress;
         } else {
@@ -97,28 +97,28 @@ class StartTranslationOfModel implements ShouldQueue
                     ->where('from_locale', $fromLocale)
                     ->where('to_locale', $toLocale)
                     ->delete();
-//                    ->where('status', '!=', 'finished')
-//                    ->latest()
-//                    ->first();
-//                if (! $automatedTranslationProgress) {
+                //                    ->where('status', '!=', 'finished')
+                //                    ->latest()
+                //                    ->first();
+                //                if (! $automatedTranslationProgress) {
                 $automatedTranslationProgress = new AutomatedTranslationProgress();
                 $automatedTranslationProgress->model_type = $model::class;
                 $automatedTranslationProgress->model_id = $model->id;
                 $automatedTranslationProgress->from_locale = $fromLocale;
                 $automatedTranslationProgress->to_locale = $toLocale;
-//                }
+                //                }
                 $automatedTranslationProgress->status = 'in_progress';
                 $automatedTranslationProgress->error = null;
                 $automatedTranslationProgress->total_strings_to_translate = 0;
                 $automatedTranslationProgress->total_strings_translated = 0;
                 $automatedTranslationProgress->save();
-//                $automatedTranslationProgress->strings()->delete();
+                //                $automatedTranslationProgress->strings()->delete();
                 $this->automatedTranslationProgresses[$toLocale] = $automatedTranslationProgress;
             }
         }
 
         foreach ($model->translatable as $column) {
-            if (!method_exists($model, $column) || in_array($column, $overwriteColumns)) {
+            if (! method_exists($model, $column) || in_array($column, $overwriteColumns)) {
                 //                    $totalStringsToTranslate++;
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
@@ -190,19 +190,19 @@ class StartTranslationOfModel implements ShouldQueue
         //        }
     }
 
-//    public function failed($exception)
-//    {
-//        $automatedTranslationProgress = $this->automatedTranslationProgresses[array_key_first($this->automatedTranslationProgresses)] ?? $this->automatedTranslationProgress;
-//        if (str($exception->getMessage())->contains('Too many requests')) {
-//            $automatedTranslationProgress->status = 'retrying';
-//            $automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
-//            $automatedTranslationProgress->save();
-//            StartTranslationOfModel::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $automatedTranslationProgress)
-//                ->delay(now()->addMinutes(2));
-//        } else {
-//            $automatedTranslationProgress->status = 'error';
-//            $automatedTranslationProgress->error = $exception->getMessage();
-//            $automatedTranslationProgress->save();
-//        }
-//    }
+    //    public function failed($exception)
+    //    {
+    //        $automatedTranslationProgress = $this->automatedTranslationProgresses[array_key_first($this->automatedTranslationProgresses)] ?? $this->automatedTranslationProgress;
+    //        if (str($exception->getMessage())->contains('Too many requests')) {
+    //            $automatedTranslationProgress->status = 'retrying';
+    //            $automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
+    //            $automatedTranslationProgress->save();
+    //            StartTranslationOfModel::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $automatedTranslationProgress)
+    //                ->delay(now()->addMinutes(2));
+    //        } else {
+    //            $automatedTranslationProgress->status = 'error';
+    //            $automatedTranslationProgress->error = $exception->getMessage();
+    //            $automatedTranslationProgress->save();
+    //        }
+    //    }
 }

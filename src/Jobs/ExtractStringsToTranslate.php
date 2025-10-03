@@ -68,7 +68,7 @@ class ExtractStringsToTranslate implements ShouldQueue
             //            $translatedText = $this->addString($this->value);
         }
 
-//        $this->automatedTranslationProgress->updateStats();
+        //        $this->automatedTranslationProgress->updateStats();
 
         if ($this->automatedTranslationProgress->total_strings_to_translate == 0) {
             $this->automatedTranslationProgress->status = 'finished';
@@ -108,16 +108,16 @@ class ExtractStringsToTranslate implements ShouldQueue
                     $currentKeys = array_merge($parentKeys, [$value['type']]);
                 }
                 $this->searchAndTranslate($value, $currentKeys);
-            } elseif (! str($key)->contains(array_merge(['type', 'url', 'icon', 'background'], cms()->builder('ignorableKeysForTranslations'))) && !is_numeric($value) && !is_int($value)) {
+            } elseif (! str($key)->contains(array_merge(['type', 'url', 'icon', 'background'], cms()->builder('ignorableKeysForTranslations'))) && ! is_numeric($value) && ! is_int($value)) {
                 $builderBlock = $this->matchBuilderBlock($key, $parentKeys, cms()->builder('blocks')) || $this->matchCustomBlock($key, $parentKeys, cms()->builder($this->attributes['customBlock'] ?? 'blocks'));
                 if ($builderBlock && ($builderBlock instanceof Select || $builderBlock instanceof Toggle || $builderBlock instanceof FileUpload)) {
                     continue;
                 }
 
 
-//                if($value == 'image'){
-//                    dump($value, $parentKeys, $key, $builderBlock, 'here');
-//                }
+                //                if($value == 'image'){
+                //                    dump($value, $parentKeys, $key, $builderBlock, 'here');
+                //                }
                 $this->addString($value);
                 //                $value = $this->addString($value);
             }
@@ -197,6 +197,6 @@ class ExtractStringsToTranslate implements ShouldQueue
             ]);
             $this->automatedTranslationProgress->updateStats();
         }
-//        TranslateAndReplaceString::dispatch($string);
+        //        TranslateAndReplaceString::dispatch($string);
     }
 }
