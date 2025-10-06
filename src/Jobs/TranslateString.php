@@ -77,7 +77,7 @@ class TranslateString implements ShouldQueue
                 $automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
                 $automatedTranslationProgress->save();
             }
-            TranslateAndReplaceString::dispatch($this->automatedTranslationString)
+            TranslateString::dispatch($this->automatedTranslationString)
                 ->delay(now()->addMinutes(2));
         } else {
             foreach ($this->automatedTranslationString->progress as $automatedTranslationProgress) {
