@@ -51,7 +51,7 @@ class ExtractStringsToTranslate implements ShouldQueue
     {
         //        return;
         //        try {
-        if ($this->toLanguage === $this->fromLanguage) {
+        if ($this->toLanguage === $this->fromLanguage || in_array($this->column, cms()->builder('ignorableColumnsForTranslations'))) {
             $this->automatedTranslationProgress->delete();
 
             return;
