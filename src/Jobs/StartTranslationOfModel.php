@@ -65,7 +65,7 @@ class StartTranslationOfModel implements ShouldQueue
         $this->automatedTranslationProgresses = [];
 
         if (count($toLocales) == 1) {
-            if (! $automatedTranslationProgress) {
+            if (!$automatedTranslationProgress) {
                 $automatedTranslationProgress = AutomatedTranslationProgress::where('model_type', $model::class)
                     ->where('model_id', $model->id)
                     ->where('from_locale', $fromLocale)
@@ -118,12 +118,14 @@ class StartTranslationOfModel implements ShouldQueue
         }
 
         foreach ($model->translatable as $column) {
-            if (! method_exists($model, $column) || in_array($column, $overwriteColumns)) {
+            if (!method_exists($model, $column) || in_array($column, $overwriteColumns)) {
                 //                    $totalStringsToTranslate++;
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
                 foreach ($toLocales as $locale) {
-                    ExtractStringsToTranslate::dispatchSync($model, $column, $textToTranslate, $locale, $fromLocale, [], $this->automatedTranslationProgresses[$locale]);
+                    if ($this->automatedTranslationProgresses[$locale] ?? false) {
+                        ExtractStringsToTranslate::dispatchSync($model, $column, $textToTranslate, $locale, $fromLocale, [], $this->automatedTranslationProgresses[$locale]);
+                    }
                     //                            ->delay(now()->addMinutes($waitMinutes));
                     //                        $waitMinutes++;
                 }
