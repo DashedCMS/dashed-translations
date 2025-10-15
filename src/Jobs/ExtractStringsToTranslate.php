@@ -60,43 +60,43 @@ class ExtractStringsToTranslate implements ShouldQueue
         $this->model->setTranslation($this->column, $this->toLanguage, $this->model->getTranslation($this->column, $this->fromLanguage));
         $this->model->save();
 
-        if (!in_array($this->column, cms()->builder('ignorableColumnsForTranslations'))) {
-            if (is_array($this->value)) {
-                $this->searchAndTranslate(array: $this->value);
-                //            $translatedText = $this->value;
-            } else {
-                $this->addString($this->value);
-                //            $translatedText = $this->addString($this->value);
-            }
-
-            //        $this->automatedTranslationProgress->updateStats();
+        if (is_array($this->value)) {
+            $this->searchAndTranslate(array: $this->value);
+            //            $translatedText = $this->value;
+        } else {
+            $this->addString($this->value);
+            //            $translatedText = $this->addString($this->value);
         }
+
+        //        $this->automatedTranslationProgress->updateStats();
 
         if ($this->automatedTranslationProgress->total_strings_to_translate == 0) {
             $this->automatedTranslationProgress->status = 'finished';
             $this->automatedTranslationProgress->save();
         }
-        //        } catch (\Exception $exception) {
-        //            $this->failed($exception);
-        //        }
+
+//        } catch (\Exception $exception) {
+//            $this->failed($exception);
+//        }
     }
 
-    //    public function failed($exception)
-    //    {
-    //        if (str($exception->getMessage())->contains('Too many requests')) {
-    //            $this->automatedTranslationProgress->status = 'retrying';
-    //            $this->automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
-    //            $this->automatedTranslationProgress->save();
-    //            ExtractStringsToTranslate::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $this->automatedTranslationProgress)
-    //                ->delay(now()->addMinutes(2));
-    //        } else {
-    //            $this->automatedTranslationProgress->status = 'error';
-    //            $this->automatedTranslationProgress->error = $exception->getMessage();
-    //            $this->automatedTranslationProgress->save();
-    //        }
-    //    }
+//    public function failed($exception)
+//    {
+//        if (str($exception->getMessage())->contains('Too many requests')) {
+//            $this->automatedTranslationProgress->status = 'retrying';
+//            $this->automatedTranslationProgress->error = 'Opnieuw proberen i.v.m. rate limiting';
+//            $this->automatedTranslationProgress->save();
+//            ExtractStringsToTranslate::dispatch($this->model, $this->column, $this->value, $this->toLanguage, $this->fromLanguage, $this->attributes, $this->automatedTranslationProgress)
+//                ->delay(now()->addMinutes(2));
+//        } else {
+//            $this->automatedTranslationProgress->status = 'error';
+//            $this->automatedTranslationProgress->error = $exception->getMessage();
+//            $this->automatedTranslationProgress->save();
+//        }
+//    }
 
-    private function searchAndTranslate(&$array, $parentKeys = [])
+    private
+    function searchAndTranslate(&$array, $parentKeys = [])
     {
         foreach ($array as $key => &$value) {
             if (!is_int($key) && $key != 'data') {
@@ -128,7 +128,8 @@ class ExtractStringsToTranslate implements ShouldQueue
         unset($value);
     }
 
-    private function matchBuilderBlock($key, $parentKeys, $blocks, $currentBlock = null)
+    private
+    function matchBuilderBlock($key, $parentKeys, $blocks, $currentBlock = null)
     {
         if (count($parentKeys) || (!count($parentKeys) && $currentBlock)) {
             foreach ($blocks as $block) {
@@ -151,7 +152,8 @@ class ExtractStringsToTranslate implements ShouldQueue
         return null;
     }
 
-    private function matchCustomBlock($key, $parentKeys, $blocks, $currentBlock = null)
+    private
+    function matchCustomBlock($key, $parentKeys, $blocks, $currentBlock = null)
     {
         if (count($parentKeys) || (!count($parentKeys) && $currentBlock)) {
             foreach ($blocks as $block) {
@@ -174,7 +176,8 @@ class ExtractStringsToTranslate implements ShouldQueue
         return null;
     }
 
-    private function addString(?string $value = '')
+    private
+    function addString(?string $value = '')
     {
         if (!$value) {
             return $value;
