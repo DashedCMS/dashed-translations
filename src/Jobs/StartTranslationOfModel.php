@@ -118,7 +118,7 @@ class StartTranslationOfModel implements ShouldQueue
         }
 
         foreach ($model->translatable as $column) {
-            if (!method_exists($model, $column) || in_array($column, $overwriteColumns)) {
+            if ((!method_exists($model, $column) || in_array($column, $overwriteColumns)) && in_array($column, cms()->builder('ignorableColumnsForTranslations'))) {
                 //                    $totalStringsToTranslate++;
                 $textToTranslate = $model->getTranslation($column, $fromLocale);
 
