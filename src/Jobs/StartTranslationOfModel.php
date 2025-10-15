@@ -118,16 +118,23 @@ class StartTranslationOfModel implements ShouldQueue
         }
 
         foreach ($model->translatable as $column) {
-            if ((!method_exists($model, $column) || in_array($column, $overwriteColumns)) && in_array($column, cms()->builder('ignorableColumnsForTranslations'))) {
-                //                    $totalStringsToTranslate++;
-                $textToTranslate = $model->getTranslation($column, $fromLocale);
-
-                foreach ($toLocales as $locale) {
-                    if ($this->automatedTranslationProgresses[$locale] ?? false) {
-                        ExtractStringsToTranslate::dispatchSync($model, $column, $textToTranslate, $locale, $fromLocale, [], $this->automatedTranslationProgresses[$locale]);
+            if ((!method_exists($model, $column) || in_array($column, $overwriteColumns))) {
+                if (in_array($column, cms()->builder('ignorableColumnsForTranslations'))) {
+                    foreach ($toLocales as $locale) {
+                        $model->setTranslation($column, $locale, $this->model->getTranslation($column, $fromLocale));
                     }
-                    //                            ->delay(now()->addMinutes($waitMinutes));
-                    //                        $waitMinutes++;
+                    $model->saveQuietly();
+                } else {
+                    //                    $totalStringsToTranslate++;
+                    $textToTranslate = $model->getTranslation($column, $fromLocale);
+
+                    foreach ($toLocales as $locale) {
+                        if ($this->automatedTranslationProgresses[$locale] ?? false) {
+                            ExtractStringsToTranslate::dispatchSync($model, $column, $textToTranslate, $locale, $fromLocale, [], $this->automatedTranslationProgresses[$locale]);
+                        }
+                        //                            ->delay(now()->addMinutes($waitMinutes));
+                        //                        $waitMinutes++;
+                    }
                 }
             }
         }
