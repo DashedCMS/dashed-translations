@@ -2,8 +2,10 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources;
 
-use Filament\Forms\Form;
+use UnitEnum;
+use BackedEnum;
 use Filament\Tables\Table;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Dashed\DashedTranslations\Models\Translation;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\ListTranslations;
@@ -14,8 +16,8 @@ class TranslationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static ?string $navigationIcon = 'heroicon-o-language';
-    protected static ?string $navigationGroup = 'Content';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-language';
+    protected static string | UnitEnum | null $navigationGroup = 'Content';
     protected static ?string $navigationLabel = 'Vertalingen';
     protected static ?string $label = 'Vertaling';
     protected static ?string $pluralLabel = 'Vertalingen';
@@ -25,7 +27,7 @@ class TranslationResource extends Resource
         return [];
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
         return [];
     }

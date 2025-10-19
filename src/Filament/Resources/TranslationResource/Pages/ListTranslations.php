@@ -3,35 +3,40 @@
 namespace Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages;
 
 use Carbon\Carbon;
-use Filament\Forms\Set;
 use Illuminate\Support\Str;
+use Filament\Actions\Action;
+use Filament\Schemas\Schema;
 use Filament\Resources\Pages\Page;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Tabs;
 use Illuminate\Support\Facades\Cache;
 use Dashed\DashedCore\Classes\Locales;
-use Filament\Forms\Components\Section;
 use FilamentTiptapEditor\TiptapEditor;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Forms\Components\Actions\Action;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Schemas\Components\Utilities\Set;
 use Dashed\DashedTranslations\Models\Translation;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
 use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
 use RalphJSmit\Filament\MediaLibrary\Forms\Components\MediaPicker;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 
-class ListTranslations extends Page
+class ListTranslations extends Page implements HasSchemas
 {
+    use InteractsWithSchemas;
+
     protected static string $resource = TranslationResource::class;
-    protected static string $view = 'dashed-translations::translations.pages.list-translations';
-    public $data;
+    protected string $view = 'dashed-translations::translations.pages.list-translations';
+    public array $data = [];
 
     public function mount(): void
     {
@@ -50,17 +55,19 @@ class ListTranslations extends Page
         $this->form->fill($formData);
     }
 
-    public function getFormStatePath(): ?string
-    {
-        return 'data';
-    }
-
     protected function getActions(): array
     {
 
         return [
             self::translateEverything(),
         ];
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->statePath('data')
+            ->schema($this->getFormSchema());
     }
 
     protected function getFormSchema(): array
@@ -155,11 +162,8 @@ class ListTranslations extends Page
                                 //                                    ->send();
                             });
                     } elseif ($translation->type == 'image') {
-                        $schema[] = MediaPicker::make("translation_{$translation->id}_{$locale['id']}")
+                        $schema[] = mediaHelper()->field("translation_{$translation->id}_{$locale['id']}", Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->default($translation->default)
-                            ->downloadable()
-                            ->showFileName()
-                            ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                             ->helperText($helperText ?? '')
                             ->hintAction(Action::make('save')
                                 ->label('Media opslaan')
@@ -246,7 +250,7 @@ class ListTranslations extends Page
                     ->schema($schema);
             }
 
-            $sections[] = Section::make('Vertalingen voor ' . $tab)
+            $sections[] = Section::make('Vertalingen voor ' . $tab)->columnSpanFull()
                 ->schema([
                     Tabs::make('Locales')
                         ->tabs($tabs),
@@ -337,7 +341,7 @@ class ListTranslations extends Page
                 ->icon('heroicon-m-language')
                 ->label('Vertaal tab')
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
-                ->form(array_merge([
+                ->schema(array_merge([
                     Select::make('from_locale')
                         ->options($allLocales)
                         ->preload()
@@ -395,7 +399,7 @@ class ListTranslations extends Page
                 ->icon('heroicon-m-language')
                 ->label('Vertaal alles')
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
-                ->form(array_merge([
+                ->schema(array_merge([
                     Select::make('from_locale')
                         ->options($allLocales)
                         ->preload()
@@ -440,7 +444,7 @@ class ListTranslations extends Page
                 ->icon('heroicon-m-language')
                 ->label('Vertaal')
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
-                ->form([
+                ->schema([
                     Select::make('locales')
                         ->options($otherLocales)
                         ->preload()

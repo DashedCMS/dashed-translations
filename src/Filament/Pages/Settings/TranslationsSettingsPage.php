@@ -2,29 +2,29 @@
 
 namespace Dashed\DashedTranslations\Filament\Pages\Settings;
 
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Pages\Page;
 use Filament\Actions\Action;
+use Filament\Schemas\Schema;
 use Dashed\DashedCore\Classes\Sites;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Dashed\DashedCore\Classes\Locales;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Contracts\HasSchemas;
 use Dashed\DashedCore\Models\Customsetting;
-use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 
-class TranslationsSettingsPage extends Page implements HasForms
+class TranslationsSettingsPage extends Page implements HasSchemas
 {
-    use InteractsWithForms;
-
+    use InteractsWithSchemas;
     protected static bool $shouldRegisterNavigation = false;
     protected static ?string $title = 'Vertalingen';
 
-    protected static string $view = 'dashed-core::settings.pages.default-settings';
+    protected string $view = 'dashed-core::settings.pages.default-settings';
     public array $data = [];
 
     public function mount(): void
@@ -37,9 +37,9 @@ class TranslationsSettingsPage extends Page implements HasForms
         $this->form->fill($formData);
     }
 
-    protected function getFormSchema(): array
+    public function form(Schema $schema): Schema
     {
-        $schema = [
+        return $schema->schema([
             Toggle::make("deepl_translations_enabled")
                 ->label('DeepL vertalingen')
                 ->helperText('Deze functie is in BETA')
@@ -48,9 +48,8 @@ class TranslationsSettingsPage extends Page implements HasForms
                 ->label('DeepL API key')
                 ->required(fn (Get $get) => $get('deepl_translations_enabled'))
                 ->visible(fn (Get $get) => $get('deepl_translations_enabled')),
-        ];
-
-        return $schema;
+        ])
+            ->statePath('data');
     }
 
     public function getFormStatePath(): ?string
@@ -65,7 +64,7 @@ class TranslationsSettingsPage extends Page implements HasForms
                 ->label('Bulk vertalen')
                 ->icon('heroicon-m-language')
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
-                ->form(function () {
+                ->schema(function () {
                     $form = [];
 
                     foreach (cms()->builder('routeModels') as $routeModel) {
@@ -82,7 +81,7 @@ class TranslationsSettingsPage extends Page implements HasForms
                             })
                             ->visible($routeModel['class']::all()->pluck('id')->count())
                             ->hintActions([
-                                \Filament\Forms\Components\Actions\Action::make('select-all')
+                                \Filament\Actions\Action::make('select-all')
                                     ->label('Selecteer alles')
                                     ->action(function (Set $set) use ($routeModel) {
                                         $set($routeModel['name'], $routeModel['class']::all()->pluck('id')->toArray());
@@ -143,7 +142,7 @@ class TranslationsSettingsPage extends Page implements HasForms
 
         foreach ($sites as $site) {
             Customsetting::set('deepl_translations_enabled', $this->form->getState()["deepl_translations_enabled"], $site['id']);
-            Customsetting::set('deepl_api_key', $this->form->getState()["deepl_api_key"], $site['id']);
+            Customsetting::set('deepl_api_key', $this->form->getState()["deepl_api_key"] ?? '', $site['id']);
         }
 
         Notification::make()

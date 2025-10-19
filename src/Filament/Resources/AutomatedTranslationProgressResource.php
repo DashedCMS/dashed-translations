@@ -2,16 +2,18 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources;
 
-use Filament\Forms\Form;
+use UnitEnum;
+use BackedEnum;
 use Filament\Tables\Table;
+use Filament\Actions\Action;
+use Filament\Schemas\Schema;
+use Filament\Actions\BulkAction;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Actions\DeleteBulkAction;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
@@ -23,8 +25,8 @@ class AutomatedTranslationProgressResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static ?string $navigationIcon = 'heroicon-o-language';
-    protected static ?string $navigationGroup = 'Content';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-language';
+    protected static string | UnitEnum | null $navigationGroup = 'Content';
     protected static ?string $navigationLabel = 'Automatische vertaling';
     protected static ?string $label = 'Vertaling';
     protected static ?string $pluralLabel = 'Automatische vertalingen';
@@ -39,9 +41,9 @@ class AutomatedTranslationProgressResource extends Resource
         return [];
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form;
+        return $schema;
     }
 
     public static function table(Table $table): Table
@@ -98,7 +100,7 @@ class AutomatedTranslationProgressResource extends Resource
                 ->sortable()
                 ->dateTime(),
         ])
-            ->actions([
+            ->recordActions([
                 Action::make('translateAgain')
                     ->label('Opnieuw vertalen')
                     ->icon('heroicon-o-language')
@@ -114,7 +116,7 @@ class AutomatedTranslationProgressResource extends Resource
                     }),
                 DeleteAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 DeleteBulkAction::make(),
                 BulkAction::make('translateAgain')
                     ->label('Opnieuw vertalen')
