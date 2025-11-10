@@ -323,7 +323,7 @@ class ListTranslations extends Page implements HasSchemas
         $translationSchema = [];
 
         foreach ($translations as $translation) {
-            if (! in_array($translation->type, ['image', 'repeater'])) {
+            if (!in_array($translation->type, ['image', 'repeater'])) {
                 $translationSchema[] = Toggle::make('translate.' . $translation->id)
                     ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                     ->default(true);
@@ -362,6 +362,10 @@ class ListTranslations extends Page implements HasSchemas
                     foreach ($data['translate'] as $id => $bool) {
                         if ($bool === true) {
                             $translation = Translation::find($id);
+                            if (!$translation->getTranslation('value', $data['from_locale']) && $translation->default) {
+                                $translation->setTranslation('value', $data['from_locale'], $translation->default);
+                                $translation->save();
+                            }
                             StartTranslationOfModel::dispatch($translation, $data['from_locale'], $data['to_locales']);
                             //                            $textToTranslate = $translation->getTranslation('value', $data['from_locale']) ?: $translation->default;
                             //                            foreach ($data['to_locales'] as $locale) {
@@ -422,7 +426,10 @@ class ListTranslations extends Page implements HasSchemas
                             $translations = Translation::where('tag', $tab)->get();
                             foreach ($translations as $translation) {
                                 //                                $textToTranslate = $translation->getTranslation('value', $data['from_locale']) ?: $translation->default;
-                                //                                foreach ($data['to_locales'] as $locale) {
+                                if (!$translation->getTranslation('value', $data['from_locale']) && $translation->default) {
+                                    $translation->setTranslation('value', $data['from_locale'], $translation->default);
+                                    $translation->save();
+                                }
                                 StartTranslationOfModel::dispatch($translation, $data['from_locale'], $data['to_locales']);
                                 //                                    TranslateValueFromModel::dispatch($translation, 'value', $textToTranslate, $locale, $data['from_locale']);
                                 //                                }
@@ -457,7 +464,7 @@ class ListTranslations extends Page implements HasSchemas
                 ->action(function (array $data, $livewire) use ($locale) {
                     $id = explode('_', $livewire->mountedActions[0]['context']['schemaComponent'])[1];
                     $translation = Translation::find($id);
-                    if (! $translation->getTranslation('value', $locale['id']) && $translation->default) {
+                    if (!$translation->getTranslation('value', $locale['id']) && $translation->default) {
                         $translation->setTranslation('value', $locale['id'], $translation->default);
                         $translation->save();
                         Cache::forget(Str::slug($translation->name . $translation->tag . $locale['id'] . $translation->type));
