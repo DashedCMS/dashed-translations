@@ -75,7 +75,7 @@ class ListTranslations extends Page implements HasSchemas
         $tabs = Translation::distinct('tag')->orderBy('tag', 'ASC')->pluck('tag');
         $sections = [];
 
-        foreach ($tabs as $tab) {
+        foreach ($tabs as $key => $tab) {
             $translations = Translation::where('tag', $tab)->orderBy('name', 'ASC')->get();
             $tabs = [];
 
@@ -256,7 +256,7 @@ class ListTranslations extends Page implements HasSchemas
                         ->tabs($tabs),
                 ])
                 ->headerActions([
-                    self::translateTab($translations),
+                    self::translateTab($translations, $key),
                 ])
                 ->collapsible();
         }
@@ -318,7 +318,7 @@ class ListTranslations extends Page implements HasSchemas
         }
     }
 
-    public static function translateTab($translations)
+    public static function translateTab($translations, $key)
     {
         $translationSchema = [];
 
@@ -337,7 +337,7 @@ class ListTranslations extends Page implements HasSchemas
         }
 
         return
-            Action::make('translateTab')
+            Action::make('translateTab' . $key)
                 ->icon('heroicon-m-language')
                 ->label('Vertaal tab')
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
