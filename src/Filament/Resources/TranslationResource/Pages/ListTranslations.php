@@ -337,7 +337,7 @@ class ListTranslations extends Page implements HasSchemas
         }
 
         return
-            Action::make('translate')
+            Action::make('translateTab')
                 ->icon('heroicon-m-language')
                 ->label('Vertaal tab')
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
@@ -395,7 +395,7 @@ class ListTranslations extends Page implements HasSchemas
         }
 
         return
-            \Filament\Actions\Action::make('translate')
+            \Filament\Actions\Action::make('translateEverything')
                 ->icon('heroicon-m-language')
                 ->label('Vertaal alles')
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
@@ -455,7 +455,7 @@ class ListTranslations extends Page implements HasSchemas
                         ->multiple(),
                 ])
                 ->action(function (array $data, $livewire) use ($locale) {
-                    $id = explode('_', $livewire->mountedFormComponentActionsComponents[0])[1];
+                    $id = explode('_', $livewire->mountedActions[0]['context']['schemaComponent'])[1];
                     $translation = Translation::find($id);
                     if (! $translation->getTranslation('value', $locale['id']) && $translation->default) {
                         $translation->setTranslation('value', $locale['id'], $translation->default);
