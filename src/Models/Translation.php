@@ -109,6 +109,9 @@ class Translation extends Model
         if ($translation && $translation->value) {
             if ($variables) {
                 foreach ($variables as $key => $variable) {
+                    if(is_array($translation->value)){
+                        $translation->value = cms()->convertToHtml($translation->value);
+                    }
                     $translation->value = str_replace(':' . $key . ':', $variable, $translation->value);
                 }
             }
