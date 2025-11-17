@@ -3,6 +3,8 @@
 namespace Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages;
 
 use Carbon\Carbon;
+use Dashed\DashedCore\CMSManager;
+use Filament\Forms\Components\RichEditor;
 use Illuminate\Support\Str;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
@@ -72,6 +74,7 @@ class ListTranslations extends Page implements HasSchemas
 
     protected function getFormSchema(): array
     {
+        global $component;
         $tabs = Translation::distinct('tag')->orderBy('tag', 'ASC')->pluck('tag');
         $sections = [];
 
@@ -148,7 +151,7 @@ class ListTranslations extends Page implements HasSchemas
                             ->helperText($helperText ?? '')
                             ->live()
                             ->hintAction(self::translateSingleField($otherLocales, $locale))
-                            ->afterStateUpdated(function (TiptapEditor $component, Set $set, $state) {
+                            ->afterStateUpdated(function (RichEditor $component, Set $set, $state) {
                                 //                                $explode = explode('_', $component->getStatePath());
                                 //                                $translationId = $explode[1];
                                 //                                $locale = $explode[2];
@@ -323,7 +326,7 @@ class ListTranslations extends Page implements HasSchemas
         $translationSchema = [];
 
         foreach ($translations as $translation) {
-            if (!in_array($translation->type, ['image', 'repeater'])) {
+            if (! in_array($translation->type, ['image', 'repeater'])) {
                 $translationSchema[] = Toggle::make('translate.' . $translation->id)
                     ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                     ->default(true);
@@ -362,7 +365,7 @@ class ListTranslations extends Page implements HasSchemas
                     foreach ($data['translate'] as $id => $bool) {
                         if ($bool === true) {
                             $translation = Translation::find($id);
-                            if (!$translation->getTranslation('value', $data['from_locale']) && $translation->default) {
+                            if (! $translation->getTranslation('value', $data['from_locale']) && $translation->default) {
                                 $translation->setTranslation('value', $data['from_locale'], $translation->default);
                                 $translation->save();
                             }
@@ -426,7 +429,7 @@ class ListTranslations extends Page implements HasSchemas
                             $translations = Translation::where('tag', $tab)->get();
                             foreach ($translations as $translation) {
                                 //                                $textToTranslate = $translation->getTranslation('value', $data['from_locale']) ?: $translation->default;
-                                if (!$translation->getTranslation('value', $data['from_locale']) && $translation->default) {
+                                if (! $translation->getTranslation('value', $data['from_locale']) && $translation->default) {
                                     $translation->setTranslation('value', $data['from_locale'], $translation->default);
                                     $translation->save();
                                 }
@@ -464,7 +467,7 @@ class ListTranslations extends Page implements HasSchemas
                 ->action(function (array $data, $livewire) use ($locale) {
                     $id = explode('_', $livewire->mountedActions[0]['context']['schemaComponent'])[1];
                     $translation = Translation::find($id);
-                    if (!$translation->getTranslation('value', $locale['id']) && $translation->default) {
+                    if (! $translation->getTranslation('value', $locale['id']) && $translation->default) {
                         $translation->setTranslation('value', $locale['id'], $translation->default);
                         $translation->save();
                         Cache::forget(Str::slug($translation->name . $translation->tag . $locale['id'] . $translation->type));
