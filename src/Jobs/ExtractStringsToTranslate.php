@@ -58,7 +58,7 @@ class ExtractStringsToTranslate implements ShouldQueue
         }
 
         $this->model->setTranslation($this->column, $this->toLanguage, $this->model->getTranslation($this->column, $this->fromLanguage));
-        $this->model->save();
+        $this->model->saveQuietly();
 
         if (is_array($this->value)) {
             $this->searchAndTranslate(array: $this->value);
