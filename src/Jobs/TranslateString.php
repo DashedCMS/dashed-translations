@@ -3,6 +3,7 @@
 namespace Dashed\DashedTranslations\Jobs;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,7 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Models\AutomatedTranslationString;
 
-class TranslateString implements ShouldQueue
+class TranslateString implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -20,6 +21,22 @@ class TranslateString implements ShouldQueue
     public $timeout = 300;
     public $tries = 10;
     public AutomatedTranslationString $automatedTranslationString;
+
+    /**
+     * The number of seconds after which the job's unique lock will be released.
+     *
+     * @var int
+     */
+    public $uniqueFor = 3600;
+
+    /**
+     * Get the unique ID for the job.
+     */
+    public function uniqueId(): string
+    {
+        return $this->automatedTranslationString->id;
+    }
+
 
     /**
      * Create a new job instance.
