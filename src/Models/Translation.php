@@ -49,7 +49,7 @@ class Translation extends Model
             return Schema::hasTable('dashed__translations');
         });
 
-        if (! $tableExists) {
+        if (!$tableExists) {
             return $default;
         }
 
@@ -59,7 +59,16 @@ class Translation extends Model
         }
 
         if ($variables) {
-            return self::getByParams($name, $tag, $default, $type, $variables);
+            $result = Cache::rememberForever(Str::slug($name . $tag . app()->getLocale() . $type), function () use ($name, $tag, $default, $type, $variables) {
+                return self::getByParams($name, $tag, $default, $type, []);
+            });
+            foreach ($variables as $key => $variable) {
+                if (is_array($result)) {
+                    $result = cms()->convertToHtml($result);
+                }
+                $result = str_replace(':' . $key . ':', $variable, $result);
+            }
+            return $result;
         }
 
         $result = Cache::rememberForever(Str::slug($name . $tag . app()->getLocale() . $type), function () use ($name, $tag, $default, $type, $variables) {
@@ -76,9 +85,9 @@ class Translation extends Model
         }
 
         $translation = self::where('name', $name)->where('tag', $tag)->where('type', $type)->first();
-        if (! $translation) {
+        if (!$translation) {
             $translation = self::withTrashed()->where('name', $name)->where('tag', $tag)->first();
-            if (! $translation) {
+            if (!$translation) {
                 $translation = self::updateOrCreate(
                     ['name' => $name, 'tag' => $tag],
                     ['default' => $default, 'type' => $type, 'variables' => $variables]
@@ -109,7 +118,7 @@ class Translation extends Model
         if ($translation && $translation->value) {
             if ($variables) {
                 foreach ($variables as $key => $variable) {
-                    if(is_array($translation->value)){
+                    if (is_array($translation->value)) {
                         $translation->value = cms()->convertToHtml($translation->value);
                     }
                     $translation->value = str_replace(':' . $key . ':', $variable, $translation->value);

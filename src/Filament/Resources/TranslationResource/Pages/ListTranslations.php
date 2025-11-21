@@ -3,8 +3,6 @@
 namespace Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages;
 
 use Carbon\Carbon;
-use Dashed\DashedCore\CMSManager;
-use Filament\Forms\Components\RichEditor;
 use Illuminate\Support\Str;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
@@ -14,12 +12,12 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Tabs;
 use Illuminate\Support\Facades\Cache;
 use Dashed\DashedCore\Classes\Locales;
-use FilamentTiptapEditor\TiptapEditor;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Forms\Components\DateTimePicker;

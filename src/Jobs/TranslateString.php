@@ -3,11 +3,11 @@
 namespace Dashed\DashedTranslations\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Models\AutomatedTranslationString;
 
@@ -36,7 +36,6 @@ class TranslateString implements ShouldQueue, ShouldBeUnique
     {
         return $this->automatedTranslationString->id;
     }
-
 
     /**
      * Create a new job instance.
