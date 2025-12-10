@@ -36,18 +36,16 @@ use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 class ListTranslations extends ListRecords
 {
     protected static string $resource = TranslationResource::class;
+
 //    protected string $view = 'dashed-translations::translations.pages.list-translations';
 
     protected function getTableQuery(): Builder|Relation|null
     {
-        $table = (new \Dashed\DashedTranslations\Models\Translation)->getTable();
-
-        return \Dashed\DashedTranslations\Models\Translation::query()
-            ->whereIn('id', function ($q) use ($table) {
-                $q->from($table)
-                    ->selectRaw('MIN(id) as id') // of MAX(id) als je de nieuwste wilt
-                    ->groupBy('tag');
-            });
+        return Translation::whereIn('id', function ($query) {
+            $query->selectRaw('MAX(id)')
+                ->from('dashed__translations')
+                ->groupBy('tag');
+        });
     }
 
     protected function getActions(): array
@@ -102,7 +100,7 @@ class ListTranslations extends ListRecords
                             $translations = Translation::where('tag', $tab)->get();
                             foreach ($translations as $translation) {
                                 //                                $textToTranslate = $translation->getTranslation('value', $data['from_locale']) ?: $translation->default;
-                                if (! $translation->getTranslation('value', $data['from_locale']) && $translation->default) {
+                                if (!$translation->getTranslation('value', $data['from_locale']) && $translation->default) {
                                     $translation->setTranslation('value', $data['from_locale'], $translation->default);
                                     $translation->save();
                                 }
