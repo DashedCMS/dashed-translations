@@ -1,14 +1,10 @@
 <?php
 
-namespace Dashed\DashedTranslations\Filament\Widgets;
+namespace Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\Widgets;
 
-use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
-use Filament\Widgets\StatsOverviewWidget;
-use Flowframe\Trend\Trend;
-use Filament\Widgets\ChartWidget;
-use Dashed\DashedCore\Models\NotFoundPageOccurrence;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Filament\Widgets\StatsOverviewWidget;
 
 class AutomatedTranslationStats extends StatsOverviewWidget
 {
@@ -21,6 +17,7 @@ class AutomatedTranslationStats extends StatsOverviewWidget
     protected ?string $maxHeight = '300px';
 
     protected ?string $pollingInterval = '1s';
+
 
     protected function getCards(): array
     {
@@ -35,5 +32,10 @@ class AutomatedTranslationStats extends StatsOverviewWidget
             StatsOverviewWidget\Stat::make('Zinnen om nog te vertalen', AutomatedTranslationProgress::sum('total_strings_to_translate') - $totalTranslatedStrings),
             StatsOverviewWidget\Stat::make('Vertaalde zinnen', $totalTranslatedStrings),
         ];
+    }
+
+    public static function canView(): bool
+    {
+        return request()->url() != route('filament.dashed.pages.dashboard');
     }
 }
