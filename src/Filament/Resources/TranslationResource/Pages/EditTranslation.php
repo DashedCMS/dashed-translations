@@ -3,8 +3,6 @@
 namespace Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages;
 
 use Carbon\Carbon;
-use Dashed\DashedPages\Filament\Resources\PageResource\Pages\EditPage;
-use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Str;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
@@ -18,8 +16,6 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Forms\Components\DateTimePicker;
@@ -29,7 +25,6 @@ use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
 use Dashed\DashedTranslations\Jobs\TranslateValueFromModel;
-use RalphJSmit\Filament\MediaLibrary\Forms\Components\MediaPicker;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 
 class EditTranslation extends Page implements HasSchemas
@@ -95,7 +90,7 @@ class EditTranslation extends Page implements HasSchemas
                 }
 
                 if ($translation->type == 'textarea') {
-                    $tabSchema[]= Textarea::make("translation_{$translation->id}_{$locale['id']}")
+                    $tabSchema[] = Textarea::make("translation_{$translation->id}_{$locale['id']}")
                         ->placeholder($translation->default)
                         ->rows(5)
                         ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
@@ -116,7 +111,7 @@ class EditTranslation extends Page implements HasSchemas
                                 ->send();
                         });
                 } elseif ($translation->type == 'datetime') {
-                    $tabSchema[]= DateTimePicker::make("translation_{$translation->id}_{$locale['id']}")
+                    $tabSchema[] = DateTimePicker::make("translation_{$translation->id}_{$locale['id']}")
                         ->placeholder(Carbon::parse($translation->default)->format('Y-m-d H:i:s'))
                         ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                         ->helperText($helperText ?? '')
@@ -135,13 +130,13 @@ class EditTranslation extends Page implements HasSchemas
                                 ->send();
                         });
                 } elseif ($translation->type == 'editor') {
-                    $tabSchema[]= cms()->editorField("translation_{$translation->id}_{$locale['id']}", Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
+                    $tabSchema[] = cms()->editorField("translation_{$translation->id}_{$locale['id']}", Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                         ->helperText($helperText ?? '')
 //                        ->live()
                             ->debounce(500)
                         ->hintAction(self::translateSingleField($otherLocales, $locale));
                 } elseif ($translation->type == 'image') {
-                    $tabSchema[]= mediaHelper()->field("translation_{$translation->id}_{$locale['id']}", Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
+                    $tabSchema[] = mediaHelper()->field("translation_{$translation->id}_{$locale['id']}", Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                         ->default($translation->default)
                         ->helperText($helperText ?? '')
                         ->hintAction(Action::make('save')
@@ -160,7 +155,7 @@ class EditTranslation extends Page implements HasSchemas
                                     ->send();
                             }));
                 } elseif ($translation->type == 'repeater') {
-                    $tabSchema[]= Repeater::make("translation_{$translation->id}_{$locale['id']}")
+                    $tabSchema[] = Repeater::make("translation_{$translation->id}_{$locale['id']}")
                         ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                         ->schema(cms()->builder('translationRepeaters')[$translation->name] ?? [])
                         ->helperText($helperText ?? '')
@@ -168,7 +163,7 @@ class EditTranslation extends Page implements HasSchemas
                         ->cloneable()
                         ->reactive();
                 } elseif (in_array($translation->type, ['number', 'numeric'])) {
-                    $tabSchema[]= TextInput::make("translation_{$translation->id}_{$locale['id']}")
+                    $tabSchema[] = TextInput::make("translation_{$translation->id}_{$locale['id']}")
                         ->placeholder($translation->default)
                         ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                         ->helperText($helperText ?? '')
@@ -189,7 +184,7 @@ class EditTranslation extends Page implements HasSchemas
                                 ->send();
                         });
                 } else {
-                    $tabSchema[]= TextInput::make("translation_{$translation->id}_{$locale['id']}")
+                    $tabSchema[] = TextInput::make("translation_{$translation->id}_{$locale['id']}")
                         ->placeholder($translation->default)
                         ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                         ->helperText($helperText ?? '')
@@ -273,7 +268,7 @@ class EditTranslation extends Page implements HasSchemas
         $translationSchema = [];
 
         foreach ($translations as $translation) {
-            if (!in_array($translation->type, ['image', 'repeater'])) {
+            if (! in_array($translation->type, ['image', 'repeater'])) {
                 $translationSchema[] = Toggle::make('translate.' . $translation->id)
                     ->label(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title())
                     ->default(true);
@@ -312,7 +307,7 @@ class EditTranslation extends Page implements HasSchemas
                     foreach ($data['translate'] as $id => $bool) {
                         if ($bool === true) {
                             $translation = Translation::find($id);
-                            if (!$translation->getTranslation('value', $data['from_locale']) && $translation->default) {
+                            if (! $translation->getTranslation('value', $data['from_locale']) && $translation->default) {
                                 $translation->setTranslation('value', $data['from_locale'], $translation->default);
                                 $translation->save();
                             }
@@ -347,7 +342,7 @@ class EditTranslation extends Page implements HasSchemas
                 ->action(function (array $data, $livewire) use ($locale) {
                     $id = explode('_', $livewire->mountedActions[0]['context']['schemaComponent'])[1];
                     $translation = Translation::find($id);
-                    if (!$translation->getTranslation('value', $locale['id']) && $translation->default) {
+                    if (! $translation->getTranslation('value', $locale['id']) && $translation->default) {
                         $translation->setTranslation('value', $locale['id'], $translation->default);
                         $translation->save();
                         Cache::forget(Str::slug($translation->name . $translation->tag . $locale['id'] . $translation->type));

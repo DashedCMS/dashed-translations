@@ -2,8 +2,10 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages;
 
+use Dashed\DashedTranslations\Filament\Widgets\AutomatedTranslationStats;
 use Filament\Resources\Pages\ListRecords;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource;
+use Filament\Schemas\Schema;
 
 class ListAutomatedTranslationProgress extends ListRecords
 {
@@ -12,5 +14,12 @@ class ListAutomatedTranslationProgress extends ListRecords
     protected function getTablePollingInterval(): ?string
     {
         return '1s';
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            AutomatedTranslationStats::class,
+        ];
     }
 }

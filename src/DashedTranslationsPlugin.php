@@ -2,6 +2,7 @@
 
 namespace Dashed\DashedTranslations;
 
+use Dashed\DashedTranslations\Filament\Widgets\AutomatedTranslationStats;
 use Filament\Panel;
 use Filament\Contracts\Plugin;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
@@ -20,6 +21,9 @@ class DashedTranslationsPlugin implements Plugin
         $panel
             ->pages([
                 TranslationsSettingsPage::class,
+            ])
+            ->widgets([
+                AutomatedTranslationStats::class,
             ])
             ->resources([
                 TranslationResource::class,

@@ -51,12 +51,15 @@ class AutomatedTranslationProgressResource extends Resource
         return $table->columns([
             TextColumn::make('id')
                 ->label('ID')
+                ->searchable()
                 ->sortable(),
             TextColumn::make('model.name')
                 ->label('Naam')
+                ->searchable()
                 ->formatStateUsing(fn ($record) => str($record->model->name)->limit(30)),
             TextColumn::make('model')
                 ->label('Model')
+                ->searchable()
                 ->getStateUsing(fn ($record) => str($record->model_type)->explode('\\')->last())
                 ->sortable(),
             TextColumn::make('model_id')
@@ -65,9 +68,11 @@ class AutomatedTranslationProgressResource extends Resource
                 ->searchable(),
             TextColumn::make('from_locale')
                 ->label('Vanaf taal')
+                ->searchable()
                 ->sortable(),
             TextColumn::make('to_locale')
                 ->label('Naar taal')
+                ->searchable()
                 ->sortable(),
             TextColumn::make('total_strings_to_translate')
                 ->label('Voortgang')

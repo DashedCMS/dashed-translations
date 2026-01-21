@@ -2,23 +2,21 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources;
 
-use Dashed\DashedCore\Classes\Locales;
-use Dashed\DashedTranslations\Classes\AutomatedTranslation;
-use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\EditTranslation;
-use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
-use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Notifications\Notification;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Support\Str;
 use UnitEnum;
 use BackedEnum;
 use Filament\Tables\Table;
+use Filament\Actions\Action;
 use Filament\Schemas\Schema;
+use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Dashed\DashedCore\Classes\Locales;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
 use Dashed\DashedTranslations\Models\Translation;
+use Dashed\DashedTranslations\Classes\AutomatedTranslation;
+use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
+use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\EditTranslation;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\ListTranslations;
 
 class TranslationResource extends Resource
@@ -53,10 +51,10 @@ class TranslationResource extends Resource
 
         return $table->columns([
             TextColumn::make('tag')
-                ->formatStateUsing(fn($state) => str($state)->headline()->ucfirst())
+                ->formatStateUsing(fn ($state) => str($state)->headline()->ucfirst())
                 ->searchable()
                 ->sortable(),
-            TextColumn::make('slug')
+            TextColumn::make('slug'),
         ])
             ->recordActions([
                 EditAction::make('edit'),
@@ -85,11 +83,11 @@ class TranslationResource extends Resource
                     ->action(function ($record, array $data) {
                         $translations = Translation::where('tag', $record->tag)->whereNotIn('type', ['image', 'repeater'])->get();
                         foreach ($translations as $translation) {
-                                if (!$translation->getTranslation('value', $data['from_locale']) && $translation->default) {
-                                    $translation->setTranslation('value', $data['from_locale'], $translation->default);
-                                    $translation->save();
-                                }
-                                StartTranslationOfModel::dispatch($translation, $data['from_locale'], $data['to_locales']);
+                            if (! $translation->getTranslation('value', $data['from_locale']) && $translation->default) {
+                                $translation->setTranslation('value', $data['from_locale'], $translation->default);
+                                $translation->save();
+                            }
+                            StartTranslationOfModel::dispatch($translation, $data['from_locale'], $data['to_locales']);
                         }
 
                         Notification::make()
