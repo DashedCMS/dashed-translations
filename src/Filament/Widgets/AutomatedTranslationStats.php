@@ -31,6 +31,7 @@ class AutomatedTranslationStats extends StatsOverviewWidget
             StatsOverviewWidget\Stat::make('Voltooide vertalingen', AutomatedTranslationProgress::where('status', 'finished')->count()),
             StatsOverviewWidget\Stat::make('Pending vertalingen', AutomatedTranslationProgress::where('status', 'pending')->count()),
             StatsOverviewWidget\Stat::make('Opnieuw proberen vertalingen', AutomatedTranslationProgress::where('status', 'retrying')->count()),
+            StatsOverviewWidget\Stat::make('Foute vertalingen', AutomatedTranslationProgress::where('status', 'error')->count()),
             StatsOverviewWidget\Stat::make('Zinnen om nog te vertalen', AutomatedTranslationProgress::sum('total_strings_to_translate') - $totalTranslatedStrings),
             StatsOverviewWidget\Stat::make('Vertaalde zinnen', $totalTranslatedStrings),
         ];
