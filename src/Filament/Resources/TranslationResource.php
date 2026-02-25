@@ -52,13 +52,29 @@ class TranslationResource extends Resource
         return $table->columns([
             TextColumn::make('tag')
                 ->formatStateUsing(fn ($state) => str($state)->headline()->ucfirst())
-                ->searchable([
-                    'name',
-                    'tag',
-                    'default',
-                    'value',
-                    'type'
-                ])
+                ->searchable(query: function ($query, string $search) {
+
+                    $search = mb_strtolower($search);
+
+                    return $query->where(function ($q) use ($search) {
+
+                        $q->where('t.tag', 'like', "%{$search}%")
+
+                            ->orWhereExists(function ($sub) use ($search) {
+                                $sub->selectRaw('1')
+                                    ->from('dashed__translations as s')
+                                    ->whereColumn('s.tag', 't.tag')
+                                    ->where(function ($inner) use ($search) {
+                                        $inner->whereRaw('LOWER(s.name) LIKE ?', ["%{$search}%"])
+                                            ->orWhereRaw('LOWER(s.tag) LIKE ?', ["%{$search}%"])
+                                            ->orWhereRaw('LOWER(s.default) LIKE ?', ["%{$search}%"])
+                                            ->orWhereRaw('LOWER(s.type) LIKE ?', ["%{$search}%"])
+                                            ->orWhereRaw('LOWER(CAST(s.value AS CHAR)) LIKE ?', ["%{$search}%"]);
+                                    });
+                            });
+
+                    });
+                })
                 ->sortable(),
         ])
             ->recordActions([

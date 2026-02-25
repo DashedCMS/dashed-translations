@@ -24,6 +24,14 @@ class ListTranslations extends ListRecords
 
     protected function getTableQuery(): Builder|Relation|null
     {
+        return Translation::query()
+            ->from('dashed__translations as t')
+            ->whereIn('t.id', function ($query) {
+                $query->selectRaw('MAX(id)')
+                    ->from('dashed__translations')
+                    ->groupBy('tag');
+            });
+
         return Translation::whereIn('id', function ($query) {
             $query->selectRaw('MAX(id)')
                 ->from('dashed__translations')
