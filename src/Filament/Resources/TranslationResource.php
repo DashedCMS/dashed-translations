@@ -52,9 +52,14 @@ class TranslationResource extends Resource
         return $table->columns([
             TextColumn::make('tag')
                 ->formatStateUsing(fn ($state) => str($state)->headline()->ucfirst())
-                ->searchable()
+                ->searchable([
+                    'name',
+                    'tag',
+                    'default',
+                    'value',
+                    'type'
+                ])
                 ->sortable(),
-            TextColumn::make('slug'),
         ])
             ->recordActions([
                 EditAction::make('edit'),

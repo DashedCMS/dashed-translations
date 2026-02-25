@@ -2,9 +2,9 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages;
 
+use Filament\Resources\Pages\ListRecords;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\Widgets\AutomatedTranslationStats;
-use Filament\Resources\Pages\ListRecords;
 
 class ListAutomatedTranslationProgress extends ListRecords
 {

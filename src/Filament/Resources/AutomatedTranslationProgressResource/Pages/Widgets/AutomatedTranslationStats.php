@@ -2,9 +2,9 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\Widgets;
 
-use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
-use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 
 class AutomatedTranslationStats extends StatsOverviewWidget
 {
@@ -17,7 +17,6 @@ class AutomatedTranslationStats extends StatsOverviewWidget
     protected ?string $maxHeight = '300px';
 
     protected ?string $pollingInterval = '1s';
-
 
     protected function getCards(): array
     {
