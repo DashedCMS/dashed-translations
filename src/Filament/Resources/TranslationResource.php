@@ -58,12 +58,13 @@ class TranslationResource extends Resource
 
                     return $query->where(function ($q) use ($search) {
 
-                        $q->where('t.tag', 'like', "%{$search}%")
+                        $q->where('dashed__translations.tag', 'like', "%{$search}%")
 
                             ->orWhereExists(function ($sub) use ($search) {
                                 $sub->selectRaw('1')
                                     ->from('dashed__translations as s')
-                                    ->whereColumn('s.tag', 't.tag')
+                                    ->whereColumn('s.tag', 'dashed__translations.tag')
+                                    ->whereNull('s.deleted_at')
                                     ->where(function ($inner) use ($search) {
                                         $inner->whereRaw('LOWER(s.name) LIKE ?', ["%{$search}%"])
                                             ->orWhereRaw('LOWER(s.tag) LIKE ?', ["%{$search}%"])
