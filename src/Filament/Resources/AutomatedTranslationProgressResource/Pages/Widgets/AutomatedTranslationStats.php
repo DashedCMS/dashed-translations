@@ -32,9 +32,4 @@ class AutomatedTranslationStats extends StatsOverviewWidget
             StatsOverviewWidget\Stat::make('Vertaalde zinnen', $totalTranslatedStrings),
         ];
     }
-
-    public static function canView(): bool
-    {
-        return request()->url() != route('filament.dashed.pages.dashboard');
-    }
 }

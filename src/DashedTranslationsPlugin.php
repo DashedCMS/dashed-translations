@@ -22,9 +22,6 @@ class DashedTranslationsPlugin implements Plugin
             ->pages([
                 TranslationsSettingsPage::class,
             ])
-            ->widgets([
-                AutomatedTranslationStats::class,
-            ])
             ->resources([
                 TranslationResource::class,
                 AutomatedTranslationProgressResource::class,

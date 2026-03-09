@@ -32,13 +32,13 @@ class ListTranslations extends ListRecords
                     ->groupBy('tag');
             })
             ->whereNull('deleted_at');
-//        return Translation::query()
-//            ->from('dashed__translations as t')
-//            ->whereIn('t.id', function ($query) {
-//                $query->selectRaw('MAX(id)')
-//                    ->from('dashed__translations')
-//                    ->groupBy('tag');
-//            });
+        //        return Translation::query()
+        //            ->from('dashed__translations as t')
+        //            ->whereIn('t.id', function ($query) {
+        //                $query->selectRaw('MAX(id)')
+        //                    ->from('dashed__translations')
+        //                    ->groupBy('tag');
+        //            });
 
         return Translation::whereIn('id', function ($query) {
             $query->selectRaw('MAX(id)')
