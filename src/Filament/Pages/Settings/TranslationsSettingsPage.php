@@ -15,12 +15,14 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Dashed\DashedCore\Models\Customsetting;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
+use Dashed\DashedCore\Traits\HasSettingsPermission;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 
 class TranslationsSettingsPage extends Page implements HasSchemas
 {
     use InteractsWithSchemas;
+    use HasSettingsPermission;
     protected static bool $shouldRegisterNavigation = false;
     protected static ?string $title = 'Vertalingen';
 
