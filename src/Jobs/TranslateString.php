@@ -4,6 +4,7 @@ namespace Dashed\DashedTranslations\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
+use Dashed\DashedCore\Jobs\Concerns\HandlesQueueFailures;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,6 +18,7 @@ class TranslateString implements ShouldQueue, ShouldBeUnique
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+    use HandlesQueueFailures;
 
     public $timeout = 300;
     public $tries = 10;
@@ -101,6 +103,9 @@ class TranslateString implements ShouldQueue, ShouldBeUnique
                 $automatedTranslationProgress->error = $exception->getMessage();
                 $automatedTranslationProgress->save();
             }
+            // Rate-limit retries are expected — skip admin alert in that branch.
+            // This else branch is a real terminal failure so notify admins.
+            $this->reportFailure($exception);
         }
     }
 }
