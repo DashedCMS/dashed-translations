@@ -56,7 +56,22 @@ class AutomatedTranslationProgressResource extends Resource
             TextColumn::make('model.name')
                 ->label('Naam')
                 ->searchable()
-                ->formatStateUsing(fn ($record) => str($record->model->name)->limit(30)),
+                ->formatStateUsing(fn ($record) => str($record->model->name)->limit(30))
+                ->tooltip(function ($record) {
+                    if (! $record->model) {
+                        return null;
+                    }
+
+                    $translated = method_exists($record->model, 'getTranslation')
+                        ? $record->model->getTranslation('name', $record->to_locale, false)
+                        : null;
+
+                    if (! $translated) {
+                        return 'Nog niet vertaald naar ' . strtoupper($record->to_locale);
+                    }
+
+                    return strtoupper($record->to_locale) . ': ' . $translated;
+                }),
             TextColumn::make('model')
                 ->label('Model')
                 ->searchable()
