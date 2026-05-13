@@ -117,9 +117,13 @@ class StartTranslationOfModel implements ShouldQueue
             }
         }
 
+        $ignorableColumns = method_exists(cms(), 'ignorableColumnsForTranslations')
+            ? cms()->ignorableColumnsForTranslations($model)
+            : (array) cms()->builder('ignorableColumnsForTranslations');
+
         foreach ($model->translatable as $column) {
             if ((! method_exists($model, $column) || in_array($column, $overwriteColumns))) {
-                if (in_array($column, cms()->builder('ignorableColumnsForTranslations'))) {
+                if (in_array($column, $ignorableColumns)) {
                     foreach ($toLocales as $locale) {
                         $model->setTranslation($column, $locale, $this->model->getTranslation($column, $fromLocale));
                     }
