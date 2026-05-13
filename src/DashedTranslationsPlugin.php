@@ -7,6 +7,7 @@ use Filament\Contracts\Plugin;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
 use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource;
+use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationStringResource;
 
 class DashedTranslationsPlugin implements Plugin
 {
@@ -24,6 +25,7 @@ class DashedTranslationsPlugin implements Plugin
             ->resources([
                 TranslationResource::class,
                 AutomatedTranslationProgressResource::class,
+                AutomatedTranslationStringResource::class,
             ]);
     }
 

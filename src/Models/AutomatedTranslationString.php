@@ -9,6 +9,12 @@ class AutomatedTranslationString extends Model
 {
     protected $table = 'dashed__automated_translation_strings';
 
+    protected $guarded = [];
+
+    protected $casts = [
+        'translated' => 'boolean',
+    ];
+
     public static function booted()
     {
 
