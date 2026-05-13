@@ -4,11 +4,11 @@ namespace Dashed\DashedTranslations\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
-use Dashed\DashedCore\Jobs\Concerns\HandlesQueueFailures;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Dashed\DashedCore\Jobs\Concerns\HandlesQueueFailures;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Models\AutomatedTranslationString;
 
@@ -20,9 +20,24 @@ class TranslateString implements ShouldQueue, ShouldBeUnique
     use SerializesModels;
     use HandlesQueueFailures;
 
-    public $timeout = 300;
-    public $tries = 10;
     public AutomatedTranslationString $automatedTranslationString;
+
+    /**
+     * Override the trait defaults via methods (Laravel reads these and
+     * they take precedence over the trait $tries/$timeout properties).
+     * This avoids the PHP trait composition conflict that fires when
+     * both trait and class declare the same property with different
+     * defaults / type hints.
+     */
+    public function tries(): int
+    {
+        return 10;
+    }
+
+    public function timeout(): int
+    {
+        return 300;
+    }
 
     /**
      * The number of seconds after which the job's unique lock will be released.
