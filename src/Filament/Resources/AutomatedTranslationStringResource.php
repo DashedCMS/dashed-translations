@@ -94,7 +94,7 @@ class AutomatedTranslationStringResource extends Resource
                     ->limit(60)
                     ->tooltip(fn ($record) => $record->to_string)
                     ->searchable()
-                    ->placeholder('— nog niet vertaald —'),
+                    ->placeholder('- nog niet vertaald -'),
                 IconColumn::make('translated')
                     ->label('Vertaald')
                     ->boolean()

@@ -118,7 +118,7 @@ class TranslateString implements ShouldQueue, ShouldBeUnique
                 $automatedTranslationProgress->error = $exception->getMessage();
                 $automatedTranslationProgress->save();
             }
-            // Rate-limit retries are expected — skip admin alert in that branch.
+            // Rate-limit retries are expected - skip admin alert in that branch.
             // This else branch is a real terminal failure so notify admins.
             $this->reportFailure($exception);
         }
