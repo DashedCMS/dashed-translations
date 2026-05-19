@@ -40,8 +40,53 @@ class AutomatedTranslation
         if ($provider['provider'] === 'deepl') {
             Config::set('deepl.api_key', $provider['api_key']);
 
-            return Deepl::api()->translate($text, $targetLanguage, $sourceLanguage);
+            [$protected, $tokens] = self::protectVariables($text);
+            $translated = Deepl::api()->translate($protected, $targetLanguage, $sourceLanguage);
+
+            return self::restoreVariables($translated, $tokens);
         }
+
+        return $text;
+    }
+
+    /**
+     * Vervang :varName: tokens door een placeholder die DeepL niet
+     * interpreteert. Voorkomt dat dynamische variabelen als :firstName:
+     * of :invoiceId: vertaald worden en uiteindelijk niet meer matchen
+     * met OrderVariableReplacer en consorten.
+     *
+     * @return array{0: string, 1: array<string, string>}
+     */
+    protected static function protectVariables(string $text): array
+    {
+        $tokens = [];
+        $i = 0;
+
+        $protected = preg_replace_callback(
+            '/:([a-zA-Z][a-zA-Z0-9_]*):/',
+            function (array $match) use (&$tokens, &$i): string {
+                $key = '[DTV' . $i . ']';
+                $tokens[$key] = $match[0];
+                $i++;
+
+                return $key;
+            },
+            $text
+        );
+
+        return [$protected ?? $text, $tokens];
+    }
+
+    /**
+     * @param  array<string, string>  $tokens
+     */
+    protected static function restoreVariables(string $text, array $tokens): string
+    {
+        if (! $tokens) {
+            return $text;
+        }
+
+        return str_replace(array_keys($tokens), array_values($tokens), $text);
     }
 
     public static function translateModel(Model $model, string $fromLocale, array $toLocales, array $overwriteColumns = [], ?AutomatedTranslationProgress $automatedTranslationProgress = null): void
