@@ -34,6 +34,7 @@ class TranslationsSettingsPage extends Page implements HasSchemas
         $formData = [];
 
         $formData["deepl_translations_enabled"] = Customsetting::get('deepl_translations_enabled');
+        $formData["deepl_plan"] = Customsetting::get('deepl_plan', null, 'free');
         $formData["deepl_api_key"] = Customsetting::get('deepl_api_key');
 
         $this->form->fill($formData);
@@ -46,6 +47,16 @@ class TranslationsSettingsPage extends Page implements HasSchemas
                 ->label('DeepL vertalingen')
                 ->helperText('Deze functie is in BETA')
                 ->reactive(),
+            Select::make("deepl_plan")
+                ->label('DeepL plan')
+                ->options([
+                    'free' => 'Free API (api-free.deepl.com)',
+                    'pro' => 'Pro API (api.deepl.com)',
+                ])
+                ->default('free')
+                ->helperText('Free keys eindigen op ":fx". Kies het plan dat hoort bij je sleutel.')
+                ->required(fn (Get $get) => $get('deepl_translations_enabled'))
+                ->visible(fn (Get $get) => $get('deepl_translations_enabled')),
             TextInput::make("deepl_api_key")
                 ->label('DeepL API key')
                 ->required(fn (Get $get) => $get('deepl_translations_enabled'))
@@ -144,6 +155,7 @@ class TranslationsSettingsPage extends Page implements HasSchemas
 
         foreach ($sites as $site) {
             Customsetting::set('deepl_translations_enabled', $this->form->getState()["deepl_translations_enabled"], $site['id']);
+            Customsetting::set('deepl_plan', $this->form->getState()["deepl_plan"] ?? 'free', $site['id']);
             Customsetting::set('deepl_api_key', $this->form->getState()["deepl_api_key"] ?? '', $site['id']);
         }
 

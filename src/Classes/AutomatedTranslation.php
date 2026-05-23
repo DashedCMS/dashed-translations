@@ -2,8 +2,7 @@
 
 namespace Dashed\DashedTranslations\Classes;
 
-use Dashed\Deepl\Facades\Deepl;
-use Illuminate\Support\Facades\Config;
+use ChrisKonnertz\DeepLy\DeepLy;
 use Illuminate\Database\Eloquent\Model;
 use Dashed\DashedCore\Models\Customsetting;
 use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
@@ -19,10 +18,17 @@ class AutomatedTranslation
 
     public static function getProvider(): ?array
     {
-        if (Customsetting::get('deepl_translations_enabled') && Customsetting::get('deepl_api_key')) {
+        // disableCache: voorkomt dat een long-running queue worker een verouderde
+        // sleutel uit zijn process-local runtimeContextCache blijft gebruiken
+        // nadat de admin de DeepL-key heeft geroteerd in een ander proces.
+        $apiKey = Customsetting::get('deepl_api_key', null, null, null, 'default', true);
+        $plan = Customsetting::get('deepl_plan', null, 'free', null, 'default', true);
+
+        if (Customsetting::get('deepl_translations_enabled') && $apiKey) {
             return [
                 'provider' => 'deepl',
-                'api_key' => Customsetting::get('deepl_api_key'),
+                'api_key' => $apiKey,
+                'plan' => in_array($plan, ['free', 'pro'], true) ? $plan : 'free',
             ];
         }
 
@@ -38,15 +44,32 @@ class AutomatedTranslation
         }
 
         if ($provider['provider'] === 'deepl') {
-            Config::set('deepl.api_key', $provider['api_key']);
-
             [$protected, $tokens] = self::protectVariables($text);
-            $translated = Deepl::api()->translate($protected, $targetLanguage, $sourceLanguage);
+            $translated = self::deeplyClient($provider['api_key'], $provider['plan'])
+                ->translate($protected, $targetLanguage, $sourceLanguage);
 
             return self::restoreVariables($translated, $tokens);
         }
 
         return $text;
+    }
+
+    /**
+     * Bouw een DeepLy client met expliciet gekozen endpoint. De vendor-library
+     * leidt het endpoint normaal af uit de ":fx"-suffix; wij overschrijven dat
+     * zodat de admin het plan (Free vs Pro) handmatig kan kiezen.
+     */
+    protected static function deeplyClient(string $apiKey, string $plan): DeepLy
+    {
+        $client = new DeepLy($apiKey);
+
+        $ref = new \ReflectionProperty(DeepLy::class, 'apiBaseUrl');
+        $ref->setValue(
+            $client,
+            $plan === 'pro' ? DeepLy::API_PRO_BASE_URL : DeepLy::API_FREE_BASE_URL
+        );
+
+        return $client;
     }
 
     /**
