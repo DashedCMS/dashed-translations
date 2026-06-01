@@ -11,6 +11,8 @@ use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 
 class AutomatedTranslation
 {
+    public const MAX_REQUEST_BYTES = 51200; // 50 KB veilig onder DeepL's per-request grens
+
     public static function automatedTranslationsEnabled()
     {
         return ! is_null(self::getProvider());
@@ -45,8 +47,12 @@ class AutomatedTranslation
 
         if ($provider['provider'] === 'deepl') {
             [$protected, $tokens] = self::protectVariables($text);
-            $translated = self::deeplyClient($provider['api_key'], $provider['plan'])
-                ->translate($protected, $targetLanguage, $sourceLanguage);
+            $client = self::deeplyClient($provider['api_key'], $provider['plan']);
+
+            $translated = '';
+            foreach (self::chunkForRequest($protected) as $chunk) {
+                $translated .= $client->translate($chunk, $targetLanguage, $sourceLanguage);
+            }
 
             return self::restoreVariables($translated, $tokens);
         }
@@ -110,6 +116,111 @@ class AutomatedTranslation
         }
 
         return str_replace(array_keys($tokens), array_values($tokens), $text);
+    }
+
+    /**
+     * Deel tekst op in stukken die elk onder $maxBytes blijven, zodat één
+     * DeepL-request nooit de per-request grootte-limiet (HTTP 413) raakt.
+     * Lossless: implode('', chunkForRequest($t)) === $t. Splitst op
+     * natuurlijke grenzen en valt alleen als laatste redmiddel terug op een
+     * harde byte-split.
+     *
+     * @return list<string>
+     */
+    public static function chunkForRequest(string $text, int $maxBytes = self::MAX_REQUEST_BYTES): array
+    {
+        if (strlen($text) <= $maxBytes) {
+            return [$text];
+        }
+
+        foreach (["\n\n", "\n", ". ", " "] as $separator) {
+            if (! str_contains($text, $separator)) {
+                continue;
+            }
+
+            // Splits maar behoud de separator aan het eind van elk stuk
+            // (behalve het laatste) zodat samenvoegen lossless is.
+            $pieces = explode($separator, $text);
+            $segments = [];
+            foreach ($pieces as $index => $piece) {
+                $segments[] = $index < count($pieces) - 1 ? $piece . $separator : $piece;
+            }
+
+            $chunks = [];
+            $current = '';
+            foreach ($segments as $segment) {
+                if (strlen($segment) > $maxBytes) {
+                    // Eén segment is zelf te groot: flush en recurse dieper.
+                    if ($current !== '') {
+                        $chunks[] = $current;
+                        $current = '';
+                    }
+                    foreach (self::chunkForRequest($segment, $maxBytes) as $sub) {
+                        $chunks[] = $sub;
+                    }
+
+                    continue;
+                }
+
+                if (strlen($current) + strlen($segment) > $maxBytes) {
+                    $chunks[] = $current;
+                    $current = '';
+                }
+                $current .= $segment;
+            }
+            if ($current !== '') {
+                $chunks[] = $current;
+            }
+
+            return $chunks;
+        }
+
+        // Geen enkele separator aanwezig en nog te groot: harde byte-split.
+        return self::splitByLength($text, $maxBytes);
+    }
+
+    /**
+     * Harde byte-split als laatste redmiddel: knip op <= $maxBytes, maar
+     * nooit midden in een UTF-8-teken en nooit binnen een [DTVn]-token.
+     *
+     * @return list<string>
+     */
+    private static function splitByLength(string $text, int $maxBytes): array
+    {
+        $chunks = [];
+        $offset = 0;
+        $length = strlen($text);
+
+        while ($offset < $length) {
+            $size = min($maxBytes, $length - $offset);
+            $cut = $offset + $size;
+
+            if ($cut < $length) {
+                // 1) Niet midden in een [DTVn]-token knippen.
+                $lastOpen = strrpos(substr($text, $offset, $size), '[');
+                if ($lastOpen !== false) {
+                    $absOpen = $offset + $lastOpen;
+                    $close = strpos($text, ']', $absOpen);
+                    if ($close !== false && $close >= $cut) {
+                        // Token loopt over de knip heen: knip vóór het token,
+                        // of als het token aan het begin staat ná het token,
+                        // zodat we altijd voortgang boeken.
+                        $cut = $absOpen > $offset ? $absOpen : ($close + 1);
+                    }
+                }
+
+                // 2) Niet midden in een UTF-8-teken knippen: schuif terug
+                //    zolang we op een continuation-byte (10xxxxxx) staan.
+                while ($cut > $offset + 1 && (ord($text[$cut]) & 0xC0) === 0x80) {
+                    $cut--;
+                }
+            }
+
+            $chunks[] = substr($text, $offset, $cut - $offset);
+            $offset = $cut;
+        }
+
+        return $chunks;
     }
 
     public static function translateModel(Model $model, string $fromLocale, array $toLocales, array $overwriteColumns = [], ?AutomatedTranslationProgress $automatedTranslationProgress = null): void
