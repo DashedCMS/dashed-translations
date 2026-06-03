@@ -62,7 +62,7 @@ class AutomatedTranslationProgressResource extends Resource
                         return null;
                     }
 
-                    $translated = method_exists($record->model, 'getTranslation')
+                    $translated = (method_exists($record->model, 'isTranslatableAttribute') && $record->model->isTranslatableAttribute('name'))
                         ? $record->model->getTranslation('name', $record->to_locale, false)
                         : null;
 

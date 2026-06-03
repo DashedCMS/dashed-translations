@@ -2,6 +2,11 @@
 
 All notable changes to `dashed-translations` will be documented in this file.
 
+## 4.2.5 - 2026-06-03
+
+- Fix: only read a translated `name` in `AutomatedTranslationProgressResource` when the model actually has `name` as a translatable attribute (guard with `isTranslatableAttribute('name')`), avoiding errors on models without a translatable name.
+- Chore: tidy import ordering in `DashedTranslationsPlugin` and `AutomatedTranslationStringResource`.
+
 ## 4.2.4 - 2026-06-03
 
 - Fix: preserve leading/trailing whitespace around translated strings. DeepL strips edge whitespace, so rich-text nodes split by a mark (e.g. bold) lost the space between them ("you can see the " + **Afzender** rendered as "theAfzender"). `AutomatedTranslation::translate()` now restores the source's exact edge whitespace.
