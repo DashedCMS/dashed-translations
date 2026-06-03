@@ -54,10 +54,31 @@ class AutomatedTranslation
                 $translated .= $client->translate($chunk, $targetLanguage, $sourceLanguage);
             }
 
-            return self::restoreVariables($translated, $tokens);
+            $translated = self::restoreVariables($translated, $tokens);
+
+            return self::preserveEdgeWhitespace($text, $translated);
         }
 
         return $text;
+    }
+
+    /**
+     * DeepL strips leading/trailing whitespace from its output. Rich-text is
+     * split into a separate node per mark (e.g. bold), so a node like
+     * "you can see the " comes back as "you can see the" and the following
+     * <strong> node glues onto it ("see theAfzender"). Restore the source's
+     * exact edge whitespace so adjacent nodes keep their spacing.
+     */
+    protected static function preserveEdgeWhitespace(string $original, string $translated): string
+    {
+        if (trim($original) === '') {
+            return $original;
+        }
+
+        $leading = mb_substr($original, 0, mb_strlen($original) - mb_strlen(ltrim($original)));
+        $trailing = mb_substr($original, mb_strlen(rtrim($original)));
+
+        return $leading . trim($translated) . $trailing;
     }
 
     /**
