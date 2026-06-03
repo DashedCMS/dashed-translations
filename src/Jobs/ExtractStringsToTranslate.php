@@ -140,7 +140,7 @@ class ExtractStringsToTranslate implements ShouldQueue
         }
 
         if ($currentBlock && count($parentKeys)) {
-            $currentBlock = $this->matchBuilderBlock($key, array_slice($parentKeys, 1), $currentBlock->getChildComponents(), $currentBlock);
+            $currentBlock = $this->matchBuilderBlock($key, array_slice($parentKeys, 1), $this->childBlockComponents($currentBlock), $currentBlock);
         }
 
         if ($currentBlock && $currentBlock->getName() === $key) {
@@ -163,7 +163,7 @@ class ExtractStringsToTranslate implements ShouldQueue
         }
 
         if ($currentBlock && count($parentKeys)) {
-            $currentBlock = $this->matchCustomBlock($key, array_slice($parentKeys, 1), $currentBlock->getChildComponents(), $currentBlock);
+            $currentBlock = $this->matchCustomBlock($key, array_slice($parentKeys, 1), $this->childBlockComponents($currentBlock), $currentBlock);
         }
 
         if ($currentBlock && $currentBlock->getName() === $key) {
@@ -171,6 +171,30 @@ class ExtractStringsToTranslate implements ShouldQueue
         }
 
         return null;
+    }
+
+    /**
+     * Return a block's child components without requiring a Livewire container.
+     *
+     * Filament v4's getChildComponents() lazily builds a Schema that calls
+     * getLivewire()/getContainer(), which standalone block definitions never
+     * have set, throwing "Typed property ...Component::$container must not be
+     * accessed before initialization". getDefaultChildComponents() returns the
+     * configured child components without touching the container.
+     */
+    private function childBlockComponents($block): array
+    {
+        if (method_exists($block, 'getDefaultChildComponents')) {
+            $components = $block->getDefaultChildComponents();
+
+            if ($components instanceof \Filament\Schemas\Schema) {
+                $components = $components->getComponents();
+            }
+
+            return is_array($components) ? $components : [];
+        }
+
+        return method_exists($block, 'getChildComponents') ? $block->getChildComponents() : [];
     }
 
     private function addString(?string $value = '')
