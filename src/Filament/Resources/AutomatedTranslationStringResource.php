@@ -36,6 +36,13 @@ class AutomatedTranslationStringResource extends Resource
     protected static ?string $pluralLabel = 'Cached vertalingen';
     protected static ?int $navigationSort = 99;
 
+    // Zonder eigen policy viel deze resource terug op default-allow. Vereis expliciet
+    // het beheerrecht voor (automatische) vertalingen.
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('edit_automated_translation_progress') ?? false;
+    }
+
     public static function shouldRegisterNavigation(): bool
     {
         return AutomatedTranslation::automatedTranslationsEnabled();
