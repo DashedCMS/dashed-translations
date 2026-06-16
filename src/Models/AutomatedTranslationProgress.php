@@ -3,7 +3,6 @@
 namespace Dashed\DashedTranslations\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Dashed\DashedTranslations\Jobs\ReplaceStringsInModel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AutomatedTranslationProgress extends Model
@@ -34,14 +33,18 @@ class AutomatedTranslationProgress extends Model
         $totalStringsTranslated = 0;
 
         foreach ($this->strings as $string) {
-            if ($string->translated) {
+            // Only count a string as translated when it actually has a
+            // non-empty translation. A string flagged translated=1 with an
+            // empty to_string used to push progress to 100% / 'finished' while
+            // the content was still untranslated, letting the replace step run
+            // before any real translation existed.
+            if ($string->translated && $string->to_string !== null && $string->to_string !== '') {
                 $totalStringsTranslated++;
             }
         }
         $this->total_strings_translated = $totalStringsTranslated;
 
         if ($this->total_strings_to_translate == $this->total_strings_translated) {
-            //        if ($this->total_strings_to_translate > 0 && $this->total_strings_to_translate == $this->total_strings_translated) {
             $this->status = 'finished';
         } elseif ($this->total_strings_translated > 0) {
             $this->status = 'in_progress';
@@ -49,13 +52,6 @@ class AutomatedTranslationProgress extends Model
             $this->status = 'pending';
         }
         $this->saveQuietly();
-
-        if ($startReplacingStrings && $this->status == 'finished') {
-            if (! self::where('model_type', $this->model_type)->where('model_id', $this->model_id)->where('status', '!=', 'finished')->count()) {
-                dd('asdf');
-                //                ReplaceStringsInModel::dispatch($this);
-            }
-        }
     }
 
     public function recursiveReplace($subject, string $search, string $replace)

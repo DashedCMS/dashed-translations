@@ -2,16 +2,16 @@
 
 namespace Dashed\DashedTranslations\Jobs;
 
-use Illuminate\Bus\Queueable;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Dashed\DashedTranslations\Models\AutomatedTranslationString;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Filament\Forms\Components\FileUpload;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Dashed\DashedTranslations\Models\AutomatedTranslationString;
-use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 class ExtractStringsToTranslate implements ShouldQueue
 {
@@ -57,8 +57,11 @@ class ExtractStringsToTranslate implements ShouldQueue
             return;
         }
 
-        $this->model->setTranslation($this->column, $this->toLanguage, $this->model->getTranslation($this->column, $this->fromLanguage));
-        $this->model->saveQuietly();
+        // NB: we deliberately do NOT copy the source value into the target
+        // locale here. Doing so used to leave untranslated source text in the
+        // target (e.g. French in the EN slot) whenever a translation failed to
+        // complete. ReplaceStringsInModel now builds the target from the source
+        // locale and only writes it once every string is translated.
 
         if (is_array($this->value)) {
             $this->searchAndTranslate(array: $this->value);

@@ -2,13 +2,14 @@
 
 namespace Dashed\DashedTranslations;
 
-use Livewire\Livewire;
-use Illuminate\Support\Facades\Gate;
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Dashed\DashedTranslations\Commands\RemoveUnusedTranslations;
+use Dashed\DashedTranslations\Commands\RepairTranslationStrings;
 use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\Widgets\AutomatedTranslationStats;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Livewire;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class DashedTranslationsServiceProvider extends PackageServiceProvider
 {
@@ -24,6 +25,7 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
             ->name('dashed-translations')
             ->hasCommands([
                 RemoveUnusedTranslations::class,
+                RepairTranslationStrings::class,
             ])
             ->hasViews();
 

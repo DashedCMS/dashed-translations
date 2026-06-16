@@ -2,15 +2,15 @@
 
 namespace Dashed\DashedTranslations\Jobs;
 
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
-use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Illuminate\Queue\SerializesModels;
 
 class ReplaceStringsInModel implements ShouldQueue
 {
@@ -96,52 +96,54 @@ class ReplaceStringsInModel implements ShouldQueue
         //        }
         //        $model->save();
 
-        //        dd('asdf');
         foreach ($automatedTranslationProgresses as $automatedTranslationProgress) {
-            //            foreach ($automatedTranslationProgress->strings as $automatedTranslationString) {
-            $strings = $automatedTranslationProgress->strings()->orderByRaw('CHAR_LENGTH(COALESCE(from_string, "")) DESC')->get();
-            foreach ($strings as $automatedTranslationString) {
-                if (! $automatedTranslationString->pivot->replaced) {
-                    $textToReplaceIn = $model->getTranslation(
-                        $automatedTranslationString->pivot->column,
-                        $automatedTranslationString->to_locale
-                    );
+            $strings = $automatedTranslationProgress->strings()
+                ->orderByRaw('CHAR_LENGTH(COALESCE(from_string, "")) DESC')
+                ->get();
 
-                    $textToReplaceInString = $textToReplaceIn;
-                    if (is_array($textToReplaceIn)) {
-                        $textToReplaceInString = json_encode($textToReplaceIn);
-                    }
-                    if (str($textToReplaceInString)->contains('Norsup prefab pools') && str($automatedTranslationString->from_string)->contains('Norsup prefab pools') && $automatedTranslationProgress->to_locale == 'de') {
-                        //                        dump($automatedTranslationProgress->id);
-                        //                        dump($textToReplaceIn, $automatedTranslationString, $strings);
-                        //                        foreach($strings as $string){
-                        //                            dump($string);
-                        //                            dump($string->id . ' - ' . $string->from_string . ' - replaced: ' . $string->pivot->replaced);
-                        //                        }
-                        //                        dd('done');
-                    }
+            // Group by the column each string belongs to so we can write each
+            // column atomically: a column is only written once *every* one of
+            // its strings has a real translation. A partial or failed
+            // translation therefore leaves the target locale's previous value
+            // intact instead of stamping in untranslated source text.
+            $stringsByColumn = $strings->groupBy(fn ($string) => $string->pivot->column);
 
-                    //                    if(is_array($textToReplaceIn)){
-                    //                        dd($strings);
-                    //                    }
-                    $textToReplaceIn = $automatedTranslationProgress->recursiveReplace(
-                        $textToReplaceIn,
+            foreach ($stringsByColumn as $column => $columnStrings) {
+                $hasUntranslated = $columnStrings->contains(
+                    fn ($string) => $string->to_string === null || $string->to_string === ''
+                );
+                if ($hasUntranslated) {
+                    // Leave this column for a later run; do not lock the pivots
+                    // so the strings can still be corrected once translated.
+                    continue;
+                }
+
+                // Build the translated value from the SOURCE locale so the
+                // from_strings are always present to match and replace.
+                $translatedValue = $model->getTranslation(
+                    $column,
+                    $automatedTranslationProgress->from_locale
+                );
+
+                foreach ($columnStrings as $automatedTranslationString) {
+                    $translatedValue = $automatedTranslationProgress->recursiveReplace(
+                        $translatedValue,
                         $automatedTranslationString->from_string,
-                        $automatedTranslationString->to_string ?: $automatedTranslationString->from_string
+                        $automatedTranslationString->to_string
                     );
+                }
 
-                    if (str($textToReplaceInString)->contains('Why choose Norsup') && str($automatedTranslationString->from_string)->contains('Why choose Norsup') && $automatedTranslationProgress->to_locale == 'de') {
-                        //                        dd($textToReplaceIn);
+                $model->setTranslation(
+                    $column,
+                    $automatedTranslationProgress->to_locale,
+                    $translatedValue
+                );
+
+                foreach ($columnStrings as $automatedTranslationString) {
+                    if (! $automatedTranslationString->pivot->replaced) {
+                        $automatedTranslationString->pivot->replaced = true;
+                        $automatedTranslationString->pivot->save();
                     }
-
-                    $model->setTranslation(
-                        $automatedTranslationString->pivot->column,
-                        $automatedTranslationString->to_locale,
-                        $textToReplaceIn
-                    );
-
-                    $automatedTranslationString->pivot->replaced = true;
-                    $automatedTranslationString->pivot->save();
                 }
             }
 
