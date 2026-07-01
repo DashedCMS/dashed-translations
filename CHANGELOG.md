@@ -2,6 +2,10 @@
 
 All notable changes to `dashed-translations` will be documented in this file.
 
+## 4.2.8 - 2026-07-01
+
+- Fix: the first sentence of a translated content block could stay in the source language while the rest of the block translated correctly. A cached translation string that differed from the content by only trailing/leading whitespace was reused on lookup (MySQL's `=` ignores trailing spaces), but the byte-exact `str_replace` write-back in `AutomatedTranslationProgress::recursiveReplace()` then failed to match, so the source text was never overwritten. Whole content nodes are now matched whitespace-insensitively.
+
 ## 4.2.5 - 2026-06-03
 
 - Fix: only read a translated `name` in `AutomatedTranslationProgressResource` when the model actually has `name` as a translatable attribute (guard with `isTranslatableAttribute('name')`), avoiding errors on models without a translatable name.

@@ -63,8 +63,15 @@ class AutomatedTranslationProgress extends Model
         }
 
         if (is_string($subject)) {
-            if ((str($subject)->contains('choose Norsup prefab pools') || str($search)->contains('choose Norsup prefab pools')) && $this->to_locale == 'de') {
-                //                dump($subject, $search, $replace, str($subject)->replace($search, $replace)->toString());
+            // A cached translation string can differ from the actual content by only
+            // leading/trailing whitespace: MySQL's `=` treats "foo" and "foo " as equal
+            // when the string is looked up/deduped, but PHP's str_replace below is
+            // byte-exact. Without this guard the write-back silently fails and the
+            // source-language sentence stays in place (e.g. the first sentence of a
+            // content block staying Dutch while the rest translates). When the whole
+            // node equals the search modulo surrounding whitespace, swap it directly.
+            if ($search !== '' && trim($subject) === trim($search)) {
+                return $replace;
             }
 
             return str($subject)->replace($search, $replace)->toString();
