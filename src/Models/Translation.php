@@ -4,12 +4,14 @@ namespace Dashed\DashedTranslations\Models;
 
 use Illuminate\Support\Str;
 use Spatie\Activitylog\LogOptions;
+use Dashed\DashedCore\Classes\Sites;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Dashed\DashedCore\Classes\Caching\CacheInvalidator;
 
 class Translation extends Model
 {
@@ -37,6 +39,25 @@ class Translation extends Model
     ];
 
     protected $table = 'dashed__translations';
+
+    protected static function booted(): void
+    {
+        static::saved(function ($translation) {
+            if (class_exists(CacheInvalidator::class)) {
+                foreach (Sites::getSites() as $site) {
+                    CacheInvalidator::flushSite($site['id']);
+                }
+            }
+        });
+
+        static::deleted(function ($translation) {
+            if (class_exists(CacheInvalidator::class)) {
+                foreach (Sites::getSites() as $site) {
+                    CacheInvalidator::flushSite($site['id']);
+                }
+            }
+        });
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
