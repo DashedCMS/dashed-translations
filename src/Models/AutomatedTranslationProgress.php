@@ -33,6 +33,17 @@ class AutomatedTranslationProgress extends Model
         $totalStringsTranslated = 0;
 
         foreach ($this->strings as $string) {
+            // A whitespace-only source (e.g. a stray non-breaking space) never
+            // comes back with a translation, so demanding one would hold the
+            // progress row below 'finished' forever and the gate in
+            // ReplaceStringsInModel would never open. Nothing to translate
+            // means nothing to wait for.
+            if (AutomatedTranslationString::isUntranslatable($string->from_string)) {
+                $totalStringsTranslated++;
+
+                continue;
+            }
+
             // Only count a string as translated when it actually has a
             // non-empty translation. A string flagged translated=1 with an
             // empty to_string used to push progress to 100% / 'finished' while

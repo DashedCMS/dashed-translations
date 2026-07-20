@@ -202,7 +202,11 @@ class ExtractStringsToTranslate implements ShouldQueue
 
     private function addString(?string $value = '')
     {
-        if (! $value) {
+        // Whitespace-only values have nothing to translate. Registering them
+        // poisons the column: the provider answers with an empty translation,
+        // which the replace step reads as "not translated yet" and skips the
+        // whole column on forever.
+        if (AutomatedTranslationString::isUntranslatable($value)) {
             return $value;
         }
 

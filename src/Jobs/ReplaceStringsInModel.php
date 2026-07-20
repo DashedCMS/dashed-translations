@@ -3,6 +3,7 @@
 namespace Dashed\DashedTranslations\Jobs;
 
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Dashed\DashedTranslations\Models\AutomatedTranslationString;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
@@ -109,6 +110,15 @@ class ReplaceStringsInModel implements ShouldQueue
             $stringsByColumn = $strings->groupBy(fn ($string) => $string->pivot->column);
 
             foreach ($stringsByColumn as $column => $columnStrings) {
+                // Whitespace-only sources (e.g. a non-breaking space) can never
+                // get a real translation back, so they must not count towards
+                // "still untranslated" — otherwise a single stray U+00A0 in a
+                // content block blocks that column forever. They also carry no
+                // text to replace, so drop them from the replace loop entirely.
+                $columnStrings = $columnStrings->reject(
+                    fn ($string) => AutomatedTranslationString::isUntranslatable($string->from_string)
+                );
+
                 $hasUntranslated = $columnStrings->contains(
                     fn ($string) => $string->to_string === null || $string->to_string === ''
                 );
