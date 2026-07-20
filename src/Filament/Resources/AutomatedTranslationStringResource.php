@@ -2,28 +2,28 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources;
 
-use UnitEnum;
 use BackedEnum;
-use Filament\Tables\Table;
+use Dashed\DashedTranslations\Classes\AutomatedTranslation;
+use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationStringResource\Pages\ListAutomatedTranslationStrings;
+use Dashed\DashedTranslations\Models\AutomatedTranslationString;
 use Filament\Actions\Action;
-use Filament\Schemas\Schema;
 use Filament\Actions\BulkAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Resource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
-use Dashed\DashedTranslations\Classes\AutomatedTranslation;
-use Dashed\DashedTranslations\Models\AutomatedTranslationString;
-use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationStringResource\Pages\ListAutomatedTranslationStrings;
+use UnitEnum;
 
 class AutomatedTranslationStringResource extends Resource
 {

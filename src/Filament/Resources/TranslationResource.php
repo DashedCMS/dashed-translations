@@ -2,22 +2,22 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources;
 
-use UnitEnum;
 use BackedEnum;
-use Filament\Tables\Table;
-use Filament\Actions\Action;
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
-use Filament\Resources\Resource;
-use Filament\Forms\Components\Select;
 use Dashed\DashedCore\Classes\Locales;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Notifications\Notification;
-use Dashed\DashedTranslations\Models\Translation;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
-use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\EditTranslation;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource\Pages\ListTranslations;
+use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
+use Dashed\DashedTranslations\Models\Translation;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use UnitEnum;
 
 class TranslationResource extends Resource
 {
