@@ -44,21 +44,21 @@ class TranslationsSettingsPage extends Page implements HasSchemas
     {
         return $schema->schema([
             Toggle::make("deepl_translations_enabled")
-                ->label('DeepL vertalingen')
-                ->helperText('Deze functie is in BETA')
+                ->label(__('DeepL vertalingen'))
+                ->helperText(__('Deze functie is in BETA'))
                 ->reactive(),
             Select::make("deepl_plan")
-                ->label('DeepL plan')
+                ->label(__('DeepL plan'))
                 ->options([
-                    'free' => 'Free API (api-free.deepl.com)',
-                    'pro' => 'Pro API (api.deepl.com)',
+                    'free' => __('Free API (api-free.deepl.com)'),
+                    'pro' => __('Pro API (api.deepl.com)'),
                 ])
                 ->default('free')
-                ->helperText('Free keys eindigen op ":fx". Kies het plan dat hoort bij je sleutel.')
+                ->helperText(__('Free keys eindigen op ":fx". Kies het plan dat hoort bij je sleutel.'))
                 ->required(fn (Get $get) => $get('deepl_translations_enabled'))
                 ->visible(fn (Get $get) => $get('deepl_translations_enabled')),
             TextInput::make("deepl_api_key")
-                ->label('DeepL API key')
+                ->label(__('DeepL API key'))
                 ->required(fn (Get $get) => $get('deepl_translations_enabled'))
                 ->visible(fn (Get $get) => $get('deepl_translations_enabled')),
         ])
@@ -74,7 +74,7 @@ class TranslationsSettingsPage extends Page implements HasSchemas
     {
         return [
             Action::make('bulkTranslate')
-                ->label('Bulk vertalen')
+                ->label(__('Bulk vertalen'))
                 ->icon('heroicon-m-language')
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
                 ->schema(function () {
@@ -82,7 +82,7 @@ class TranslationsSettingsPage extends Page implements HasSchemas
 
                     foreach (cms()->builder('routeModels') as $routeModel) {
                         $form[] = Select::make($routeModel['name'])
-                            ->label('Welke ' . str($routeModel['pluralName'])->lower() . ' wil je vertalen?')
+                            ->label(__('Welke :model wil je vertalen?', ['model' => str($routeModel['pluralName'])->lower()]))
                             ->options(function () use ($routeModel) {
                                 $options = [];
 
@@ -95,7 +95,7 @@ class TranslationsSettingsPage extends Page implements HasSchemas
                             ->visible($routeModel['class']::all()->pluck('id')->count())
                             ->hintActions([
                                 \Filament\Actions\Action::make('select-all')
-                                    ->label('Selecteer alles')
+                                    ->label(__('Selecteer alles'))
                                     ->action(function (Set $set) use ($routeModel) {
                                         $set($routeModel['name'], $routeModel['class']::all()->pluck('id')->toArray());
                                     }),
@@ -113,7 +113,7 @@ class TranslationsSettingsPage extends Page implements HasSchemas
                             ->searchable()
                             ->required()
                             ->reactive()
-                            ->label('Vanaf taal')
+                            ->label(__('Vanaf taal'))
                             ->afterStateUpdated(fn (Set $set, Get $get) => $set('to_locales', collect(Locales::getLocalesArrayWithoutCurrent($get('from_locale')))->keys()->toArray()));
                     $form[] =
                         Select::make('to_locales')
@@ -122,7 +122,7 @@ class TranslationsSettingsPage extends Page implements HasSchemas
                             ->preload()
                             ->searchable()
                             ->required()
-                            ->label('Naar talen')
+                            ->label(__('Naar talen'))
                             ->reactive()
                             ->multiple();
 
@@ -140,7 +140,7 @@ class TranslationsSettingsPage extends Page implements HasSchemas
                     }
 
                     Notification::make()
-                        ->title('De vertalingen zijn gestart, dit kan even duren')
+                        ->title(__('De vertalingen zijn gestart, dit kan even duren'))
                         ->warning()
                         ->send();
 
@@ -160,7 +160,7 @@ class TranslationsSettingsPage extends Page implements HasSchemas
         }
 
         Notification::make()
-            ->title('De vertaling instellingen zijn opgeslagen')
+            ->title(__('De vertaling instellingen zijn opgeslagen'))
             ->success()
             ->send();
 

@@ -51,11 +51,11 @@ class AutomatedTranslationProgressResource extends Resource
     {
         return $table->columns([
             TextColumn::make('id')
-                ->label('ID')
+                ->label(__('ID'))
                 ->searchable()
                 ->sortable(),
             TextColumn::make('model.name')
-                ->label('Naam')
+                ->label(__('Naam'))
                 ->searchable()
                 ->formatStateUsing(fn ($record) => str($record->model->name)->limit(30))
                 ->tooltip(function ($record) {
@@ -74,27 +74,27 @@ class AutomatedTranslationProgressResource extends Resource
                     return strtoupper($record->to_locale) . ': ' . $translated;
                 }),
             TextColumn::make('model')
-                ->label('Model')
+                ->label(__('Model'))
                 ->searchable()
                 ->getStateUsing(fn ($record) => str($record->model_type)->explode('\\')->last())
                 ->sortable(),
             TextColumn::make('model_id')
-                ->label('Model ID')
+                ->label(__('Model ID'))
                 ->sortable()
                 ->searchable(),
             TextColumn::make('from_locale')
-                ->label('Vanaf taal')
+                ->label(__('Vanaf taal'))
                 ->searchable()
                 ->sortable(),
             TextColumn::make('to_locale')
-                ->label('Naar taal')
+                ->label(__('Naar taal'))
                 ->searchable()
                 ->sortable(),
             TextColumn::make('total_strings_to_translate')
-                ->label('Voortgang')
+                ->label(__('Voortgang'))
                 ->formatStateUsing(fn ($record) => $record->status == 'finished' ? '100%' : ((! $record->total_strings_to_translate || ! $record->total_strings_translated) ? '0%' : ((number_format(100 / $record->total_strings_to_translate * $record->total_strings_translated, 0)) . '%'))),
             TextColumn::make('status')
-                ->label('Status')
+                ->label(__('Status'))
                 ->formatStateUsing(fn ($record) => match ($record->status) {
                     'pending' => 'In afwachting',
                     'in_progress' => 'Bezig',
@@ -113,17 +113,17 @@ class AutomatedTranslationProgressResource extends Resource
                     'retrying' => 'warning',
                 }),
             TextColumn::make('error')
-                ->label('Foutmelding')
+                ->label(__('Foutmelding'))
                 ->getStateUsing(fn ($record) => $record->error ?: '-')
                 ->sortable(),
             TextColumn::make('created_at')
-                ->label('Aangemaakt op')
+                ->label(__('Aangemaakt op'))
                 ->sortable()
                 ->dateTime(),
         ])
             ->recordActions([
                 Action::make('translateAgain')
-                    ->label('Opnieuw vertalen')
+                    ->label(__('Opnieuw vertalen'))
                     ->icon('heroicon-o-language')
                     ->button()
                     ->action(function (AutomatedTranslationProgress $record) {
@@ -132,7 +132,7 @@ class AutomatedTranslationProgressResource extends Resource
 
                         Notification::make()
                             ->success()
-                            ->title('De automatische vertaling van ' . $record->model->name . ' is opnieuw gestart')
+                            ->title(__('De automatische vertaling van :naam is opnieuw gestart', ['naam' => $record->model->name]))
                             ->send();
                     }),
                 DeleteAction::make(),
@@ -140,7 +140,7 @@ class AutomatedTranslationProgressResource extends Resource
             ->toolbarActions([
                 DeleteBulkAction::make(),
                 BulkAction::make('translateAgain')
-                    ->label('Opnieuw vertalen')
+                    ->label(__('Opnieuw vertalen'))
                     ->icon('heroicon-o-language')
                     ->action(function ($records) {
                         foreach ($records as $record) {
@@ -150,22 +150,22 @@ class AutomatedTranslationProgressResource extends Resource
 
                         Notification::make()
                             ->success()
-                            ->title('De automatische vertaling van ' . count($records) . ' records is opnieuw gestart')
+                            ->title(__('De automatische vertaling van :aantal records is opnieuw gestart', ['aantal' => count($records)]))
                             ->send();
                     }),
             ])
             ->filters([
                 SelectFilter::make('status')
-                    ->label('Status')
+                    ->label(__('Status'))
                     ->multiple()
                     ->preload()
                     ->options([
-                        'pending' => 'In afwachting',
-                        'in_progress' => 'Bezig',
-                        'finished' => 'Voltooid',
+                        'pending' => __('In afwachting'),
+                        'in_progress' => __('Bezig'),
+                        'finished' => __('Voltooid'),
                     ]),
                 SelectFilter::make('model_type')
-                    ->label('Model')
+                    ->label(__('Model'))
                     ->multiple()
                     ->preload()
                     ->options(function () {

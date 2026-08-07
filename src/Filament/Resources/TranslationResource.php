@@ -84,7 +84,7 @@ class TranslationResource extends Resource
                 Action::make('translateTab')
                     ->button()
                     ->icon('heroicon-m-language')
-                    ->label('Vertaal tab')
+                    ->label(__('Vertaal tab'))
                     ->visible(AutomatedTranslation::automatedTranslationsEnabled())
                     ->schema(array_merge([
                         Select::make('from_locale')
@@ -92,15 +92,15 @@ class TranslationResource extends Resource
                             ->preload()
                             ->searchable()
                             ->required()
-                            ->label('Vanaf taal'),
+                            ->label(__('Vanaf taal')),
                         Select::make('to_locales')
                             ->options($allLocales)
                             ->preload()
                             ->searchable()
 //                        ->default(collect($allLocales)->keys()->toArray())
                             ->required()
-                            ->helperText('Zorg dat je niet de taal kiest waar het vandaag vertaald wordt')
-                            ->label('Naar talen')
+                            ->helperText(__('Zorg dat je niet de taal kiest waar het vandaag vertaald wordt'))
+                            ->label(__('Naar talen'))
                             ->multiple(),
                     ], []))
                     ->action(function ($record, array $data) {
@@ -114,7 +114,7 @@ class TranslationResource extends Resource
                         }
 
                         Notification::make()
-                            ->title("De tab wordt vertaald")
+                            ->title(__("De tab wordt vertaald"))
                             ->success()
                             ->send();
                     }),

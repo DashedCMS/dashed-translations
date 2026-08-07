@@ -106,7 +106,7 @@ class EditTranslation extends Page implements HasSchemas
                             $translation->save();
                             Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                             Notification::make()
-                                ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                ->title(__(':naam is opgeslagen', ['naam' => Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title()]))
                                 ->success()
                                 ->send();
                         });
@@ -125,7 +125,7 @@ class EditTranslation extends Page implements HasSchemas
                             $translation->save();
                             Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                             Notification::make()
-                                ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                ->title(__(':naam is opgeslagen', ['naam' => Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title()]))
                                 ->success()
                                 ->send();
                         });
@@ -140,7 +140,7 @@ class EditTranslation extends Page implements HasSchemas
                         ->default($translation->default)
                         ->helperText($helperText ?? '')
                         ->hintAction(Action::make('save')
-                            ->label('Media opslaan')
+                            ->label(__('Media opslaan'))
                             ->action(function ($state, $component) {
                                 $explode = explode('_', $component->getStatePath());
                                 $translationId = $explode[1];
@@ -150,7 +150,7 @@ class EditTranslation extends Page implements HasSchemas
                                 $translation->save();
                                 Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                                 Notification::make()
-                                    ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                    ->title(__(':naam is opgeslagen', ['naam' => Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title()]))
                                     ->success()
                                     ->send();
                             }));
@@ -179,7 +179,7 @@ class EditTranslation extends Page implements HasSchemas
                             $translation->save();
                             Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                             Notification::make()
-                                ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                ->title(__(':naam is opgeslagen', ['naam' => Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title()]))
                                 ->success()
                                 ->send();
                         });
@@ -199,7 +199,7 @@ class EditTranslation extends Page implements HasSchemas
                             $translation->save();
                             Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                             Notification::make()
-                                ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                                ->title(__(':naam is opgeslagen', ['naam' => Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title()]))
                                 ->success()
                                 ->send();
                         });
@@ -237,7 +237,7 @@ class EditTranslation extends Page implements HasSchemas
                     $translation->save();
                     Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                     Notification::make()
-                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                        ->title(__(':naam is opgeslagen', ['naam' => Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title()]))
                         ->success()
                         ->send();
                 }
@@ -255,7 +255,7 @@ class EditTranslation extends Page implements HasSchemas
                     $translation->save();
                     Cache::forget(Str::slug($translation->name . $translation->tag . $locale . $translation->type));
                     Notification::make()
-                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " is opgeslagen")
+                        ->title(__(':naam is opgeslagen', ['naam' => Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title()]))
                         ->success()
                         ->send();
                 }
@@ -284,7 +284,7 @@ class EditTranslation extends Page implements HasSchemas
         return
             Action::make('translateTab')
                 ->icon('heroicon-m-language')
-                ->label('Vertaal tab')
+                ->label(__('Vertaal tab'))
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
                 ->schema(array_merge([
                     Select::make('from_locale')
@@ -292,15 +292,15 @@ class EditTranslation extends Page implements HasSchemas
                         ->preload()
                         ->searchable()
                         ->required()
-                        ->label('Vanaf taal'),
+                        ->label(__('Vanaf taal')),
                     Select::make('to_locales')
                         ->options($allLocales)
                         ->preload()
                         ->searchable()
                         ->default(collect($allLocales)->keys()->except([app()->getLocale()])->toArray())
                         ->required()
-                        ->helperText('Zorg dat je niet de taal kiest waar het vandaag vertaald wordt')
-                        ->label('Naar talen')
+                        ->helperText(__('Zorg dat je niet de taal kiest waar het vandaag vertaald wordt'))
+                        ->label(__('Naar talen'))
                         ->multiple(),
                 ], $translationSchema))
                 ->action(function (array $data) {
@@ -316,7 +316,7 @@ class EditTranslation extends Page implements HasSchemas
                     }
 
                     Notification::make()
-                        ->title("De tab wordt vertaald")
+                        ->title(__("De tab wordt vertaald"))
                         ->success()
                         ->send();
                 });
@@ -327,7 +327,7 @@ class EditTranslation extends Page implements HasSchemas
         return
             Action::make('translate')
                 ->icon('heroicon-m-language')
-                ->label('Vertaal')
+                ->label(__('Vertaal'))
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
                 ->schema([
                     Select::make('locales')
@@ -336,7 +336,7 @@ class EditTranslation extends Page implements HasSchemas
                         ->searchable()
                         ->default(collect($otherLocales)->keys()->toArray())
                         ->required()
-                        ->label('Talen')
+                        ->label(__('Talen'))
                         ->multiple(),
                 ])
                 ->action(function (array $data, $livewire) use ($locale) {
@@ -355,7 +355,7 @@ class EditTranslation extends Page implements HasSchemas
                     //                    }
 
                     Notification::make()
-                        ->title(Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title() . " wordt vertaald")
+                        ->title(__(':naam wordt vertaald', ['naam' => Str::of($translation->name)->replace('_', ' ')->replace('-', ' ')->title()]))
                         ->success()
                         ->send();
                 });

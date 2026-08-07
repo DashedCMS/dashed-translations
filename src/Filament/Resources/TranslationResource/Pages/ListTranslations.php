@@ -61,7 +61,7 @@ class ListTranslations extends ListRecords
 
         foreach ($tabs as $tab) {
             $translationSchema[] = Toggle::make('tabs.' . $tab)
-                ->label('Vertaal tab ' . Str::of($tab)->replace('_', ' ')->replace('-', ' ')->title())
+                ->label(__('Vertaal tab :naam', ['naam' => Str::of($tab)->replace('_', ' ')->replace('-', ' ')->title()]))
                 ->default(true);
         }
 
@@ -74,7 +74,7 @@ class ListTranslations extends ListRecords
         return
             \Filament\Actions\Action::make('translateEverything')
                 ->icon('heroicon-m-language')
-                ->label('Vertaal alles')
+                ->label(__('Vertaal alles'))
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
                 ->schema(array_merge([
                     Select::make('from_locale')
@@ -82,15 +82,15 @@ class ListTranslations extends ListRecords
                         ->preload()
                         ->searchable()
                         ->required()
-                        ->label('Vanaf taal'),
+                        ->label(__('Vanaf taal')),
                     Select::make('to_locales')
                         ->options($allLocales)
                         ->preload()
                         ->searchable()
 //                        ->default(collect($allLocales)->keys()->toArray())
                         ->required()
-                        ->helperText('Zorg dat je niet de taal kiest waar het vandaag vertaald wordt')
-                        ->label('Naar talen')
+                        ->helperText(__('Zorg dat je niet de taal kiest waar het vandaag vertaald wordt'))
+                        ->label(__('Naar talen'))
                         ->multiple(),
                 ], $translationSchema))
                 ->action(function (array $data) use ($tabs) {
@@ -111,7 +111,7 @@ class ListTranslations extends ListRecords
                     }
 
                     Notification::make()
-                        ->title("Alles wordt vertaald")
+                        ->title(__("Alles wordt vertaald"))
                         ->success()
                         ->send();
                 });

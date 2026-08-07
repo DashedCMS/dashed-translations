@@ -51,22 +51,22 @@ class AutomatedTranslationStringResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Vertaling')
+            Section::make(__('Vertaling'))
                 ->columns(2)
                 ->schema([
                     TextInput::make('from_locale')
-                        ->label('Van taal')
+                        ->label(__('Van taal'))
                         ->disabled(),
                     TextInput::make('to_locale')
-                        ->label('Naar taal')
+                        ->label(__('Naar taal'))
                         ->disabled(),
                     Textarea::make('from_string')
-                        ->label('Bron-tekst')
+                        ->label(__('Bron-tekst'))
                         ->rows(3)
                         ->columnSpanFull()
                         ->disabled(),
                     Textarea::make('to_string')
-                        ->label('Vertaalde tekst')
+                        ->label(__('Vertaalde tekst'))
                         ->rows(3)
                         ->columnSpanFull()
                         ->disabled(),
@@ -79,34 +79,34 @@ class AutomatedTranslationStringResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')
-                    ->label('ID')
+                    ->label(__('ID'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('from_locale')
-                    ->label('Van')
+                    ->label(__('Van'))
                     ->formatStateUsing(fn ($state) => strtoupper($state))
                     ->sortable(),
                 TextColumn::make('to_locale')
-                    ->label('Naar')
+                    ->label(__('Naar'))
                     ->formatStateUsing(fn ($state) => strtoupper($state))
                     ->sortable(),
                 TextColumn::make('from_string')
-                    ->label('Bron')
+                    ->label(__('Bron'))
                     ->limit(60)
                     ->tooltip(fn ($record) => $record->from_string)
                     ->searchable(),
                 TextColumn::make('to_string')
-                    ->label('Vertaling')
+                    ->label(__('Vertaling'))
                     ->limit(60)
                     ->tooltip(fn ($record) => $record->to_string)
                     ->searchable()
-                    ->placeholder('- nog niet vertaald -'),
+                    ->placeholder(__('- nog niet vertaald -')),
                 IconColumn::make('translated')
-                    ->label('Vertaald')
+                    ->label(__('Vertaald'))
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('updated_at')
-                    ->label('Bijgewerkt')
+                    ->label(__('Bijgewerkt'))
                     ->dateTime('d-m-Y H:i')
                     ->sortable()
                     ->toggleable(),
@@ -114,32 +114,32 @@ class AutomatedTranslationStringResource extends Resource
             ->defaultSort('updated_at', 'desc')
             ->filters([
                 SelectFilter::make('from_locale')
-                    ->label('Van taal')
+                    ->label(__('Van taal'))
                     ->options(fn () => AutomatedTranslationString::query()
                         ->distinct()
                         ->pluck('from_locale', 'from_locale')
                         ->map(fn ($v) => strtoupper($v))
                         ->all()),
                 SelectFilter::make('to_locale')
-                    ->label('Naar taal')
+                    ->label(__('Naar taal'))
                     ->options(fn () => AutomatedTranslationString::query()
                         ->distinct()
                         ->pluck('to_locale', 'to_locale')
                         ->map(fn ($v) => strtoupper($v))
                         ->all()),
                 TernaryFilter::make('translated')
-                    ->label('Vertaald'),
+                    ->label(__('Vertaald')),
             ])
             ->recordActions([
                 ViewAction::make(),
                 Action::make('resetTranslation')
-                    ->label('Reset')
+                    ->label(__('Reset'))
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
                     ->requiresConfirmation()
-                    ->modalHeading('Vertaling resetten')
-                    ->modalDescription('Deze gecachede vertaling wordt verwijderd, zodat de volgende vertaal-run de externe API (DeepL e.d.) opnieuw raadpleegt.')
-                    ->modalSubmitActionLabel('Ja, reset deze vertaling')
+                    ->modalHeading(__('Vertaling resetten'))
+                    ->modalDescription(__('Deze gecachede vertaling wordt verwijderd, zodat de volgende vertaal-run de externe API (DeepL e.d.) opnieuw raadpleegt.'))
+                    ->modalSubmitActionLabel(__('Ja, reset deze vertaling'))
                     ->action(function (AutomatedTranslationString $record) {
                         $record->update([
                             'to_string' => null,
@@ -152,23 +152,23 @@ class AutomatedTranslationStringResource extends Resource
                         );
 
                         Notification::make()
-                            ->title('Vertaling gereset')
-                            ->body('Volgende vertaal-run raadpleegt de externe API opnieuw.')
+                            ->title(__('Vertaling gereset'))
+                            ->body(__('Volgende vertaal-run raadpleegt de externe API opnieuw.'))
                             ->success()
                             ->send();
                     }),
                 DeleteAction::make()
-                    ->label('Verwijder'),
+                    ->label(__('Verwijder')),
             ])
             ->toolbarActions([
                 BulkAction::make('resetTranslations')
-                    ->label('Geselecteerde resetten')
+                    ->label(__('Geselecteerde resetten'))
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
                     ->requiresConfirmation()
-                    ->modalHeading('Geselecteerde vertalingen resetten')
-                    ->modalDescription('De vertalingen worden uit de cache verwijderd. De volgende vertaal-run raadpleegt de externe API (DeepL e.d.) opnieuw voor deze regels.')
-                    ->modalSubmitActionLabel('Ja, reset alle geselecteerde')
+                    ->modalHeading(__('Geselecteerde vertalingen resetten'))
+                    ->modalDescription(__('De vertalingen worden uit de cache verwijderd. De volgende vertaal-run raadpleegt de externe API (DeepL e.d.) opnieuw voor deze regels.'))
+                    ->modalSubmitActionLabel(__('Ja, reset alle geselecteerde'))
                     ->action(function (Collection $records) {
                         $ids = $records->pluck('id')->all();
 
@@ -182,8 +182,8 @@ class AutomatedTranslationStringResource extends Resource
                             ->update(['replaced' => false]);
 
                         Notification::make()
-                            ->title(count($ids) . ' vertalingen gereset')
-                            ->body('Volgende vertaal-run raadpleegt de externe API opnieuw.')
+                            ->title(__(':aantal vertalingen gereset', ['aantal' => count($ids)]))
+                            ->body(__('Volgende vertaal-run raadpleegt de externe API opnieuw.'))
                             ->success()
                             ->send();
                     })
