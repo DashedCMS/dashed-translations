@@ -2,14 +2,14 @@
 
 namespace Dashed\DashedTranslations;
 
+use Livewire\Livewire;
+use Illuminate\Support\Facades\Gate;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Dashed\DashedTranslations\Commands\RemoveUnusedTranslations;
 use Dashed\DashedTranslations\Commands\RepairTranslationStrings;
 use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\Widgets\AutomatedTranslationStats;
-use Illuminate\Support\Facades\Gate;
-use Livewire\Livewire;
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class DashedTranslationsServiceProvider extends PackageServiceProvider
 {
@@ -45,6 +45,12 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
             'edit_translation' => 'Vertalingen bewerken',
             'edit_automated_translation_progress' => 'Vertalingsvoortgang bewerken',
         ]);
+
+        // Eigen navigatiegroep, zodat de drie vertaalschermen niet meer tussen de
+        // content-items staan. Guarded voor oudere dashed-core versies.
+        if (method_exists(cms(), 'registerNavigationGroup')) {
+            cms()->registerNavigationGroup('Vertalingen', 75);
+        }
 
         cms()->registerResourceDocs(
             resource: \Dashed\DashedTranslations\Filament\Resources\TranslationResource::class,

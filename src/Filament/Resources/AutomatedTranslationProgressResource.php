@@ -2,22 +2,22 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources;
 
+use UnitEnum;
 use BackedEnum;
-use Dashed\DashedTranslations\Classes\AutomatedTranslation;
-use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\ListAutomatedTranslationProgress;
-use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
-use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Filament\Tables\Table;
 use Filament\Actions\Action;
+use Filament\Schemas\Schema;
 use Filament\Actions\BulkAction;
+use Filament\Resources\Resource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Notifications\Notification;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
-use UnitEnum;
+use Dashed\DashedTranslations\Classes\AutomatedTranslation;
+use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\ListAutomatedTranslationProgress;
 
 class AutomatedTranslationProgressResource extends Resource
 {
@@ -26,7 +26,8 @@ class AutomatedTranslationProgressResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-language';
-    protected static string | UnitEnum | null $navigationGroup = 'Content';
+    protected static string | UnitEnum | null $navigationGroup = 'Vertalingen';
+    protected static ?int $navigationSort = 20;
     protected static ?string $navigationLabel = 'Automatische vertaling';
     protected static ?string $label = 'Vertaling';
     protected static ?string $pluralLabel = 'Automatische vertalingen';

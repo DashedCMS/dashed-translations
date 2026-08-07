@@ -2,35 +2,35 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources;
 
+use UnitEnum;
 use BackedEnum;
-use Dashed\DashedTranslations\Classes\AutomatedTranslation;
-use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationStringResource\Pages\ListAutomatedTranslationStrings;
-use Dashed\DashedTranslations\Models\AutomatedTranslationString;
+use Filament\Tables\Table;
 use Filament\Actions\Action;
+use Filament\Schemas\Schema;
 use Filament\Actions\BulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Resource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
-use Filament\Resources\Resource;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Section;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
-use UnitEnum;
+use Dashed\DashedTranslations\Classes\AutomatedTranslation;
+use Dashed\DashedTranslations\Models\AutomatedTranslationString;
+use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationStringResource\Pages\ListAutomatedTranslationStrings;
 
 class AutomatedTranslationStringResource extends Resource
 {
     protected static ?string $model = AutomatedTranslationString::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
-    protected static string|UnitEnum|null $navigationGroup = 'Content';
+    protected static string|UnitEnum|null $navigationGroup = 'Vertalingen';
     protected static ?string $navigationLabel = 'Vertalings-cache';
     protected static ?string $label = 'Cached vertaling';
     protected static ?string $pluralLabel = 'Cached vertalingen';
