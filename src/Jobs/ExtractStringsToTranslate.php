@@ -98,6 +98,52 @@ class ExtractStringsToTranslate implements ShouldQueue
     //        }
     //    }
 
+    /**
+     * De sleutels die in deze kolom niet naar de vertaler mogen.
+     *
+     * De vaste sleutels horen bij de structuur van een builder-blok en gelden
+     * overal. De lijst die een project zelf instelt geldt alleen voor kolommen
+     * die builder-inhoud bevatten: daar beschermt hij sleutels als 'name' en
+     * 'slug', die een blok identificeren in plaats van iets te tonen. In een
+     * kolom met gewone inhoud betekent dezelfde sleutel juist wél tekst - denk
+     * aan de opties van een keuzeveld, opgeslagen als [['name' => '...']] -
+     * en knijpt de lijst de kolom leeg: er viel dan niets meer te vertalen.
+     *
+     * @return array<int, string>
+     */
+    private function ignorableKeys(): array
+    {
+        $fixedKeys = ['type', 'url', 'icon', 'background'];
+
+        if ($this->columnHoldsPlainContent()) {
+            return $fixedKeys;
+        }
+
+        return array_merge($fixedKeys, (array) cms()->builder('ignorableKeysForTranslations'));
+    }
+
+    /**
+     * Of het model deze kolom heeft aangemeld als gewone inhoud in plaats van
+     * builder-inhoud, via:
+     *
+     *     cms()->builder('plainContentColumnsForTranslations', [
+     *         FormField::class => ['options', 'images'],
+     *     ]);
+     *
+     * De vergelijking gaat via instanceof, zodat een project dat een
+     * Dashed-model uitbreidt de registratie van de package erft.
+     */
+    private function columnHoldsPlainContent(): bool
+    {
+        foreach ((array) cms()->builder('plainContentColumnsForTranslations') as $model => $columns) {
+            if ($this->model instanceof $model && in_array($this->column, (array) $columns, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private function searchAndTranslate(&$array, $parentKeys = [])
     {
         foreach ($array as $key => &$value) {
@@ -112,7 +158,7 @@ class ExtractStringsToTranslate implements ShouldQueue
                     $currentKeys = array_merge($parentKeys, [$value['type']]);
                 }
                 $this->searchAndTranslate($value, $currentKeys);
-            } elseif (! str($key)->contains(array_merge(['type', 'url', 'icon', 'background'], cms()->builder('ignorableKeysForTranslations'))) && ! is_numeric($value) && ! is_int($value)) {
+            } elseif (! str($key)->contains($this->ignorableKeys()) && ! is_numeric($value) && ! is_int($value)) {
                 $builderBlock = $this->matchBuilderBlock($key, $parentKeys, cms()->builder('blocks')) || $this->matchCustomBlock($key, $parentKeys, cms()->builder($this->attributes['customBlock'] ?? 'blocks'));
                 if ($builderBlock && ($builderBlock instanceof Select || $builderBlock instanceof Toggle || $builderBlock instanceof FileUpload)) {
                     continue;

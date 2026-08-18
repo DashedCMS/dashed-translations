@@ -2,6 +2,19 @@
 
 All notable changes to `dashed-translations` will be documented in this file.
 
+## 4.5.0 - 2026-08-18
+
+- Fix: de door een project ingestelde `ignorableKeysForTranslations` knijpt geen kolommen met gewone inhoud meer leeg. Die lijst beschermt de structuur-sleutels van builder-blokken, maar werd op élke kolom toegepast en matcht op substring. Vrijwel elk project zet er `name` op, dus een repeater die zijn waarden als `[['name' => '...']]` opslaat — de opties van een keuze-veld bijvoorbeeld — leverde geen enkele te vertalen tekst op: de doeltaal bleef leeg en viel terug op de brontaal, ook nadat elke andere kolom al vertaald was.
+- Nieuw: een model kan zulke kolommen aanmelden, waarna alleen de vaste structuur-sleutels (`type`, `url`, `icon`, `background`) blijven gelden:
+
+  ```php
+  cms()->builder('plainContentColumnsForTranslations', [
+      FormField::class => ['options', 'images'],
+  ]);
+  ```
+
+  De vergelijking gaat via `instanceof`, dus een project dat een Dashed-model uitbreidt erft de registratie van de package. Zonder registratie verandert er niets.
+
 ## 4.2.8 - 2026-07-01
 
 - Fix: the first sentence of a translated content block could stay in the source language while the rest of the block translated correctly. A cached translation string that differed from the content by only trailing/leading whitespace was reused on lookup (MySQL's `=` ignores trailing spaces), but the byte-exact `str_replace` write-back in `AutomatedTranslationProgress::recursiveReplace()` then failed to match, so the source text was never overwritten. Whole content nodes are now matched whitespace-insensitively.
