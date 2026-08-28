@@ -2,16 +2,16 @@
 
 namespace Dashed\DashedTranslations\Jobs;
 
-use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
-use Dashed\DashedTranslations\Models\AutomatedTranslationString;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
+use Dashed\DashedTranslations\Models\AutomatedTranslationString;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 
 class ReplaceStringsInModel implements ShouldQueue
 {

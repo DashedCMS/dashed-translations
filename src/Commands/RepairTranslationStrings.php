@@ -2,9 +2,9 @@
 
 namespace Dashed\DashedTranslations\Commands;
 
+use Illuminate\Console\Command;
 use Dashed\DashedTranslations\Jobs\TranslateString;
 use Dashed\DashedTranslations\Models\AutomatedTranslationString;
-use Illuminate\Console\Command;
 
 class RepairTranslationStrings extends Command
 {

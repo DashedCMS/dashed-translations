@@ -2,16 +2,16 @@
 
 namespace Dashed\DashedTranslations\Models;
 
-use Dashed\DashedCore\Classes\Caching\CacheInvalidator;
-use Dashed\DashedCore\Classes\Sites;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Dashed\DashedCore\Classes\Sites;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Dashed\DashedCore\Classes\Caching\CacheInvalidator;
 
 class Translation extends Model
 {
