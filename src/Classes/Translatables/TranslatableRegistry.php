@@ -79,10 +79,35 @@ class TranslatableRegistry
     }
 
     /**
-     * Hangt de listeners aan de geregistreerde modellen. Wordt in Task 4
-     * gevuld; hier alvast aanwezig zodat de provider hem kan aanroepen.
+     * Hangt de listeners aan. Elke boot opnieuw, zonder statische
+     * "al gedaan"-vlag: die overleeft in tests de herstart van de applicatie
+     * en hangt de listener dan aan een dispatcher die niet meer bestaat.
      */
     public function boot(): void
     {
+        foreach ($this->entries as $entry) {
+            $class = $entry->modelClass();
+
+            if (! class_exists($class)) {
+                continue;
+            }
+
+            $class::saved(fn (Model $model) => rescue(fn () => TranslationStateUpdater::refresh($model), report: false));
+            $class::deleted(function (Model $model) {
+                if (method_exists($model, 'isForceDeleting') && ! $model->isForceDeleting()) {
+                    return;
+                }
+
+                rescue(fn () => TranslationStateUpdater::forget($model), report: false);
+            });
+
+            foreach ($entry->children() as $definition) {
+                $childClass = $definition['class'];
+
+                if (class_exists($childClass)) {
+                    $childClass::saved(fn (Model $child) => rescue(fn () => TranslationStateUpdater::refresh($child), report: false));
+                }
+            }
+        }
     }
 }

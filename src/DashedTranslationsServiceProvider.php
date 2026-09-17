@@ -41,6 +41,10 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
 
     public function bootingPackage()
     {
+        // Na de boot van alle providers, zodat de registraties van de andere
+        // pakketten (in hun bootingPackage) er al in staan.
+        $this->app->booted(fn () => app(\Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry::class)->boot());
+
         Livewire::component('automated-translation-stats', AutomatedTranslationStats::class);
 
         Gate::policy(\Dashed\DashedTranslations\Models\Translation::class, \Dashed\DashedTranslations\Policies\TranslationPolicy::class);

@@ -89,6 +89,48 @@ class TranslationStateUpdater
     }
 
     /**
+     * Stempel vanuit de vertaalpijplijn. translateModel() stuurt model,
+     * metadata en customBlocks als drie losse jobs; elk stempelt de ouder.
+     * Zolang er voor de ouder of een kind nog een progress-rij loopt voor
+     * deze taal, stempelt de laatste; ReplaceStringsInModel wacht zelf al
+     * op zijn eigen model, dit is het vangnet voor de andere twee.
+     */
+    public static function stampFromProgress(Model $model, string $fromLocale, string $toLocale): void
+    {
+        if (! $resolved = self::resolve($model)) {
+            return;
+        }
+
+        [$parent, $registration] = $resolved;
+        self::reloadChildren($parent, $registration);
+
+        $pending = \Dashed\DashedTranslations\Models\AutomatedTranslationProgress::query()
+            ->where('to_locale', $toLocale)
+            ->whereNotIn('status', ['finished', 'error'])
+            ->where(function ($query) use ($parent, $registration) {
+                $query->where(fn ($q) => $q->where('model_type', $parent::class)->where('model_id', $parent->getKey()));
+
+                foreach (array_keys($registration->children()) as $relation) {
+                    $related = $parent->{$relation};
+                    $rows = $related instanceof \Illuminate\Support\Collection ? $related : collect($related ? [$related] : []);
+
+                    foreach ($rows as $child) {
+                        $query->orWhere(fn ($q) => $q->where('model_type', $child::class)->where('model_id', $child->getKey()));
+                    }
+                }
+            })
+            ->exists();
+
+        if ($pending) {
+            self::refresh($parent);
+
+            return;
+        }
+
+        self::stamp($parent, $fromLocale, $toLocale);
+    }
+
+    /**
      * Nulmeting: vergelijk, en stempel alleen wat compleet is én nog nooit
      * gestempeld. Een bestaande stempel blijft staan, anders zou een tweede
      * ronde verouderde items weer op "vertaald" zetten.

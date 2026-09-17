@@ -158,6 +158,15 @@ class ReplaceStringsInModel implements ShouldQueue
             }
 
             $model->saveQuietly();
+
+            rescue(
+                fn () => \Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater::stampFromProgress(
+                    $model,
+                    $automatedTranslationProgress->from_locale,
+                    $automatedTranslationProgress->to_locale
+                ),
+                report: false
+            );
         }
     }
 
