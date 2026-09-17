@@ -12,13 +12,6 @@ use Dashed\DashedTranslations\Models\TranslationState;
  * De enige plek die dashed__translation_states schrijft. refresh() vergelijkt
  * de huidige inhoud met de laatste stempel; stamp() zet een nieuwe stempel.
  * Alleen stamp() kan "vertaald" maken.
- *
- * Elke publieke methode ruimt aan het eind ook zijn eigen relatiecache weer
- * op: ContentFingerprint leest onderweg de kindrelaties van het model en
- * Eloquent cachet die lezing, inclusief een lege uitkomst. Zonder die tweede
- * reloadChildren()-aanroep blijft een net aangemaakt kind (bijvoorbeeld
- * metadata die pas na stamp() wordt opgeslagen) onzichtbaar voor de
- * aanroeper die hetzelfde modelobject daarna nog gebruikt.
  */
 class TranslationStateUpdater
 {
@@ -69,8 +62,6 @@ class TranslationStateUpdater
         foreach (self::toLocales() as $to) {
             self::refreshOne($model, $registration, $from, $to);
         }
-
-        self::reloadChildren($model, $registration);
     }
 
     public static function stamp(Model $model, string $fromLocale, string $toLocale): void
@@ -95,8 +86,6 @@ class TranslationStateUpdater
             'translated_at' => now(),
             'checked_at' => now(),
         ])->save();
-
-        self::reloadChildren($model, $registration);
     }
 
     /**
@@ -121,8 +110,6 @@ class TranslationStateUpdater
                 self::stamp($model, $from, $to);
             }
         }
-
-        self::reloadChildren($model, $registration);
     }
 
     public static function forget(Model $model): void
