@@ -68,17 +68,35 @@ class TranslationsSettingsPage extends Page implements HasSchemas
             Section::make(__('Automatisch bijwerken'))
                 ->description(__('Elke nacht om 03:00 worden ontbrekende en verouderde vertalingen opnieuw door de vertaler gehaald. Handmatig aangepaste vertalingen worden nooit automatisch overschreven; die zet je zelf opnieuw in gang op het scherm Vertaalstatus.'))
                 ->schema([
+                    // Deze twee velden staan in een sectie die verborgen is
+                    // zolang DeepL uitstaat. Filament laat een verborgen
+                    // component standaard uit getState() vallen, en dat werkt
+                    // door naar de kinderen van een verborgen sectie; zonder
+                    // dehydratedWhenHidden() zou submit() hier stil de
+                    // standaardwaarden (uit, 200) wegschrijven zodra iemand
+                    // opslaat met DeepL uit, en een ingestelde nachtronde
+                    // met een afgestemd plafond verdwijnt dan ongemerkt.
+                    // Daarom staat dehydratedWhenHidden() zowel op de sectie
+                    // zelf als op de twee velden: alleen op de velden was niet
+                    // genoeg, de uitsluiting van de verborgen ouder werkt door
+                    // naar de kinderen. De twee DeepL-velden hierboven
+                    // (deepl_plan, deepl_api_key) hebben dit bewust niet: dat
+                    // is bestaand gedrag buiten deze taak en blijft
+                    // ongewijzigd.
                     Toggle::make('auto_translate_outdated')
-                        ->label(__('Ontbrekende en verouderde vertalingen \'s nachts automatisch bijwerken')),
+                        ->label(__('Ontbrekende en verouderde vertalingen \'s nachts automatisch bijwerken'))
+                        ->dehydratedWhenHidden(),
                     TextInput::make('auto_translate_max_per_run')
                         ->label(__('Maximaal aantal items per nacht'))
                         ->helperText(__('Beperkt het DeepL-verbruik bij een grote catalogus. Wat niet aan de beurt komt, komt de volgende nacht.'))
                         ->numeric()
                         ->minValue(1)
                         ->default(200)
-                        ->required(),
+                        ->required()
+                        ->dehydratedWhenHidden(),
                 ])
-                ->visible(fn (Get $get) => $get('deepl_translations_enabled')),
+                ->visible(fn (Get $get) => $get('deepl_translations_enabled'))
+                ->dehydratedWhenHidden(),
         ])
             ->statePath('data');
     }
