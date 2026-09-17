@@ -32,6 +32,13 @@ final class Translatable
 
     private ?Closure $tag = null;
 
+    /**
+     * De resourceklasse van urlVia(), los bewaard van de closure zodat een
+     * test kan controleren dat de resource ook echt het geregistreerde
+     * model bedient, zonder de closure zelf te hoeven aanroepen.
+     */
+    private ?string $resourceClass = null;
+
     private readonly string $model;
 
     /**
@@ -112,6 +119,8 @@ final class Translatable
      */
     public function urlVia(string $resourceClass): self
     {
+        $this->resourceClass = ltrim($resourceClass, '\\');
+
         return $this->url(fn (Model $record) => class_exists($resourceClass)
             ? rescue(fn () => $resourceClass::getUrl('edit', ['record' => $record]), null, false)
             : null);
@@ -159,6 +168,12 @@ final class Translatable
     public function urlFor(Model $record): ?string
     {
         return $this->url ? ($this->url)($record) : null;
+    }
+
+    /** De resourceklasse doorgegeven aan urlVia(), of null bij een eigen url()/geen url. */
+    public function resourceClass(): ?string
+    {
+        return $this->resourceClass;
     }
 
     public function tagFor(Model $record): ?string
