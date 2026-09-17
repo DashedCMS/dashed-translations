@@ -56,11 +56,19 @@ class TranslationStateUpdater
         }
 
         [$model, $registration] = $resolved;
-        self::reloadChildren($model, $registration);
-        $from = self::fromLocale();
+        ContentFingerprint::forgetChildren($model);
 
-        foreach (self::toLocales() as $to) {
-            self::refreshOne($model, $registration, $from, $to);
+        try {
+            $from = self::fromLocale();
+
+            foreach (self::toLocales() as $to) {
+                self::refreshOne($model, $registration, $from, $to);
+            }
+        } finally {
+            // Niets van deze aanroep mag blijven hangen: een lang levende
+            // queue worker verwerkt hierna misschien duizenden andere
+            // modellen, en die mogen dit geheugen niet zien groeien.
+            ContentFingerprint::forgetChildren($model);
         }
     }
 
@@ -71,21 +79,25 @@ class TranslationStateUpdater
         }
 
         [$model, $registration] = $resolved;
-        self::reloadChildren($model, $registration);
+        ContentFingerprint::forgetChildren($model);
 
-        $state = self::row($model, $fromLocale, $toLocale);
-        $complete = ContentFingerprint::isComplete($model, $fromLocale, $toLocale, $registration);
+        try {
+            $state = self::row($model, $fromLocale, $toLocale);
+            $complete = ContentFingerprint::isComplete($model, $fromLocale, $toLocale, $registration);
 
-        $state->fill([
-            'source_hash' => ContentFingerprint::for($model, $fromLocale, $registration),
-            'target_hash' => ContentFingerprint::for($model, $toLocale, $registration),
-            'source_changed' => false,
-            'target_changed' => false,
-            'complete' => $complete,
-            'status' => TranslationState::deriveStatus($complete, true, false, false),
-            'translated_at' => now(),
-            'checked_at' => now(),
-        ])->save();
+            $state->fill([
+                'source_hash' => ContentFingerprint::for($model, $fromLocale, $registration),
+                'target_hash' => ContentFingerprint::for($model, $toLocale, $registration),
+                'source_changed' => false,
+                'target_changed' => false,
+                'complete' => $complete,
+                'status' => TranslationState::deriveStatus($complete, true, false, false),
+                'translated_at' => now(),
+                'checked_at' => now(),
+            ])->save();
+        } finally {
+            ContentFingerprint::forgetChildren($model);
+        }
     }
 
     /**
@@ -102,32 +114,33 @@ class TranslationStateUpdater
         }
 
         [$parent, $registration] = $resolved;
-        self::reloadChildren($parent, $registration);
+        ContentFingerprint::forgetChildren($parent);
 
-        $pending = \Dashed\DashedTranslations\Models\AutomatedTranslationProgress::query()
-            ->where('to_locale', $toLocale)
-            ->whereNotIn('status', ['finished', 'error'])
-            ->where(function ($query) use ($parent, $registration) {
-                $query->where(fn ($q) => $q->where('model_type', $parent::class)->where('model_id', $parent->getKey()));
+        try {
+            $pending = \Dashed\DashedTranslations\Models\AutomatedTranslationProgress::query()
+                ->where('to_locale', $toLocale)
+                ->whereNotIn('status', ['finished', 'error'])
+                ->where(function ($query) use ($parent, $registration) {
+                    $query->where(fn ($q) => $q->where('model_type', $parent::class)->where('model_id', $parent->getKey()));
 
-                foreach (array_keys($registration->children()) as $relation) {
-                    $related = $parent->{$relation};
-                    $rows = $related instanceof \Illuminate\Support\Collection ? $related : collect($related ? [$related] : []);
-
-                    foreach ($rows as $child) {
-                        $query->orWhere(fn ($q) => $q->where('model_type', $child::class)->where('model_id', $child->getKey()));
+                    foreach (array_keys($registration->children()) as $relation) {
+                        foreach (ContentFingerprint::childrenOf($parent, $relation) as $child) {
+                            $query->orWhere(fn ($q) => $q->where('model_type', $child::class)->where('model_id', $child->getKey()));
+                        }
                     }
-                }
-            })
-            ->exists();
+                })
+                ->exists();
 
-        if ($pending) {
-            self::refresh($parent);
+            if ($pending) {
+                self::refresh($parent);
 
-            return;
+                return;
+            }
+
+            self::stamp($parent, $fromLocale, $toLocale);
+        } finally {
+            ContentFingerprint::forgetChildren($parent);
         }
-
-        self::stamp($parent, $fromLocale, $toLocale);
     }
 
     /**
@@ -142,15 +155,20 @@ class TranslationStateUpdater
         }
 
         [$model, $registration] = $resolved;
-        self::reloadChildren($model, $registration);
-        $from = self::fromLocale();
+        ContentFingerprint::forgetChildren($model);
 
-        foreach (self::toLocales() as $to) {
-            $state = self::refreshOne($model, $registration, $from, $to);
+        try {
+            $from = self::fromLocale();
 
-            if ($state->complete && $state->source_hash === null) {
-                self::stamp($model, $from, $to);
+            foreach (self::toLocales() as $to) {
+                $state = self::refreshOne($model, $registration, $from, $to);
+
+                if ($state->complete && $state->source_hash === null) {
+                    self::stamp($model, $from, $to);
+                }
             }
+        } finally {
+            ContentFingerprint::forgetChildren($model);
         }
     }
 
@@ -186,16 +204,5 @@ class TranslationStateUpdater
             'from_locale' => $from,
             'to_locale' => $to,
         ]);
-    }
-
-    /**
-     * Een kind dat net los is opgeslagen zit nog oud in de relatiecache van
-     * de ouder; gooi die weg zodat de vingerafdruk de nieuwe inhoud ziet.
-     */
-    protected static function reloadChildren(Model $model, Translatable $registration): void
-    {
-        foreach (array_keys($registration->children()) as $relation) {
-            $model->unsetRelation($relation);
-        }
     }
 }

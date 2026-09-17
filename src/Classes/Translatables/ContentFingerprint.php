@@ -15,6 +15,20 @@ use Dashed\DashedTranslations\Models\AutomatedTranslationString;
  */
 class ContentFingerprint
 {
+    /**
+     * Kindrijen per (model, relatie), binnen de levensduur van één publieke
+     * aanroep in TranslationStateUpdater. Zo'n aanroep leest dezelfde
+     * kinderen meerdere keren (isComplete() plus twee keer for(), per
+     * doeltaal), en zonder memo was dat evenzoveel keren een verse query.
+     * De kinderen kunnen binnen die ene aanroep niet veranderen, dus
+     * memoiseren is daar veilig; TranslationStateUpdater roept
+     * forgetChildren() aan bij het begin (en het einde) van elke publieke
+     * methode om te zorgen dat niets hier veroudert of blijft hangen.
+     *
+     * @var array<string, Collection<int, Model>> "Klasse#id#relatie" => rijen
+     */
+    private static array $childrenMemo = [];
+
     public static function for(Model $model, string $locale, Translatable $registration): string
     {
         return hash('sha256', json_encode(self::values($model, $locale, $registration), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
@@ -55,7 +69,7 @@ class ContentFingerprint
         }
 
         foreach ($registration->children() as $relation => $definition) {
-            foreach (self::childRows($model, $relation) as $child) {
+            foreach (self::childrenOf($model, $relation) as $child) {
                 foreach (self::columns($child) as $column) {
                     $values["{$relation}.{$child->getKey()}.{$column}"] = self::normalize($child->getTranslation($column, $locale, false));
                 }
@@ -78,29 +92,60 @@ class ContentFingerprint
     }
 
     /**
-     * Haalt de kinderen altijd vers op, via getResults() en niet via de
-     * magic property. Die laatste cachet het resultaat op $model, en een
-     * vingerafdruk die tijdens Model::saved al vroeg gemaakt wordt (bijvoorbeeld
-     * meteen bij het aanmaken van de ouder, voordat er kinderen bestaan) zou
-     * die lege cache achterlaten. Een latere aanroep op hetzelfde
-     * model-object, ook buiten deze klasse, zou dan een verouderde lege
-     * relatie teruggeven in plaats van de inmiddels aangemaakte kinderen.
+     * Vergeet de gememoiseerde kinderen van dit model. Raakt alleen het eigen
+     * geheugen van deze klasse, nooit de relatiecache van $model zelf: die
+     * cache vullen of strippen was precies de oorspronkelijke bug (een
+     * vingerafdruk die tijdens Model::saved al vroeg gemaakt wordt, voordat
+     * er kinderen bestaan, liet anders een verouderde lege relatie achter op
+     * het model-object van de aanroeper).
+     */
+    public static function forgetChildren(Model $model): void
+    {
+        $prefix = self::memoPrefix($model);
+
+        foreach (array_keys(self::$childrenMemo) as $key) {
+            if (str_starts_with($key, $prefix)) {
+                unset(self::$childrenMemo[$key]);
+            }
+        }
+    }
+
+    /**
+     * De kindrijen van één relatie, gememoiseerd per (model, relatie) voor de
+     * duur van de huidige publieke aanroep in TranslationStateUpdater. Ook
+     * gebruikt door TranslationStateUpdater::stampFromProgress() zelf, zodat
+     * ook die niet nog eens los queryt of de relatiecache van het model
+     * aanraakt.
      *
      * @return Collection<int, Model>
      */
-    private static function childRows(Model $model, string $relation): Collection
+    public static function childrenOf(Model $model, string $relation): Collection
     {
         if (! method_exists($model, $relation)) {
             return collect();
         }
 
-        $related = $model->{$relation}()->getResults();
+        $key = self::memoPrefix($model) . $relation;
 
-        if ($related instanceof Collection) {
-            return $related->sortBy(fn (Model $row) => $row->getKey())->values();
+        if (array_key_exists($key, self::$childrenMemo)) {
+            return self::$childrenMemo[$key];
         }
 
-        return $related instanceof Model ? collect([$related]) : collect();
+        // getResults() en niet de magic property: die laatste cachet het
+        // resultaat op $model zelf, en dat is precies de relatiecache van de
+        // aanroeper die we met opzet niet aanraken.
+        $related = $model->{$relation}()->getResults();
+
+        $rows = $related instanceof Collection
+            ? $related->sortBy(fn (Model $row) => $row->getKey())->values()
+            : ($related instanceof Model ? collect([$related]) : collect());
+
+        return self::$childrenMemo[$key] = $rows;
+    }
+
+    private static function memoPrefix(Model $model): string
+    {
+        return $model::class . '#' . $model->getKey() . '#';
     }
 
     private static function normalize(mixed $value): mixed
