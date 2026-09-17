@@ -2,6 +2,15 @@
 
 All notable changes to `dashed-translations` will be documented in this file.
 
+## 4.6.0 - 2026-09-18
+
+- Nieuw: scherm **Vertaalstatus** (menu Vertalingen, alleen zichtbaar met DeepL aan) met per model en doeltaal de status ontbreekt, vertaald, verouderd of handmatig aangepast, gegroepeerd per soort, met filters op status en taal, een badge Bezig/Fout voor een lopende of mislukte vertaaljob, en rij-, bulk- en twee koptekstacties om opnieuw te vertalen.
+- Nieuw: `TranslatableRegistry` waarin pakketten hun vertaalbare modellen aanmelden (`Translatable::make(...)`), tabel `dashed__translation_states` met een vingerafdruk van bron en doel per model, brontaal en doeltaal, en een `saved`/`deleted`-listener die bronwijzigingen markeert.
+- Nieuw: nachtelijke ronde `dashed:translate-outdated` (03:00), alleen actief met de instelling "Ontbrekende en verouderde vertalingen 's nachts automatisch bijwerken" aan, met een plafond per nacht (`auto_translate_max_per_run`, standaard 200); handmatig aangepaste vertalingen worden nooit automatisch overschreven.
+- Nieuw: `dashed:translation-states:rescan {--baseline}` vergelijkt alle vertaalbare inhoud opnieuw met de laatste stempel en ruimt verweesde statusrijen op (met behoud van rijen die alleen soft-deleted zijn); `--baseline` zet daarna ook de nulmeting in de wachtrij. Een migratie zet die nulmeting bij het uitrollen zelf al in de wachtrij.
+- Gewijzigd: de knop "Bulk vertalen" op de instellingenpagina is vervangen door een verwijzing naar het scherm Vertaalstatus.
+- Vereist na uitrol: `php artisan migrate` (maakt `dashed__translation_states` aan en zet de nulmeting in de wachtrij); de wachtrij moet draaien.
+
 ## 4.5.0 - 2026-08-18
 
 - Fix: de door een project ingestelde `ignorableKeysForTranslations` knijpt geen kolommen met gewone inhoud meer leeg. Die lijst beschermt de structuur-sleutels van builder-blokken, maar werd op élke kolom toegepast en matcht op substring. Vrijwel elk project zet er `name` op, dus een repeater die zijn waarden als `[['name' => '...']]` opslaat — de opties van een keuze-veld bijvoorbeeld — leverde geen enkele te vertalen tekst op: de doeltaal bleef leeg en viel terug op de brontaal, ook nadat elke andere kolom al vertaald was.
