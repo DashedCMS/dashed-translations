@@ -45,6 +45,8 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
         // pakketten (in hun bootingPackage) er al in staan.
         $this->app->booted(fn () => app(\Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry::class)->boot());
 
+        self::registreerVertaalbaren();
+
         Livewire::component('automated-translation-stats', AutomatedTranslationStats::class);
 
         Gate::policy(\Dashed\DashedTranslations\Models\Translation::class, \Dashed\DashedTranslations\Policies\TranslationPolicy::class);
@@ -147,6 +149,26 @@ MARKDOWN,
                 'De gratis DeepL variant heeft een maandelijks tekenlimiet. Houd dat in de gaten als je grote hoeveelheden tekst vertaalt.',
                 'Gebruik de bulk vertaal knop bovenaan deze pagina om bestaande content in een keer mee te nemen.',
             ],
+        );
+    }
+
+    /**
+     * Vaste teksten aanmelden bij het vertaalstatus-overzicht.
+     *
+     * Statisch en apart van bootingPackage(), naar het voorbeeld van
+     * registreerBewaartermijnen(). De __()-aanroepen op het label mogen niet
+     * in registeringPackage() staan: die fase draait voordat de
+     * vertaalservice klaarstaat en zou de hele boot laten klappen.
+     */
+    public static function registreerVertaalbaren(): void
+    {
+        \Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry::register(
+            \Dashed\DashedTranslations\Classes\Translatables\Translatable::make(\Dashed\DashedTranslations\Models\Translation::class)
+                ->label(__('Vaste teksten'))
+                ->group(__('Vaste teksten'))
+                ->name(fn (\Dashed\DashedTranslations\Models\Translation $t) => $t->tag . ': ' . $t->name)
+                ->tag(fn (\Dashed\DashedTranslations\Models\Translation $t) => $t->tag)
+                ->urlVia(\Dashed\DashedTranslations\Filament\Resources\TranslationResource::class)
         );
     }
 }

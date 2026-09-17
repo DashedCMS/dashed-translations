@@ -77,14 +77,24 @@ class ContentFingerprint
         return array_values(array_diff($translatable, $ignorable));
     }
 
-    /** @return Collection<int, Model> */
+    /**
+     * Haalt de kinderen altijd vers op, via getResults() en niet via de
+     * magic property. Die laatste cachet het resultaat op $model, en een
+     * vingerafdruk die tijdens Model::saved al vroeg gemaakt wordt (bijvoorbeeld
+     * meteen bij het aanmaken van de ouder, voordat er kinderen bestaan) zou
+     * die lege cache achterlaten. Een latere aanroep op hetzelfde
+     * model-object, ook buiten deze klasse, zou dan een verouderde lege
+     * relatie teruggeven in plaats van de inmiddels aangemaakte kinderen.
+     *
+     * @return Collection<int, Model>
+     */
     private static function childRows(Model $model, string $relation): Collection
     {
         if (! method_exists($model, $relation)) {
             return collect();
         }
 
-        $related = $model->{$relation};
+        $related = $model->{$relation}()->getResults();
 
         if ($related instanceof Collection) {
             return $related->sortBy(fn (Model $row) => $row->getKey())->values();
