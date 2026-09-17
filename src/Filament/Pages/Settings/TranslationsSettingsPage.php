@@ -11,6 +11,7 @@ use Filament\Forms\Components\Toggle;
 use Dashed\DashedCore\Classes\Locales;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Contracts\HasSchemas;
 use Dashed\DashedCore\Models\Customsetting;
 use Filament\Schemas\Components\Utilities\Get;
@@ -37,6 +38,9 @@ class TranslationsSettingsPage extends Page implements HasSchemas
         $formData["deepl_plan"] = Customsetting::get('deepl_plan', null, 'free');
         $formData["deepl_api_key"] = Customsetting::get('deepl_api_key');
 
+        $formData['auto_translate_outdated'] = (bool) Customsetting::get('auto_translate_outdated');
+        $formData['auto_translate_max_per_run'] = (int) Customsetting::get('auto_translate_max_per_run', null, 200);
+
         $this->form->fill($formData);
     }
 
@@ -60,6 +64,20 @@ class TranslationsSettingsPage extends Page implements HasSchemas
             TextInput::make("deepl_api_key")
                 ->label(__('DeepL API key'))
                 ->required(fn (Get $get) => $get('deepl_translations_enabled'))
+                ->visible(fn (Get $get) => $get('deepl_translations_enabled')),
+            Section::make(__('Automatisch bijwerken'))
+                ->description(__('Elke nacht om 03:00 worden ontbrekende en verouderde vertalingen opnieuw door de vertaler gehaald. Handmatig aangepaste vertalingen worden nooit automatisch overschreven; die zet je zelf opnieuw in gang op het scherm Vertaalstatus.'))
+                ->schema([
+                    Toggle::make('auto_translate_outdated')
+                        ->label(__('Ontbrekende en verouderde vertalingen \'s nachts automatisch bijwerken')),
+                    TextInput::make('auto_translate_max_per_run')
+                        ->label(__('Maximaal aantal items per nacht'))
+                        ->helperText(__('Beperkt het DeepL-verbruik bij een grote catalogus. Wat niet aan de beurt komt, komt de volgende nacht.'))
+                        ->numeric()
+                        ->minValue(1)
+                        ->default(200)
+                        ->required(),
+                ])
                 ->visible(fn (Get $get) => $get('deepl_translations_enabled')),
         ])
             ->statePath('data');
@@ -157,6 +175,8 @@ class TranslationsSettingsPage extends Page implements HasSchemas
             Customsetting::set('deepl_translations_enabled', $this->form->getState()["deepl_translations_enabled"], $site['id']);
             Customsetting::set('deepl_plan', $this->form->getState()["deepl_plan"] ?? 'free', $site['id']);
             Customsetting::set('deepl_api_key', $this->form->getState()["deepl_api_key"] ?? '', $site['id']);
+            Customsetting::set('auto_translate_outdated', (bool) ($this->form->getState()['auto_translate_outdated'] ?? false), $site['id']);
+            Customsetting::set('auto_translate_max_per_run', (int) ($this->form->getState()['auto_translate_max_per_run'] ?? 200), $site['id']);
         }
 
         Notification::make()

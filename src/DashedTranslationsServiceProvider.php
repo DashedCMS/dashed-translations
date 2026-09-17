@@ -9,6 +9,7 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Dashed\DashedTranslations\Commands\RemoveUnusedTranslations;
 use Dashed\DashedTranslations\Commands\RepairTranslationStrings;
 use Dashed\DashedTranslations\Commands\RescanTranslationStates;
+use Dashed\DashedTranslations\Commands\TranslateOutdated;
 use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\Widgets\AutomatedTranslationStats;
 
@@ -33,6 +34,7 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
                 RemoveUnusedTranslations::class,
                 RepairTranslationStrings::class,
                 RescanTranslationStates::class,
+                TranslateOutdated::class,
             ])
             ->hasViews();
 
@@ -46,6 +48,14 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
         // Na de boot van alle providers, zodat de registraties van de andere
         // pakketten (in hun bootingPackage) er al in staan.
         $this->app->booted(fn () => app(\Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry::class)->boot());
+
+        $this->app->booted(function (): void {
+            $schedule = app(\Illuminate\Console\Scheduling\Schedule::class);
+
+            $schedule->command('dashed:translate-outdated')
+                ->dailyAt('03:00')
+                ->withoutOverlapping();
+        });
 
         self::registreerVertaalbaren();
 
