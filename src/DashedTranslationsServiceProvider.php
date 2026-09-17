@@ -60,9 +60,11 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
         self::registreerVertaalbaren();
 
         Livewire::component('automated-translation-stats', AutomatedTranslationStats::class);
+        Livewire::component('translation-state-stats', \Dashed\DashedTranslations\Filament\Resources\TranslationStateResource\Widgets\TranslationStateStats::class);
 
         Gate::policy(\Dashed\DashedTranslations\Models\Translation::class, \Dashed\DashedTranslations\Policies\TranslationPolicy::class);
         Gate::policy(\Dashed\DashedTranslations\Models\AutomatedTranslationProgress::class, \Dashed\DashedTranslations\Policies\AutomatedTranslationProgressPolicy::class);
+        Gate::policy(\Dashed\DashedTranslations\Models\TranslationState::class, \Dashed\DashedTranslations\Policies\TranslationStatePolicy::class);
 
         cms()->registerRolePermissions('Vertalingen', [
             'edit_translation' => 'Vertalingen bewerken',
@@ -128,6 +130,31 @@ MARKDOWN,
                 'Wacht rustig even, grote vertaalklussen kunnen een paar minuten duren.',
                 'Komt een job twee keer met een fout terug? Controleer dan de koppeling met de vertaalprovider.',
                 'Ruim oude afgeronde jobs af en toe op om het overzicht schoon te houden.',
+            ],
+        );
+
+        cms()->registerResourceDocs(
+            resource: \Dashed\DashedTranslations\Filament\Resources\TranslationStateResource::class,
+            title: 'Vertaalstatus',
+            intro: 'Eén overzicht van alle vertaalbare inhoud: pagina\'s, producten, artikelen, formulieren, verzendmethodes, e-mailtemplates en vaste teksten. Per doeltaal zie je of de vertaling ontbreekt, actueel is, verouderd is omdat de brontekst daarna gewijzigd is, of met de hand is aangepast.',
+            sections: [
+                [
+                    'heading' => 'De vier statussen',
+                    'body' => <<<MARKDOWN
+- **Ontbreekt**: een of meer teksten zijn in de doeltaal leeg.
+- **Vertaald**: de vertaling hoort bij de huidige brontekst.
+- **Verouderd**: de brontekst is gewijzigd sinds de laatste vertaling.
+- **Handmatig aangepast**: de doeltaal is na de vertaling met de hand bewerkt. Opnieuw vertalen gooit dat handwerk weg, daarom vraagt het scherm eerst om bevestiging en slaat de nachtelijke ronde zulke items altijd over.
+MARKDOWN,
+                ],
+                [
+                    'heading' => 'Opnieuw vertalen',
+                    'body' => 'Per rij met "Vertaal", per selectie met "Vertaal selectie", of alles in een keer met de knoppen bovenaan. Wil je dat verouderde en ontbrekende vertalingen elke nacht vanzelf bijgewerkt worden, zet dat dan aan bij Instellingen, Vertalingen.',
+                ],
+            ],
+            tips: [
+                'Een bronwijziging wordt pas gemarkeerd als een vertaalbare tekst echt anders is; een prijs- of voorraadwijziging telt niet.',
+                'Controleer een automatische vertaling altijd even, zeker bij merknamen en vakjargon.',
             ],
         );
 

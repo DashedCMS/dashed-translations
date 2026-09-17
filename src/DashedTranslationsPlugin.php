@@ -5,6 +5,7 @@ namespace Dashed\DashedTranslations;
 use Filament\Panel;
 use Filament\Contracts\Plugin;
 use Dashed\DashedTranslations\Filament\Resources\TranslationResource;
+use Dashed\DashedTranslations\Filament\Resources\TranslationStateResource;
 use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationStringResource;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource;
@@ -26,6 +27,7 @@ class DashedTranslationsPlugin implements Plugin
                 TranslationResource::class,
                 AutomatedTranslationProgressResource::class,
                 AutomatedTranslationStringResource::class,
+                TranslationStateResource::class,
             ]);
     }
 

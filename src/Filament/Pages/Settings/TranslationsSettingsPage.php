@@ -8,15 +8,14 @@ use Filament\Schemas\Schema;
 use Dashed\DashedCore\Classes\Sites;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Dashed\DashedCore\Classes\Locales;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Contracts\HasSchemas;
 use Dashed\DashedCore\Models\Customsetting;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Dashed\DashedCore\Traits\HasSettingsPermission;
+use Dashed\DashedTranslations\Filament\Resources\TranslationStateResource;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 
@@ -109,79 +108,11 @@ class TranslationsSettingsPage extends Page implements HasSchemas
     protected function getActions(): array
     {
         return [
-            Action::make('bulkTranslate')
-                ->label(__('Bulk vertalen'))
-                ->icon('heroicon-m-language')
+            Action::make('translationStates')
+                ->label(__('Naar vertaalstatus'))
+                ->icon('heroicon-o-clipboard-document-check')
                 ->visible(AutomatedTranslation::automatedTranslationsEnabled())
-                ->schema(function () {
-                    $form = [];
-
-                    foreach (cms()->builder('routeModels') as $routeModel) {
-                        $form[] = Select::make($routeModel['name'])
-                            ->label(__('Welke :model wil je vertalen?', ['model' => str($routeModel['pluralName'])->lower()]))
-                            ->options(function () use ($routeModel) {
-                                $options = [];
-
-                                foreach ($routeModel['class']::all()->pluck('name', 'id')->toArray() as $id => $name) {
-                                    $options[$id] = $name;
-                                }
-
-                                return $options;
-                            })
-                            ->visible($routeModel['class']::all()->pluck('id')->count())
-                            ->hintActions([
-                                \Filament\Actions\Action::make('select-all')
-                                    ->label(__('Selecteer alles'))
-                                    ->action(function (Set $set) use ($routeModel) {
-                                        $set($routeModel['name'], $routeModel['class']::all()->pluck('id')->toArray());
-                                    }),
-                            ])
-                            ->multiple()
-                            ->preload()
-                            ->searchable();
-                    }
-
-                    $form[] =
-                        Select::make('from_locale')
-                            ->options(Locales::getLocalesArray())
-                            ->default(Locales::getFirstLocale()['id'])
-                            ->preload()
-                            ->searchable()
-                            ->required()
-                            ->reactive()
-                            ->label(__('Vanaf taal'))
-                            ->afterStateUpdated(fn (Set $set, Get $get) => $set('to_locales', collect(Locales::getLocalesArrayWithoutCurrent($get('from_locale')))->keys()->toArray()));
-                    $form[] =
-                        Select::make('to_locales')
-                            ->options(fn (Get $get) => Locales::getLocalesArrayWithoutCurrent($get('from_locale')))
-                            ->default(fn (Get $get) => collect(Locales::getLocalesArrayWithoutCurrent($get('from_locale')))->keys()->toArray())
-                            ->preload()
-                            ->searchable()
-                            ->required()
-                            ->label(__('Naar talen'))
-                            ->reactive()
-                            ->multiple();
-
-                    return $form;
-                })
-                ->action(function (array $data) {
-                    foreach ($data as $model => $results) {
-                        foreach (cms()->builder('routeModels') as $routeModel) {
-                            if ($model == $routeModel['name']) {
-                                foreach ($results as $modelId) {
-                                    AutomatedTranslation::translateModel($routeModel['class']::find($modelId), $data['from_locale'], $data['to_locales']);
-                                }
-                            }
-                        }
-                    }
-
-                    Notification::make()
-                        ->title(__('De vertalingen zijn gestart, dit kan even duren'))
-                        ->warning()
-                        ->send();
-
-                    //                    return redirect
-                }),
+                ->url(TranslationStateResource::getUrl()),
         ];
     }
 
