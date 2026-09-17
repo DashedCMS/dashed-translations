@@ -8,6 +8,7 @@ use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Dashed\DashedTranslations\Commands\RemoveUnusedTranslations;
 use Dashed\DashedTranslations\Commands\RepairTranslationStrings;
+use Dashed\DashedTranslations\Commands\RescanTranslationStates;
 use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\Widgets\AutomatedTranslationStats;
 
@@ -31,6 +32,7 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
             ->hasCommands([
                 RemoveUnusedTranslations::class,
                 RepairTranslationStrings::class,
+                RescanTranslationStates::class,
             ])
             ->hasViews();
 
