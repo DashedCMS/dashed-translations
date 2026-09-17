@@ -15,6 +15,11 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
 {
     public static string $name = 'dashed-translations';
 
+    public function registeringPackage(): void
+    {
+        $this->app->singleton(\Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry::class);
+    }
+
     public function configurePackage(Package $package): void
     {
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
