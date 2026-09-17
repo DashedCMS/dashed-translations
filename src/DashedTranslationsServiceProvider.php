@@ -165,7 +165,7 @@ MARKDOWN,
             sections: [
                 [
                     'heading' => 'Wat kun je hier instellen?',
-                    'body' => 'Je activeert DeepL en vult je API sleutel in. Bovenaan deze pagina vind je een knop om alle bestaande teksten in een keer te laten vertalen via een bulk actie.',
+                    'body' => 'Je activeert DeepL en vult je API sleutel in. Bovenaan deze pagina vind je een knop naar het scherm Vertaalstatus, waar je bestaande content per rij, per selectie of in een keer laat vertalen.',
                 ],
                 [
                     'heading' => 'Hoe haal je je DeepL API sleutel op?',
@@ -175,7 +175,7 @@ MARKDOWN,
 3. Log in op je DeepL account en ga naar **Account > Authentication Key for DeepL API**.
 4. Kopieer de sleutel die je daar ziet staan.
 5. Zet hieronder DeepL aan en plak de sleutel in het API key veld.
-6. Sla op en test de bulk vertaal actie op een enkel item om te zien of het werkt.
+6. Sla op en test op het scherm Vertaalstatus de rijactie "Vertaal" op een enkel item om te zien of het werkt.
 MARKDOWN,
                 ],
             ],
@@ -186,7 +186,7 @@ MARKDOWN,
             tips: [
                 'DeepL vertalingen zijn beta. Loop ze altijd zelf na voor je iets publiceert, vooral bij merknamen en vakjargon.',
                 'De gratis DeepL variant heeft een maandelijks tekenlimiet. Houd dat in de gaten als je grote hoeveelheden tekst vertaalt.',
-                'Gebruik de bulk vertaal knop bovenaan deze pagina om bestaande content in een keer mee te nemen.',
+                'Ga naar het scherm Vertaalstatus om bestaande content in een keer mee te nemen, per rij bij te werken of te zien wat nog ontbreekt.',
             ],
         );
     }

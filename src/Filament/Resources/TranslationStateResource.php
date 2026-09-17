@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Filament\Resources;
 
+use WeakMap;
 use UnitEnum;
 use BackedEnum;
 use Filament\Tables\Table;
@@ -169,8 +170,8 @@ class TranslationStateResource extends Resource
                 Action::make('open')
                     ->label(__('Open'))
                     ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->url(fn (TranslationState $record) => $record->model ? $registry->vind($record->model_type)?->urlFor($record->model) : null)
-                    ->visible(fn (TranslationState $record) => $record->model && $registry->vind($record->model_type)?->urlFor($record->model))
+                    ->url(fn (TranslationState $record) => self::openUrlFor($registry, $record))
+                    ->visible(fn (TranslationState $record) => filled(self::openUrlFor($registry, $record)))
                     ->openUrlInNewTab(),
             ])
             ->toolbarActions([
@@ -235,6 +236,25 @@ class TranslationStateResource extends Resource
 
                 Notification::make()->title(__('Vertalingen gestart, dit kan even duren.'))->warning()->send();
             });
+    }
+
+    /**
+     * urlFor() bouwt een Filament-route-url op, geen kale property-lezing.
+     * De "open"-actie vraagt dit zowel in url() als in visible() op; een
+     * WeakMap per rij-record voorkomt dat dat twee keer gebeurt, zonder een
+     * gewone statische cache die (met spl_object_id-hergebruik in een
+     * langlevend proces) tussen rijen door elkaar zou kunnen lopen.
+     */
+    protected static function openUrlFor(TranslatableRegistry $registry, TranslationState $record): ?string
+    {
+        static $cache = null;
+        $cache ??= new WeakMap();
+
+        if (! isset($cache[$record])) {
+            $cache[$record] = $record->model ? $registry->vind($record->model_type)?->urlFor($record->model) : null;
+        }
+
+        return $cache[$record];
     }
 
     public static function getPages(): array
