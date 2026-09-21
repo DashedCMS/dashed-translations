@@ -7,6 +7,8 @@ namespace Dashed\DashedTranslations\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Dashed\DashedTranslations\Classes\Translatables\Translatable;
+use Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry;
 
 /**
  * Per model, brontaal en doeltaal: hoe de inhoud eruitzag toen er voor het
@@ -41,6 +43,33 @@ class TranslationState extends Model
     public function scopeVoorModel(Builder $query, Model $model): Builder
     {
         return $query->where('model_type', $model::class)->where('model_id', $model->getKey());
+    }
+
+    /**
+     * Alleen de soorten die op dit moment geregistreerd staan.
+     *
+     * Eén definitie voor het scherm, de statswidget, de bevestigingsmodal en
+     * TranslateOutdatedJob, zodat het cijfer in de widget, het cijfer in de
+     * modal en wat de knop daadwerkelijk oppakt over dezelfde rijen gaan.
+     *
+     * Bewust `whereIn` op model_type en niet `whereHasMorph('model', '*')`:
+     * die laatste doet eerst een `select distinct model_type` en zet daarna
+     * per soort een EXISTS-tak neer (hier veertig), op de lijstquery, de
+     * telling én elke poll van vijf seconden. Hij doet bovendien `new $type`
+     * per gevonden soort, dus een project dat een pakket verwijdert krijgt
+     * een fatale "class not found" op het scherm. model_type is de eerste
+     * kolom van de unieke index, dus deze variant is ook nog indexdekkend.
+     * Rijen waarvan het record zelf weg is blijven staan; de kolommen en
+     * acties vangen een lege morph-relatie al op, en de rescan ruimt ze op.
+     */
+    public function scopeInRegister(Builder $query): Builder
+    {
+        $classes = array_map(
+            fn (Translatable $entry) => $entry->modelClass(),
+            app(TranslatableRegistry::class)->alles()
+        );
+
+        return $query->whereIn('model_type', $classes);
     }
 
     /**

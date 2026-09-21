@@ -9,8 +9,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Dashed\DashedTranslations\Models\TranslationState;
-use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Dashed\DashedTranslations\Classes\Translatables\TranslationStarter;
 use Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater;
 
 /**
@@ -52,6 +52,11 @@ class TranslateOutdatedJob implements ShouldQueue
         }
 
         $query = TranslationState::query()
+            // Dezelfde afbakening als het scherm en de statswidget: alleen
+            // soorten die nu geregistreerd staan. Zonder dit vreten rijen van
+            // een verwijderd pakket het plafond op zonder dat er iets vertaald
+            // wordt, en telt de bevestigingsmodal iets anders dan de knop doet.
+            ->inRegister()
             ->where('from_locale', $from)
             ->whereIn('to_locale', $this->toLocales)
             ->whereIn('status', $statuses)
@@ -96,7 +101,11 @@ class TranslateOutdatedJob implements ShouldQueue
                 continue;
             }
 
-            AutomatedTranslation::translateModel($model, $from, array_values(array_unique($item['locales'])));
+            // Via TranslationStarter en niet rechtstreeks via translateModel():
+            // die laatste stuurt alleen het model, zijn metadata en zijn
+            // customBlocks weg, en laat geregistreerde kinderen als
+            // Form->fields onvertaald. Zie TranslationStarter.
+            TranslationStarter::start($model, $from, array_values(array_unique($item['locales'])));
         }
     }
 }

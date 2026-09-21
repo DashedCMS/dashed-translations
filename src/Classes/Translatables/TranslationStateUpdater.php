@@ -82,22 +82,39 @@ class TranslationStateUpdater
         ContentFingerprint::forgetChildren($model);
 
         try {
-            $state = self::row($model, $fromLocale, $toLocale);
-            $complete = ContentFingerprint::isComplete($model, $fromLocale, $toLocale, $registration);
-
-            $state->fill([
-                'source_hash' => ContentFingerprint::for($model, $fromLocale, $registration),
-                'target_hash' => ContentFingerprint::for($model, $toLocale, $registration),
-                'source_changed' => false,
-                'target_changed' => false,
-                'complete' => $complete,
-                'status' => TranslationState::deriveStatus($complete, true, false, false),
-                'translated_at' => now(),
-                'checked_at' => now(),
-            ])->save();
+            self::stampNow($model, $registration, $fromLocale, $toLocale);
         } finally {
             ContentFingerprint::forgetChildren($model);
         }
+    }
+
+    /**
+     * De kern van stamp(), zonder de memo aan te raken. stamp() zelf wikkelt
+     * dit in forgetChildren() aan begin en eind, voor een aanroeper die maar
+     * één stempel zet. baseline() roept dit rechtstreeks aan, meerdere keren
+     * in zijn eigen lus over de doeltalen: zou het via stamp() lopen, dan
+     * wist elke stempel de memo alweer voordat de volgende taal in dezelfde
+     * lus zijn kinderen leest, en werd elke taal na de eerste een verse
+     * query. baseline() beheert zijn eigen forgetChildren() al aan begin en
+     * eind van de hele lus (zie hieronder), dus hier is geen extra staat
+     * nodig die zou kunnen verouderen: de kinderen van dit model veranderen
+     * niet tussen twee doeltalen binnen dezelfde baseline()-aanroep.
+     */
+    private static function stampNow(Model $model, Translatable $registration, string $fromLocale, string $toLocale): void
+    {
+        $state = self::row($model, $fromLocale, $toLocale);
+        $complete = ContentFingerprint::isComplete($model, $fromLocale, $toLocale, $registration);
+
+        $state->fill([
+            'source_hash' => ContentFingerprint::for($model, $fromLocale, $registration),
+            'target_hash' => ContentFingerprint::for($model, $toLocale, $registration),
+            'source_changed' => false,
+            'target_changed' => false,
+            'complete' => $complete,
+            'status' => TranslationState::deriveStatus($complete, true, false, false),
+            'translated_at' => now(),
+            'checked_at' => now(),
+        ])->save();
     }
 
     /**
@@ -164,7 +181,7 @@ class TranslationStateUpdater
                 $state = self::refreshOne($model, $registration, $from, $to);
 
                 if ($state->complete && $state->source_hash === null) {
-                    self::stamp($model, $from, $to);
+                    self::stampNow($model, $registration, $from, $to);
                 }
             }
         } finally {

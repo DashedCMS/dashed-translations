@@ -6,6 +6,7 @@ namespace Dashed\DashedTranslations\Classes\Translatables;
 
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 use Dashed\DashedTranslations\Models\AutomatedTranslationString;
 
 /**
@@ -79,7 +80,16 @@ class ContentFingerprint
         return $values;
     }
 
-    /** @return array<int, string> */
+    /**
+     * Kolommen op de kruising van `translatable` en de tabel: `$translatable`
+     * is met de hand bijgehouden en kan een kolom noemen die er niet (meer)
+     * is. `Form::$translatable = ['mustHaveSomethingDefined']` is zo'n geval
+     * (een bestaande bug in dat model, buiten dit werk om); zonder deze
+     * filter leest `getTranslation()` een niet-bestaande kolom en gooit
+     * Spatie's HasTranslations een exception per vingerafdruk.
+     *
+     * @return array<int, string>
+     */
     public static function columns(Model $model): array
     {
         $translatable = $model->translatable ?? [];
@@ -88,7 +98,24 @@ class ContentFingerprint
             ? cms()->ignorableColumnsForTranslations($model)
             : (array) cms()->builder('ignorableColumnsForTranslations');
 
-        return array_values(array_diff($translatable, $ignorable));
+        return array_values(array_diff(array_intersect($translatable, self::existingColumns($model)), $ignorable));
+    }
+
+    /**
+     * De kolommen die de tabel echt heeft, per tabel gecachet: `Schema::
+     * getColumnListing()` is een schema-query, en zonder cache zou elke
+     * vingerafdruk van elk model op die tabel hem opnieuw doen.
+     *
+     * @var array<string, array<int, string>>
+     */
+    private static array $tableColumnsCache = [];
+
+    /** @return array<int, string> */
+    private static function existingColumns(Model $model): array
+    {
+        $table = $model->getTable();
+
+        return self::$tableColumnsCache[$table] ??= Schema::getColumnListing($table);
     }
 
     /**

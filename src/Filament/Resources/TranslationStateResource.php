@@ -17,15 +17,19 @@ use Illuminate\Support\Collection;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Illuminate\Support\Facades\Schema as DbSchema;
 use Filament\Notifications\Notification;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Dashed\DashedCore\Classes\Locales;
+use Dashed\DashedCore\Models\Customsetting;
 use Dashed\DashedTranslations\Models\TranslationState;
 use Dashed\DashedTranslations\Jobs\TranslateOutdatedJob;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
+use Dashed\DashedCore\Classes\QueryHelpers\TokenizedSearch;
 use Dashed\DashedTranslations\Classes\Translatables\RunningTranslations;
 use Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry;
+use Dashed\DashedTranslations\Classes\Translatables\TranslationStarter;
 use Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater;
 use Dashed\DashedTranslations\Filament\Resources\TranslationStateResource\Pages\ListTranslationStates;
 
@@ -59,7 +63,7 @@ class TranslationStateResource extends Resource
     {
         return parent::getEloquentQuery()
             ->where('from_locale', TranslationStateUpdater::fromLocale())
-            ->whereHasMorph('model', '*');
+            ->inRegister();
     }
 
     public static function table(Table $table): Table
@@ -73,6 +77,7 @@ class TranslationStateResource extends Resource
                     ->getStateUsing(fn (TranslationState $record) => $record->model && ($entry = $registry->vind($record->model_type))
                         ? $entry->nameFor($record->model)
                         : '#' . $record->model_id)
+                    ->searchable(query: fn (Builder $query, string $search) => self::applyNameSearch($query, $registry, $search))
                     ->limit(50),
                 TextColumn::make('model_type')
                     ->label(__('Soort'))
@@ -163,7 +168,12 @@ class TranslationStateResource extends Resource
                             return;
                         }
 
-                        AutomatedTranslation::translateModel($record->model, $record->from_locale, [$record->to_locale]);
+                        // Via TranslationStarter en niet rechtstreeks via
+                        // translateModel(): zie de toelichting op die klasse.
+                        // Zonder dit blijft bijvoorbeeld een formulier met
+                        // velden op 'missing' staan terwijl deze knop
+                        // "gestart" meldt.
+                        TranslationStarter::start($record->model, $record->from_locale, [$record->to_locale]);
 
                         Notification::make()->title(__('Vertaling gestart, dit kan even duren.'))->warning()->send();
                     }),
@@ -215,6 +225,7 @@ class TranslationStateResource extends Resource
             ->requiresConfirmation($includeManual)
             ->modalDescription(function () use ($statuses) {
                 $perTaal = TranslationState::query()
+                    ->inRegister()
                     ->where('from_locale', TranslationStateUpdater::fromLocale())
                     ->whereIn('status', $statuses)
                     ->selectRaw('to_locale, count(*) as aantal')
@@ -232,7 +243,17 @@ class TranslationStateResource extends Resource
                     ->required(),
             ])
             ->action(function (array $data) use ($includeManual) {
-                TranslateOutdatedJob::dispatch($data['to_locales'], $includeManual);
+                // Zelfde plafond als de nachtelijke ronde (dashed:translate-
+                // outdated), uit dezelfde instelling: deze knop heeft geen
+                // stateIds-selectie en kan dus in theorie de hele tabel
+                // pakken, terwijl TranslateOutdatedJob timeout 600 / tries 1
+                // heeft. Zonder plafond loopt de job vast op een grote
+                // catalogus en meldt hij niets meer terug (tries 1, geen
+                // retry). Wat niet aan de beurt komt, komt bij een volgende
+                // druk op de knop of de volgende nacht.
+                $limit = max(1, (int) Customsetting::get('auto_translate_max_per_run', null, '200'));
+
+                TranslateOutdatedJob::dispatch($data['to_locales'], $includeManual, $limit);
 
                 Notification::make()->title(__('Vertalingen gestart, dit kan even duren.'))->warning()->send();
             });
@@ -250,11 +271,44 @@ class TranslationStateResource extends Resource
         static $cache = null;
         $cache ??= new WeakMap();
 
-        if (! isset($cache[$record])) {
+        // offsetExists() en niet isset(): isset() geeft false terug voor een
+        // opgeslagen null, en null is precies de uitkomst die visible() hier
+        // moet kunnen dedupliceren (een resolvebare url() die null oplevert).
+        // Met isset() werd zo'n rij dus toch twee keer uitgerekend.
+        if (! $cache->offsetExists($record)) {
             $cache[$record] = $record->model ? $registry->vind($record->model_type)?->urlFor($record->model) : null;
         }
 
         return $cache[$record];
+    }
+
+    /**
+     * Zoeken op de naam-kolom: de kolom zelf bestaat niet op TranslationState
+     * (die is afgeleid via nameFor()), dus de zoekterm wordt via een
+     * whereHasMorph over de geregistreerde soorten toegepast op hun eigen
+     * name/title-kolom. TokenizedSearch en geen handgeschreven LIKE (zie
+     * CLAUDE.md, "Breed zoeken"). Per soort wordt alleen de kolom gebruikt
+     * die er echt is: Schema::hasColumn() voorkomt een SQL-fout op een model
+     * dat geen 'name' of 'title' heeft.
+     */
+    protected static function applyNameSearch(Builder $query, TranslatableRegistry $registry, string $search): Builder
+    {
+        $classes = array_map(fn ($entry) => $entry->modelClass(), $registry->alles());
+
+        return $query->whereHasMorph('model', $classes, function (Builder $q, string $type) use ($search) {
+            $kolommen = array_values(array_filter(
+                ['name', 'title'],
+                fn ($kolom) => class_exists($type) && DbSchema::hasColumn((new $type())->getTable(), $kolom)
+            ));
+
+            if ($kolommen === []) {
+                $q->whereRaw('1 = 0');
+
+                return;
+            }
+
+            TokenizedSearch::apply($q, $search, $kolommen);
+        });
     }
 
     public static function getPages(): array

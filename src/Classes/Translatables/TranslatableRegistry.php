@@ -53,6 +53,16 @@ class TranslatableRegistry
     /**
      * De geregistreerde ouder van een kind, of null als het model geen kind is
      * of zijn ouder niet (meer) bestaat.
+     *
+     * Roept de parent-closure hooguit één keer aan, op de EERSTE registratie
+     * die deze kindklasse noemt, en niet per registratie die hem noemt. De
+     * closure leest alleen van $child zelf (zijn eigen foreign key of
+     * morph-kolommen), nooit van welke ouder-entry hem aanroept, dus elke
+     * registratie met dezelfde kindklasse zou toch dezelfde ouder opleveren.
+     * `contentChildren()` registreert 'metadata' en 'customBlocks' onder elk
+     * model dat die traits heeft (tientallen), dus zonder deze kortsluiting
+     * deed elke save van één Metadata-rij tientallen identieke find()-queries
+     * in plaats van één.
      */
     public function ouderVan(Model $child): ?Model
     {
@@ -64,9 +74,7 @@ class TranslatableRegistry
 
                 $parent = ($definition['parent'])($child);
 
-                if ($parent instanceof Model && $parent::class === $entry->modelClass()) {
-                    return $parent;
-                }
+                return $parent instanceof Model && $this->vind($parent::class) ? $parent : null;
             }
         }
 
@@ -106,6 +114,23 @@ class TranslatableRegistry
 
                 if (class_exists($childClass)) {
                     $childClass::saved(fn (Model $child) => rescue(fn () => TranslationStateUpdater::refresh($child), report: false));
+
+                    // Zonder dit maakt het verwijderen van bijvoorbeeld een
+                    // formulierveld de ouder onzichtbaar voor de nachtronde:
+                    // de statusrij van de ouder blijft op zijn oude waarde
+                    // staan (vaak 'manual', want de laatste stempel dekte nog
+                    // het inmiddels verwijderde veld) en wordt dus nooit meer
+                    // herzien. refresh() en niet forget(): het kind zelf heeft
+                    // geen eigen statusrij, alleen de ouder. En refresh() kan,
+                    // net als bij het model zelf, een stempel alleen
+                    // bevestigen of afbreken, nooit zelf 'translated' maken
+                    // (zie TranslationStateUpdater::refresh()); na het
+                    // verwijderen van een veld toont de rij dus bijvoorbeeld
+                    // 'verouderd' totdat er opnieuw gestempeld wordt, in
+                    // plaats van meteen 'vertaald' als het verwijderde veld
+                    // toevallig de enige ontbrekende vertaling was. Dezelfde
+                    // onnauwkeurigheid gold al voor de ouder zelf.
+                    $childClass::deleted(fn (Model $child) => rescue(fn () => TranslationStateUpdater::refresh($child), report: false));
                 }
             }
         }

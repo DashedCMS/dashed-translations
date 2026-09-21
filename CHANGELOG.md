@@ -2,13 +2,20 @@
 
 All notable changes to `dashed-translations` will be documented in this file.
 
-## 4.6.0 - 2026-09-18
+## 4.6.0 - 2026-09-21
 
 - Nieuw: scherm **Vertaalstatus** (menu Vertalingen, alleen zichtbaar met DeepL aan) met per model en doeltaal de status ontbreekt, vertaald, verouderd of handmatig aangepast, gegroepeerd per soort, met filters op status en taal, een badge Bezig/Fout voor een lopende of mislukte vertaaljob, en rij-, bulk- en twee koptekstacties om opnieuw te vertalen.
 - Nieuw: `TranslatableRegistry` waarin pakketten hun vertaalbare modellen aanmelden (`Translatable::make(...)`), tabel `dashed__translation_states` met een vingerafdruk van bron en doel per model, brontaal en doeltaal, en een `saved`/`deleted`-listener die bronwijzigingen markeert.
 - Nieuw: nachtelijke ronde `dashed:translate-outdated` (03:00), alleen actief met de instelling "Ontbrekende en verouderde vertalingen 's nachts automatisch bijwerken" aan, met een plafond per nacht (`auto_translate_max_per_run`, standaard 200); handmatig aangepaste vertalingen worden nooit automatisch overschreven.
 - Nieuw: `dashed:translation-states:rescan {--baseline}` vergelijkt alle vertaalbare inhoud opnieuw met de laatste stempel en ruimt verweesde statusrijen op (met behoud van rijen die alleen soft-deleted zijn); `--baseline` zet daarna ook de nulmeting in de wachtrij. Een migratie zet die nulmeting bij het uitrollen zelf al in de wachtrij.
 - Gewijzigd: de knop "Bulk vertalen" op de instellingenpagina is vervangen door een verwijzing naar het scherm Vertaalstatus.
+- Nieuw: `TranslationStarter::start()` vertaalt naast het model ook elk geregistreerd kind dat in de vingerafdruk van de ouder meetelt (formuliervelden, opties van filters en extra's). De rijactie, de bulkactie, de koptekstactie en de nachtronde lopen erdoorheen; zonder dat bleef de status van zo'n ouder op ontbreekt staan terwijl de knop "gestart" meldde.
+- Nieuw: de statuskaarten boven het scherm zijn per taal en per status, en een klik zet het status- en taalfilter van de tabel. Zoeken op naam werkt woord voor woord over alle geregistreerde soorten.
+- Nieuw: de koptekstactie "Vertaal alles wat ontbreekt of verouderd is" heeft hetzelfde plafond per keer als de nachtronde (`auto_translate_max_per_run`).
+- Gewijzigd: alle tellingen en lijsten lezen `TranslationState::scopeInRegister()` in plaats van `whereHasMorph('model', '*')`; een project waar een pakket uit verdwijnt krijgt minder rijen in plaats van een "class not found".
+- Gewijzigd: de nulmeting draait als één job per geregistreerd model, los opnieuw te proberen met `queue:retry`.
+- Fix: het verwijderen van een kind (een formulierveld bijvoorbeeld) werkt de status van de ouder bij.
+- Fix: `ContentFingerprint` slaat een `$translatable`-kolom over die niet in de tabel bestaat, en `ouderVan()` stopt bij de eerste passende registratie in plaats van voor elke registratie een query te doen.
 - Vereist na uitrol: `php artisan migrate` (maakt `dashed__translation_states` aan en zet de nulmeting in de wachtrij); de wachtrij moet draaien.
 
 ## 4.5.0 - 2026-08-18
