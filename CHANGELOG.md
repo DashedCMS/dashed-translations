@@ -2,6 +2,10 @@
 
 All notable changes to `dashed-translations` will be documented in this file.
 
+## 4.6.1 - 2026-09-24
+
+- Fix: een bestaande vertaling wordt alleen nog hergebruikt als de brontekst byte-exact gelijk is. De tekstkolom vergelijkt zonder hoofdletters en zonder spaties achteraan (`utf8mb4_unicode_ci`), dus een rij voor "Call Credit" bediende ook "Call credit", terwijl het terugschrijven letterlijk vervangt. Zo'n tekst bleef in de brontaal staan tussen wel vertaalde teksten in, zichtbaar als opties van een keuzeveld in verschillende talen door elkaar. Opnieuw vertalen van het betreffende model herstelt de doeltaal.
+
 ## 4.6.0 - 2026-09-21
 
 - Nieuw: scherm **Vertaalstatus** (menu Vertalingen, alleen zichtbaar met DeepL aan) met per model en doeltaal de status ontbreekt, vertaald, verouderd of handmatig aangepast, gegroepeerd per soort, met filters op status en taal, een badge Bezig/Fout voor een lopende of mislukte vertaaljob, en rij-, bulk- en twee koptekstacties om opnieuw te vertalen.

@@ -256,10 +256,16 @@ class ExtractStringsToTranslate implements ShouldQueue
             return $value;
         }
 
+        // De kolom vergelijkt zonder hoofdletters en zonder spaties achteraan
+        // (utf8mb4_unicode_ci), maar ReplaceStringsInModel vervangt letterlijk.
+        // Een bestaande rij voor "Call Credit" zou ook "Call credit" bedienen,
+        // waarna die tekst in de brontaal bleef staan. Daarom pas hergebruiken
+        // bij een byte-exacte match.
         $string = AutomatedTranslationString::where('from_locale', $this->fromLanguage)
             ->where('to_locale', $this->toLanguage)
             ->where('from_string', $value)
-            ->first();
+            ->get()
+            ->first(fn ($candidate) => $candidate->from_string === $value);
 
         if (! $string) {
             $string = new AutomatedTranslationString();
