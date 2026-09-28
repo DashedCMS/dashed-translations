@@ -2,6 +2,10 @@
 
 All notable changes to `dashed-translations` will be documented in this file.
 
+## Unreleased
+
+- Sneller: `Translation::get` onthoudt vertalingen per request (scoped `TranslationMemo`, leeg na elke queue-job en elk Octane-request en na opslaan of verwijderen van een vertaling) en kijkt per proces nog maar één keer of de tabel bestaat. Een categoriepagina deed eerder ruim 600 cache-calls alleen voor die check.
+
 ## 4.6.1 - 2026-09-24
 
 - Fix: een bestaande vertaling wordt alleen nog hergebruikt als de brontekst byte-exact gelijk is. De tekstkolom vergelijkt zonder hoofdletters en zonder spaties achteraan (`utf8mb4_unicode_ci`), dus een rij voor "Call Credit" bediende ook "Call credit", terwijl het terugschrijven letterlijk vervangt. Zo'n tekst bleef in de brontaal staan tussen wel vertaalde teksten in, zichtbaar als opties van een keuzeveld in verschillende talen door elkaar. Opnieuw vertalen van het betreffende model herstelt de doeltaal.
