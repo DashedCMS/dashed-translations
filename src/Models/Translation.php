@@ -44,17 +44,6 @@ class Translation extends Model
     /** Alleen true wordt onthouden, zodat migrate en tests in één proces blijven werken. */
     protected static ?bool $tableExists = null;
 
-    /**
-     * Het container-object waarop $tableExists is vastgesteld. Testbench (en
-     * in theorie elke omgeving die de applicatie herstart zonder het PHP-
-     * proces te herstarten) bouwt een nieuwe container met een nieuwe,
-     * ongemigreerde databaseverbinding; zonder deze check zou een sinds een
-     * vorig proces "true" onthouden vlag een query op die lege verbinding
-     * laten uitvoeren. Binnen één Octane-worker of queue-proces blijft
-     * app() hetzelfde object, dus daar blijft de vlag gewoon geldig.
-     */
-    protected static $tableExistsApp = null;
-
     protected static function booted(): void
     {
         static::saved(function ($translation) {
@@ -120,7 +109,7 @@ class Translation extends Model
 
     public static function tableExists(): bool
     {
-        if (static::$tableExists && static::$tableExistsApp === app()) {
+        if (static::$tableExists) {
             return true;
         }
 
@@ -130,16 +119,19 @@ class Translation extends Model
 
         if ($exists) {
             static::$tableExists = true;
-            static::$tableExistsApp = app();
         }
 
         return $exists;
     }
 
+    /**
+     * Voor tests: reset zowel de procesbrede vlag als de gedeelde cache-key,
+     * zodat een volgende test (of een volgend migrate-commando) de tabel
+     * opnieuw controleert in plaats van een verouderd antwoord te hergebruiken.
+     */
     public static function forgetTableExists(): void
     {
         static::$tableExists = null;
-        static::$tableExistsApp = null;
         Cache::forget('dashed__translations_table_exists');
     }
 
