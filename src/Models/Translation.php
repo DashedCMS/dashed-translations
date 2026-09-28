@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Dashed\DashedTranslations\Classes\TranslationMemo;
 use Dashed\DashedCore\Classes\Caching\CacheInvalidator;
 
 class Translation extends Model
@@ -40,9 +41,25 @@ class Translation extends Model
 
     protected $table = 'dashed__translations';
 
+    /** Alleen true wordt onthouden, zodat migrate en tests in één proces blijven werken. */
+    protected static ?bool $tableExists = null;
+
+    /**
+     * Het container-object waarop $tableExists is vastgesteld. Testbench (en
+     * in theorie elke omgeving die de applicatie herstart zonder het PHP-
+     * proces te herstarten) bouwt een nieuwe container met een nieuwe,
+     * ongemigreerde databaseverbinding; zonder deze check zou een sinds een
+     * vorig proces "true" onthouden vlag een query op die lege verbinding
+     * laten uitvoeren. Binnen één Octane-worker of queue-proces blijft
+     * app() hetzelfde object, dus daar blijft de vlag gewoon geldig.
+     */
+    protected static $tableExistsApp = null;
+
     protected static function booted(): void
     {
         static::saved(function ($translation) {
+            app(TranslationMemo::class)->flush();
+
             if (class_exists(CacheInvalidator::class)) {
                 foreach (Sites::getSites() as $site) {
                     CacheInvalidator::flushSite($site['id']);
@@ -51,6 +68,8 @@ class Translation extends Model
         });
 
         static::deleted(function ($translation) {
+            app(TranslationMemo::class)->flush();
+
             if (class_exists(CacheInvalidator::class)) {
                 foreach (Sites::getSites() as $site) {
                     CacheInvalidator::flushSite($site['id']);
@@ -66,11 +85,7 @@ class Translation extends Model
 
     public static function get($name, $tag, $default = null, $type = 'text', $variables = null)
     {
-        $tableExists = Cache::remember('dashed__translations_table_exists', 60, function () {
-            return Schema::hasTable('dashed__translations');
-        });
-
-        if (! $tableExists) {
+        if (! static::tableExists()) {
             return $default;
         }
 
@@ -79,10 +94,15 @@ class Translation extends Model
             $name = Str::slug($name);
         }
 
+        $cacheKey = Str::slug($name . $tag . app()->getLocale() . $type);
+        $memo = app(TranslationMemo::class);
+
         if ($variables) {
-            $result = Cache::rememberForever(Str::slug($name . $tag . app()->getLocale() . $type), function () use ($name, $tag, $default, $type, $variables) {
+            // De memo bewaart de tekst zonder ingevulde variabelen; invullen
+            // gebeurt per aanroep.
+            $result = $memo->remember($cacheKey, fn () => Cache::rememberForever($cacheKey, function () use ($name, $tag, $default, $type) {
                 return self::getByParams($name, $tag, $default, $type, []);
-            });
+            }));
             foreach ($variables as $key => $variable) {
                 if (is_array($result)) {
                     $result = cms()->convertToHtml($result);
@@ -93,11 +113,34 @@ class Translation extends Model
             return $result;
         }
 
-        $result = Cache::rememberForever(Str::slug($name . $tag . app()->getLocale() . $type), function () use ($name, $tag, $default, $type, $variables) {
+        return $memo->remember($cacheKey, fn () => Cache::rememberForever($cacheKey, function () use ($name, $tag, $default, $type, $variables) {
             return self::getByParams($name, $tag, $default, $type, $variables);
+        }));
+    }
+
+    public static function tableExists(): bool
+    {
+        if (static::$tableExists && static::$tableExistsApp === app()) {
+            return true;
+        }
+
+        $exists = (bool) Cache::remember('dashed__translations_table_exists', 60, function () {
+            return Schema::hasTable('dashed__translations');
         });
 
-        return $result;
+        if ($exists) {
+            static::$tableExists = true;
+            static::$tableExistsApp = app();
+        }
+
+        return $exists;
+    }
+
+    public static function forgetTableExists(): void
+    {
+        static::$tableExists = null;
+        static::$tableExistsApp = null;
+        Cache::forget('dashed__translations_table_exists');
     }
 
     public static function getByParams($name, $tag, $default, $type, $variables)

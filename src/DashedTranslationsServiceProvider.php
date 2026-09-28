@@ -6,10 +6,10 @@ use Livewire\Livewire;
 use Illuminate\Support\Facades\Gate;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Dashed\DashedTranslations\Commands\TranslateOutdated;
+use Dashed\DashedTranslations\Commands\RescanTranslationStates;
 use Dashed\DashedTranslations\Commands\RemoveUnusedTranslations;
 use Dashed\DashedTranslations\Commands\RepairTranslationStrings;
-use Dashed\DashedTranslations\Commands\RescanTranslationStates;
-use Dashed\DashedTranslations\Commands\TranslateOutdated;
 use Dashed\DashedTranslations\Filament\Pages\Settings\TranslationsSettingsPage;
 use Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\Widgets\AutomatedTranslationStats;
 
@@ -20,6 +20,7 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
     public function registeringPackage(): void
     {
         $this->app->singleton(\Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry::class);
+        $this->app->scoped(\Dashed\DashedTranslations\Classes\TranslationMemo::class);
     }
 
     public function configurePackage(Package $package): void
