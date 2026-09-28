@@ -125,14 +125,13 @@ class Translation extends Model
     }
 
     /**
-     * Voor tests: reset zowel de procesbrede vlag als de gedeelde cache-key,
-     * zodat een volgende test (of een volgend migrate-commando) de tabel
-     * opnieuw controleert in plaats van een verouderd antwoord te hergebruiken.
+     * Voor tests: reset de procesbrede vlag, zodat een volgende test (of een
+     * volgend migrate-commando) de tabel opnieuw controleert in plaats van
+     * een verouderd antwoord te hergebruiken.
      */
     public static function forgetTableExists(): void
     {
         static::$tableExists = null;
-        Cache::forget('dashed__translations_table_exists');
     }
 
     public static function getByParams($name, $tag, $default, $type, $variables)
