@@ -2,7 +2,7 @@
 
 All notable changes to `dashed-translations` will be documented in this file.
 
-## Unreleased
+## 4.7.0 - 2026-09-30
 
 - Sneller: `Translation::get` onthoudt vertalingen per request (scoped `TranslationMemo`, leeg na elke queue-job en elk Octane-request en na opslaan of verwijderen van een vertaling) en kijkt per proces nog maar één keer of de tabel bestaat. Een categoriepagina deed eerder ruim 600 cache-calls alleen voor die check.
 
