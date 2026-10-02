@@ -27,6 +27,8 @@ use UnitEnum;
 
 class AutomatedTranslationStringResource extends Resource
 {
+    use \Dashed\DashedCore\Filament\Concerns\TranslatesResourceLabels;
+
     protected static ?string $model = AutomatedTranslationString::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';

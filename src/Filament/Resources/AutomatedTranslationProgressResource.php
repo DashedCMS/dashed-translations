@@ -21,6 +21,8 @@ use UnitEnum;
 
 class AutomatedTranslationProgressResource extends Resource
 {
+    use \Dashed\DashedCore\Filament\Concerns\TranslatesResourceLabels;
+
     protected static ?string $model = AutomatedTranslationProgress::class;
 
     protected static ?string $recordTitleAttribute = 'name';

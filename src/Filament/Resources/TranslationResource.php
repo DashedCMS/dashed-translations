@@ -21,6 +21,8 @@ use UnitEnum;
 
 class TranslationResource extends Resource
 {
+    use \Dashed\DashedCore\Filament\Concerns\TranslatesResourceLabels;
+
     protected static ?string $model = Translation::class;
 
     protected static ?string $recordTitleAttribute = 'name';
