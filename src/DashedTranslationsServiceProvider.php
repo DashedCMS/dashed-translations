@@ -31,6 +31,7 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
 
         $package
             ->name('dashed-translations')
+            ->hasTranslations()
             ->hasCommands([
                 RemoveUnusedTranslations::class,
                 RepairTranslationStrings::class,
