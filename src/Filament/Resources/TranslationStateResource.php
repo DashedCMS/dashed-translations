@@ -35,6 +35,8 @@ use WeakMap;
 
 class TranslationStateResource extends Resource
 {
+    use \Dashed\DashedCore\Filament\Concerns\TranslatesResourceLabels;
+
     protected static ?string $model = TranslationState::class;
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-check';
