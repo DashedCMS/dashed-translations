@@ -140,12 +140,14 @@ final class Translatable
 
     public function labelText(): string
     {
-        return (string) value($this->label);
+        // Geregistreerd tijdens de boot, dus als Nederlandse sleutel; vertalen
+        // bij het tonen zodat het scherm de taal van de beheerder volgt.
+        return __((string) value($this->label));
     }
 
     public function groupText(): string
     {
-        return (string) value($this->group);
+        return __((string) value($this->group));
     }
 
     /** @return array<string, array{class: string, parent: Closure}> */
