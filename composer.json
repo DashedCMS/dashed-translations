@@ -21,6 +21,7 @@
         "spatie/laravel-package-tools": "^1.16"
     },
     "require-dev": {
+        "dashed/dashed-core": "^4.80",
         "filament/upgrade": "^4.0",
         "friendsofphp/php-cs-fixer": "^3.63",
         "orchestra/testbench": "^9|^10|^11",
