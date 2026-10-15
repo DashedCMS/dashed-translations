@@ -3,11 +3,11 @@
 namespace Dashed\DashedTranslations\Classes;
 
 use ChrisKonnertz\DeepLy\DeepLy;
-use Illuminate\Database\Eloquent\Model;
 use Dashed\DashedCore\Models\Customsetting;
-use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
 use Dashed\DashedTranslations\Jobs\ExtractStringsToTranslate;
+use Dashed\DashedTranslations\Jobs\StartTranslationOfModel;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Illuminate\Database\Eloquent\Model;
 
 class AutomatedTranslation
 {

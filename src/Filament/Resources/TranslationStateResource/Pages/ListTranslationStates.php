@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Filament\Resources\TranslationStateResource\Pages;
 
-use Filament\Resources\Pages\ListRecords;
 use Dashed\DashedTranslations\Classes\Translatables\RunningTranslations;
 use Dashed\DashedTranslations\Filament\Resources\TranslationStateResource;
 use Dashed\DashedTranslations\Filament\Resources\TranslationStateResource\Widgets\TranslationStateStats;
+use Filament\Resources\Pages\ListRecords;
 
 class ListTranslationStates extends ListRecords
 {

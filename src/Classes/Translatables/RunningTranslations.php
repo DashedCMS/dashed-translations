@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Classes\Translatables;
 
-use Illuminate\Support\Collection;
-use Dashed\DashedCore\Models\Metadata;
 use Dashed\DashedCore\Models\CustomBlock;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use Dashed\DashedCore\Models\Metadata;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 
 /**
  * De lopende en gefaalde progress-rijen, één keer per request opgehaald,

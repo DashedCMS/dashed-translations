@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Commands;
 
-use Illuminate\Console\Command;
 use Dashed\DashedCore\Models\Customsetting;
-use Dashed\DashedTranslations\Jobs\TranslateOutdatedJob;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater;
+use Dashed\DashedTranslations\Jobs\TranslateOutdatedJob;
+use Illuminate\Console\Command;
 
 class TranslateOutdated extends Command
 {

@@ -3,8 +3,8 @@
 namespace Dashed\DashedTranslations\Policies;
 
 use Dashed\DashedCore\Models\User;
-use Illuminate\Database\Eloquent\Model;
 use Dashed\DashedCore\Policies\BaseResourcePolicy;
+use Illuminate\Database\Eloquent\Model;
 
 class TranslationStatePolicy extends BaseResourcePolicy
 {

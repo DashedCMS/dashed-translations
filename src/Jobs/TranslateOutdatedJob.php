@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Dashed\DashedTranslations\Models\TranslationState;
-use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Dashed\DashedTranslations\Classes\Translatables\TranslationStarter;
 use Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Dashed\DashedTranslations\Models\TranslationState;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
 
 /**
  * Zet voor elk item dat vertaling nodig heeft één translateModel()-aanroep

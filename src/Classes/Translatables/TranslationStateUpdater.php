@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Dashed\DashedTranslations\Classes\Translatables;
 
 use Dashed\DashedCore\Classes\Locales;
-use Illuminate\Database\Eloquent\Model;
 use Dashed\DashedTranslations\Models\TranslationState;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * De enige plek die dashed__translation_states schrijft. refresh() vergelijkt

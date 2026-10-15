@@ -4,34 +4,34 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Filament\Resources;
 
-use WeakMap;
-use UnitEnum;
 use BackedEnum;
-use Filament\Tables\Table;
-use Filament\Actions\Action;
-use Filament\Schemas\Schema;
-use Filament\Actions\BulkAction;
-use Filament\Resources\Resource;
-use Filament\Tables\Grouping\Group;
-use Illuminate\Support\Collection;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Illuminate\Support\Facades\Schema as DbSchema;
-use Filament\Notifications\Notification;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
 use Dashed\DashedCore\Classes\Locales;
-use Dashed\DashedCore\Models\Customsetting;
-use Dashed\DashedTranslations\Models\TranslationState;
-use Dashed\DashedTranslations\Jobs\TranslateOutdatedJob;
-use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedCore\Classes\QueryHelpers\TokenizedSearch;
+use Dashed\DashedCore\Models\Customsetting;
+use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Classes\Translatables\RunningTranslations;
 use Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry;
 use Dashed\DashedTranslations\Classes\Translatables\TranslationStarter;
 use Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater;
 use Dashed\DashedTranslations\Filament\Resources\TranslationStateResource\Pages\ListTranslationStates;
+use Dashed\DashedTranslations\Jobs\TranslateOutdatedJob;
+use Dashed\DashedTranslations\Models\TranslationState;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema as DbSchema;
+use UnitEnum;
+use WeakMap;
 
 class TranslationStateResource extends Resource
 {

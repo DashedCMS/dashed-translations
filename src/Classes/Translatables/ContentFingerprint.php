@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Classes\Translatables;
 
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Schema;
 use Dashed\DashedTranslations\Models\AutomatedTranslationString;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Vingerafdruk van de vertaalbare inhoud van een model in één taal, inclusief

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Classes\Translatables;
 
-use Illuminate\Database\Eloquent\Model;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Eén ingang voor het starten van een vertaling vanuit het

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Commands;
 
+use Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry;
+use Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater;
+use Dashed\DashedTranslations\Jobs\BaselineTranslationStatesJob;
+use Dashed\DashedTranslations\Models\TranslationState;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use Dashed\DashedTranslations\Models\TranslationState;
-use Dashed\DashedTranslations\Jobs\BaselineTranslationStatesJob;
-use Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry;
-use Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater;
 
 class RescanTranslationStates extends Command
 {

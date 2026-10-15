@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Dashed\DashedTranslations\Classes\Translatables;
 
 use Closure;
-use Illuminate\Database\Eloquent\Model;
-use Dashed\DashedCore\Models\Metadata;
-use Dashed\DashedCore\Models\CustomBlock;
-use Dashed\DashedCore\Models\Concerns\HasMetadata;
 use Dashed\DashedCore\Models\Concerns\HasCustomBlocks;
+use Dashed\DashedCore\Models\Concerns\HasMetadata;
+use Dashed\DashedCore\Models\CustomBlock;
+use Dashed\DashedCore\Models\Metadata;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**

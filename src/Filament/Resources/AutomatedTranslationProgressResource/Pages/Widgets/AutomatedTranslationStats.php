@@ -2,9 +2,9 @@
 
 namespace Dashed\DashedTranslations\Filament\Resources\AutomatedTranslationProgressResource\Pages\Widgets;
 
-use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Filament\Widgets\StatsOverviewWidget;
 
 class AutomatedTranslationStats extends StatsOverviewWidget
 {

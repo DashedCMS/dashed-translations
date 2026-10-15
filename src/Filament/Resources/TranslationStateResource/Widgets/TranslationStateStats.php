@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Filament\Resources\TranslationStateResource\Widgets;
 
+use Dashed\DashedCore\Filament\Support\ResourceFilterUrl;
+use Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater;
+use Dashed\DashedTranslations\Filament\Resources\TranslationStateResource;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Dashed\DashedTranslations\Models\TranslationState;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Dashed\DashedTranslations\Models\TranslationState;
-use Dashed\DashedCore\Filament\Support\ResourceFilterUrl;
-use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
-use Dashed\DashedTranslations\Filament\Resources\TranslationStateResource;
-use Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater;
 
 /**
  * Eén kaart per (doeltaal, status): de spec vraagt dat klikken op een cijfer

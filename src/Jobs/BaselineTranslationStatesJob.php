@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry;
 use Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Nulmeting: loopt alle geregistreerde modellen af en vertrouwt wat al

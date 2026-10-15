@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Dashed\DashedTranslations\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Dashed\DashedTranslations\Classes\Translatables\Translatable;
 use Dashed\DashedTranslations\Classes\Translatables\TranslatableRegistry;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * Per model, brontaal en doeltaal: hoe de inhoud eruitzag toen er voor het
