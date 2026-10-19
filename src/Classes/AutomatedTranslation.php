@@ -49,12 +49,30 @@ class AutomatedTranslation
             [$protected, $tokens] = self::protectVariables($text);
             $client = self::deeplyClient($provider['api_key'], $provider['plan']);
 
+            // DeepL rekent per teken van wat er heen gaat; één logregel per
+            // vertaling, ook als die in meerdere verzoeken is opgeknipt.
+            $log = class_exists(\Dashed\DashedAi\Logging\AiLogger::class)
+                ? \Dashed\DashedAi\Logging\AiLogger::begin('deepl', 'translation', [
+                    'model' => $provider['plan'],
+                    'prompt' => $text,
+                    'options' => ['from' => $sourceLanguage, 'to' => $targetLanguage],
+                ])->units(mb_strlen($protected), 'characters')
+                : null;
+
             $translated = '';
-            foreach (self::chunkForRequest($protected) as $chunk) {
-                $translated .= $client->translate($chunk, $targetLanguage, $sourceLanguage);
+
+            try {
+                foreach (self::chunkForRequest($protected) as $chunk) {
+                    $translated .= $client->translate($chunk, $targetLanguage, $sourceLanguage);
+                }
+            } catch (\Throwable $e) {
+                $log?->fail($e);
+
+                throw $e;
             }
 
             $translated = self::restoreVariables($translated, $tokens);
+            $log?->response($translated)->succeed();
 
             return self::preserveEdgeWhitespace($text, $translated);
         }

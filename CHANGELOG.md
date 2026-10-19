@@ -2,6 +2,15 @@
 
 All notable changes to `dashed-translations` will be documented in this file.
 
+## 4.9.0 - 2026-10-19
+
+### Changed
+- **DeepL-vertalingen in het AI-logboek.** `AutomatedTranslation::translate()` logt per vertaling het aantal tekens, het plan (free/pro) en de geschatte kosten via `AiLogger` uit dashed-ai, als dat pakket aanwezig is.
+
+## 4.8.0 - 2026-10-15
+
+- Engelse vertaling van de beheeromgeving: statische labels vertaalbaar via de i18n-trait, taalbestanden meegeleverd in het pakket.
+
 ## 4.7.0 - 2026-09-30
 
 - Sneller: `Translation::get` onthoudt vertalingen per request (scoped `TranslationMemo`, leeg na elke queue-job en elk Octane-request en na opslaan of verwijderen van een vertaling) en kijkt per proces nog maar één keer of de tabel bestaat. Een categoriepagina deed eerder ruim 600 cache-calls alleen voor die check.
