@@ -383,7 +383,7 @@ class TranslationStateResource extends Resource
     protected static function openUrlFor(TranslatableRegistry $registry, TranslationState $record): ?string
     {
         static $cache = null;
-        $cache ??= new WeakMap;
+        $cache ??= new WeakMap();
 
         // offsetExists() en niet isset(): isset() geeft false terug voor een
         // opgeslagen null, en null is precies de uitkomst die visible() hier
@@ -412,7 +412,7 @@ class TranslationStateResource extends Resource
         return $query->whereHasMorph('model', $classes, function (Builder $q, string $type) use ($search) {
             $kolommen = array_values(array_filter(
                 ['name', 'title'],
-                fn ($kolom) => class_exists($type) && DbSchema::hasColumn((new $type)->getTable(), $kolom)
+                fn ($kolom) => class_exists($type) && DbSchema::hasColumn((new $type())->getTable(), $kolom)
             ));
 
             if ($kolommen === []) {

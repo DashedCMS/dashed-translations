@@ -243,7 +243,7 @@ class ExtractStringsToTranslate implements ShouldQueue
             ->first(fn ($candidate) => $candidate->from_string === $value);
 
         if (! $string) {
-            $string = new AutomatedTranslationString;
+            $string = new AutomatedTranslationString();
             $string->from_locale = $this->fromLanguage;
             $string->to_locale = $this->toLanguage;
             $string->from_string = $value;
