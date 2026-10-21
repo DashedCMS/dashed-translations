@@ -9,36 +9,48 @@ use Dashed\DashedTranslations\Classes\Translatables\TranslationStateUpdater;
 use Dashed\DashedTranslations\Filament\Resources\TranslationStateResource;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Dashed\DashedTranslations\Models\TranslationState;
-use Filament\Widgets\StatsOverviewWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
+use Filament\Widgets\Widget;
 
 /**
- * Eén kaart per (doeltaal, status): de spec vraagt dat klikken op een cijfer
- * het status- en taalfilter van de tabel zet ("Klikken op een cijfer zet het
- * status- en taalfilter van de tabel"). Filament's Stat heeft maar één url()
- * per kaart, dus dat cijfer moet zijn eigen kaart zijn; een enkele kaart per
- * taal met vier cijfers in de omschrijving kan dat niet, want die vier delen
- * één url. "Bezig" krijgt geen url: dat is geen kolomwaarde van status (de
- * SelectFilter kent alleen missing/translated/outdated/manual), maar een
- * live afgeleide van AutomatedTranslationProgress.
+ * Eén regel per doeltaal met per status een klikbaar cijfer dat het status-
+ * en taalfilter van de tabel zet. Eerder was dit één Stat-kaart per
+ * (taal, status); met vijf statussen plus "Bezig" en tien doeltalen waren
+ * dat zestig kaarten in een raster van drie breed, waardoor de talen door
+ * elkaar liepen. "Bezig" krijgt geen url: dat is geen kolomwaarde van
+ * status maar een live afgeleide van AutomatedTranslationProgress.
  */
-class TranslationStateStats extends StatsOverviewWidget
+class TranslationStateStats extends Widget
 {
+    protected string $view = 'dashed-translations::widgets.translation-state-stats';
+
     protected int|string|array $columnSpan = 'full';
 
     protected ?string $pollingInterval = '5s';
 
-    protected function getCards(): array
+    public function getPollingInterval(): ?string
     {
-        $from = TranslationStateUpdater::fromLocale();
-        $cards = [];
+        return $this->pollingInterval;
+    }
 
-        $statussen = [
+    /** @return array<string, array{label: string, color: string}> */
+    public static function statussen(): array
+    {
+        return [
             TranslationState::STATUS_MISSING => ['label' => __('Ontbreekt'), 'color' => 'danger'],
             TranslationState::STATUS_OUTDATED => ['label' => __('Verouderd'), 'color' => 'warning'],
             TranslationState::STATUS_MANUAL => ['label' => __('Handmatig aangepast'), 'color' => 'info'],
             TranslationState::STATUS_TRANSLATED => ['label' => __('Vertaald'), 'color' => 'success'],
+            TranslationState::STATUS_EXCLUDED => ['label' => __('Niet vertalen'), 'color' => 'gray'],
         ];
+    }
+
+    /**
+     * @return list<array{locale: string, cells: list<array{status: string, count: int, color: string, url: string}>, running: int}>
+     */
+    public function getRows(): array
+    {
+        $from = TranslationStateUpdater::fromLocale();
+        $rows = [];
 
         foreach (TranslationStateUpdater::toLocales() as $locale) {
             // inRegister(): dezelfde afbakening als de tabel en de
@@ -53,26 +65,32 @@ class TranslationStateStats extends StatsOverviewWidget
                 ->groupBy('status')
                 ->pluck('aantal', 'status');
 
-            foreach ($statussen as $status => $meta) {
-                $aantal = (int) ($perStatus[$status] ?? 0);
+            $cells = [];
 
-                $cards[] = Stat::make(strtoupper($locale) . ' · ' . $meta['label'], (string) $aantal)
-                    ->color($aantal > 0 ? $meta['color'] : 'gray')
-                    ->url(ResourceFilterUrl::for(TranslationStateResource::class, [
+            foreach (self::statussen() as $status => $meta) {
+                $count = (int) ($perStatus[$status] ?? 0);
+
+                $cells[] = [
+                    'status' => $status,
+                    'count' => $count,
+                    'color' => $count > 0 ? $meta['color'] : 'gray',
+                    'url' => ResourceFilterUrl::for(TranslationStateResource::class, [
                         'status' => ['values' => [$status]],
                         'to_locale' => ['values' => [$locale]],
-                    ]));
+                    ]),
+                ];
             }
 
-            $bezig = AutomatedTranslationProgress::query()
-                ->where('to_locale', $locale)
-                ->whereNotIn('status', ['finished', 'error'])
-                ->count();
-
-            $cards[] = Stat::make(strtoupper($locale) . ' · ' . __('Bezig'), (string) $bezig)
-                ->color($bezig > 0 ? 'info' : 'gray');
+            $rows[] = [
+                'locale' => strtoupper($locale),
+                'cells' => $cells,
+                'running' => AutomatedTranslationProgress::query()
+                    ->where('to_locale', $locale)
+                    ->whereNotIn('status', ['finished', 'error'])
+                    ->count(),
+            ];
         }
 
-        return $cards;
+        return $rows;
     }
 }

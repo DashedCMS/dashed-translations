@@ -36,26 +36,90 @@ class ContentFingerprint
     }
 
     /**
-     * Compleet betekent: elke kolom die in de bron tekst heeft, heeft in het
-     * doel ook tekst. Een whitespace-only bron telt niet als tekst, anders
-     * blokkeert één losse non-breaking space een kolom voor altijd.
+     * Compleet betekent: elke kolom die in de bron vertaalbare tekst heeft,
+     * heeft in het doel ook tekst. "Tekst" is wat de extractie ook naar de
+     * vertaler zou sturen: een leeg rich-text-document ({type: doc, content:
+     * [{type: paragraph}]}), een blok met alleen id's (faqs: [1, 2]), een
+     * getal, of alleen negeerbare sleutels tellen niet. Anders blijft zo'n
+     * kolom na een geslaagde vertaalronde (nul strings, doel leeg) voor
+     * altijd op "ontbreekt" staan. Een whitespace-only bron telt evenmin,
+     * anders blokkeert één losse non-breaking space een kolom voor altijd.
      */
     public static function isComplete(Model $model, string $fromLocale, string $toLocale, Translatable $registration): bool
     {
-        $source = self::values($model, $fromLocale, $registration);
-        $target = self::values($model, $toLocale, $registration);
+        $source = self::keysWithText($model, $fromLocale, $registration);
+        $target = self::keysWithText($model, $toLocale, $registration);
 
-        foreach ($source as $key => $value) {
-            if (self::isEmpty($value)) {
-                continue;
-            }
+        return array_diff($source, $target) === [];
+    }
 
-            if (self::isEmpty($target[$key] ?? null)) {
-                return false;
+    /**
+     * De sleutels (kolom of "relatie.id.kolom") die in deze taal vertaalbare
+     * tekst bevatten.
+     *
+     * @return array<int, string>
+     */
+    public static function keysWithText(Model $model, string $locale, Translatable $registration): array
+    {
+        $keys = [];
+
+        foreach (self::columns($model) as $column) {
+            if (self::hasText($model, $column, $model->getTranslation($column, $locale, false))) {
+                $keys[] = $column;
             }
         }
 
-        return true;
+        foreach ($registration->children() as $relation => $definition) {
+            foreach (self::childrenOf($model, $relation) as $child) {
+                foreach (self::columns($child) as $column) {
+                    if (self::hasText($child, $column, $child->getTranslation($column, $locale, false))) {
+                        $keys[] = "{$relation}.{$child->getKey()}.{$column}";
+                    }
+                }
+            }
+        }
+
+        return $keys;
+    }
+
+    /**
+     * Of deze kolomwaarde iets bevat dat de extractie zou vertalen.
+     */
+    public static function hasText(Model $model, string $column, mixed $value): bool
+    {
+        return self::valueHasText($value, null, IgnorableKeys::for($model, $column));
+    }
+
+    /**
+     * Spiegelt ExtractStringsToTranslate::searchAndTranslate(): een string
+     * telt als tekst tenzij hij onder een negeerbare sleutel staat, een getal
+     * is of alleen uit witruimte bestaat; alles wat geen string is (null,
+     * bool, int, float) is nooit tekst. Een array heeft tekst zodra een van
+     * zijn waarden tekst heeft.
+     *
+     * @param  array<int, string>  $ignorable
+     */
+    private static function valueHasText(mixed $value, ?string $key, array $ignorable): bool
+    {
+        if (is_array($value)) {
+            foreach ($value as $childKey => $childValue) {
+                if (self::valueHasText($childValue, is_string($childKey) ? $childKey : null, $ignorable)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        if (! is_string($value)) {
+            return false;
+        }
+
+        if ($key !== null && IgnorableKeys::ignores($key, $ignorable)) {
+            return false;
+        }
+
+        return ! is_numeric($value) && ! AutomatedTranslationString::isUntranslatable($value);
     }
 
     /**
@@ -152,7 +216,7 @@ class ContentFingerprint
             return collect();
         }
 
-        $key = self::memoPrefix($model) . $relation;
+        $key = self::memoPrefix($model).$relation;
 
         if (array_key_exists($key, self::$childrenMemo)) {
             return self::$childrenMemo[$key];
@@ -172,28 +236,11 @@ class ContentFingerprint
 
     private static function memoPrefix(Model $model): string
     {
-        return $model::class . '#' . $model->getKey() . '#';
+        return $model::class.'#'.$model->getKey().'#';
     }
 
     private static function normalize(mixed $value): mixed
     {
         return is_string($value) ? trim($value) : $value;
-    }
-
-    private static function isEmpty(mixed $value): bool
-    {
-        if ($value === null) {
-            return true;
-        }
-
-        if (is_array($value)) {
-            return $value === [];
-        }
-
-        if (is_string($value)) {
-            return AutomatedTranslationString::isUntranslatable($value);
-        }
-
-        return false;
     }
 }

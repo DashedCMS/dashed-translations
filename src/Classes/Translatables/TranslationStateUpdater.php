@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dashed\DashedTranslations\Classes\Translatables;
 
 use Dashed\DashedCore\Classes\Locales;
+use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Dashed\DashedTranslations\Models\TranslationState;
 use Illuminate\Database\Eloquent\Model;
 
@@ -111,7 +112,7 @@ class TranslationStateUpdater
             'source_changed' => false,
             'target_changed' => false,
             'complete' => $complete,
-            'status' => TranslationState::deriveStatus($complete, true, false, false),
+            'status' => TranslationState::deriveStatus($complete, true, false, false, (bool) $state->excluded),
             'translated_at' => now(),
             'checked_at' => now(),
         ])->save();
@@ -134,7 +135,7 @@ class TranslationStateUpdater
         ContentFingerprint::forgetChildren($parent);
 
         try {
-            $pending = \Dashed\DashedTranslations\Models\AutomatedTranslationProgress::query()
+            $pending = AutomatedTranslationProgress::query()
                 ->where('to_locale', $toLocale)
                 ->whereNotIn('status', ['finished', 'error'])
                 ->where(function ($query) use ($parent, $registration) {
@@ -194,6 +195,47 @@ class TranslationStateUpdater
         TranslationState::voorModel($model)->delete();
     }
 
+    /**
+     * Sluit een item uit van vertalen, voor alle doeltalen. De rijen blijven
+     * bestaan (met status "niet vertalen") zodat het scherm ze kan tonen en
+     * include() ze later weer gewoon kan afleiden; een rij die nog niet
+     * bestond wordt aangemaakt, anders zou een nieuw item na de eerstvolgende
+     * refresh() alsnog als "ontbreekt" in de vertaalronde belanden.
+     */
+    public static function exclude(Model $model): void
+    {
+        if (! $resolved = self::resolve($model)) {
+            return;
+        }
+
+        [$model] = $resolved;
+        $from = self::fromLocale();
+
+        foreach (self::toLocales() as $to) {
+            self::row($model, $from, $to)->fill([
+                'excluded' => true,
+                'status' => TranslationState::STATUS_EXCLUDED,
+                'checked_at' => now(),
+            ])->save();
+        }
+    }
+
+    /**
+     * Maakt exclude() ongedaan en leidt de status meteen weer uit de inhoud af.
+     */
+    public static function include(Model $model): void
+    {
+        if (! $resolved = self::resolve($model)) {
+            return;
+        }
+
+        [$model] = $resolved;
+
+        TranslationState::voorModel($model)->update(['excluded' => false]);
+
+        self::refresh($model);
+    }
+
     protected static function refreshOne(Model $model, Translatable $registration, string $from, string $to): TranslationState
     {
         $state = self::row($model, $from, $to);
@@ -206,7 +248,7 @@ class TranslationStateUpdater
             'source_changed' => $sourceChanged,
             'target_changed' => $targetChanged,
             'complete' => $complete,
-            'status' => TranslationState::deriveStatus($complete, $stamped, $targetChanged, $sourceChanged),
+            'status' => TranslationState::deriveStatus($complete, $stamped, $targetChanged, $sourceChanged, (bool) $state->excluded),
             'checked_at' => now(),
         ])->save();
 

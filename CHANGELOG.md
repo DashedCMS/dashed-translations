@@ -2,6 +2,14 @@
 
 All notable changes to `dashed-translations` will be documented in this file.
 
+## 4.10.0 - 2026-10-19
+
+- Fix: de vertaalstatus telt een kolom alleen nog als "ontbreekt" wanneer de bron echt vertaalbare tekst bevat. Een leeg rich-text-document (`{type: doc, content: [{type: paragraph}]}`), een blok met alleen id's (`faqs: [1, 2]`), een getal of alleen negeerbare sleutels telt niet meer mee. Zulke kolommen bleven na een geslaagde vertaalronde (nul strings, doel leeg) voor altijd op "Ontbreekt" staan: op rechargehamster.com ging het om ruim 800 Deense productrijen met een lege `description` of `customBlocks`. Na het bijwerken eenmalig `php artisan dashed:translation-states:rescan` draaien. De regel voor negeerbare sleutels staat nu in `IgnorableKeys`, gedeeld door de extractie en de compleetheidstoets.
+- Nieuw: items uitsluiten van vertalen. Rij-actie en bulkactie "Niet vertalen" zetten een item voor alle doeltalen op de status "Niet vertalen" (kolom `excluded`, migratie), de vertaalrondes en de knoppen slaan die rijen over, en "Toch vertalen" leidt de status weer uit de inhoud af. Bedoeld voor interne inhoud zoals een fraudemeldingsformulier. Eigen kaart in de statistieken en eigen waarde in het statusfilter.
+- Nieuw: filter "Laatst vertaald" op het scherm Vertaalstatus: nog nooit vertaald, ooit vertaald, en een datumbereik.
+- Gewijzigd: de statistieken boven het scherm Vertaalstatus zijn één regel per doeltaal met een kolom per status (Ontbreekt, Verouderd, Handmatig aangepast, Vertaald, Niet vertalen, Bezig) in plaats van één kaart per taal en status in een raster van drie breed; elk cijfer blijft klikbaar en zet het status- en taalfilter van de tabel.
+- Vereist na uitrol: `php artisan migrate` (kolom `excluded`) en eenmalig `php artisan dashed:translation-states:rescan`.
+
 ## 4.9.0 - 2026-10-19
 
 ### Changed

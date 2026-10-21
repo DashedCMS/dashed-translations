@@ -19,9 +19,19 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class TranslationState extends Model
 {
     public const STATUS_MISSING = 'missing';
+
     public const STATUS_TRANSLATED = 'translated';
+
     public const STATUS_OUTDATED = 'outdated';
+
     public const STATUS_MANUAL = 'manual';
+
+    /**
+     * Bewust niet vertalen (interne inhoud zoals een fraudemeldingsformulier).
+     * Geldt per item, voor alle doeltalen; de vertaalrondes en de knoppen
+     * slaan deze rijen over.
+     */
+    public const STATUS_EXCLUDED = 'excluded';
 
     protected $table = 'dashed__translation_states';
 
@@ -31,6 +41,7 @@ class TranslationState extends Model
         'source_changed' => 'boolean',
         'target_changed' => 'boolean',
         'complete' => 'boolean',
+        'excluded' => 'boolean',
         'translated_at' => 'datetime',
         'checked_at' => 'datetime',
     ];
@@ -73,12 +84,17 @@ class TranslationState extends Model
     }
 
     /**
-     * De volgorde is de kern: ontbreken gaat voor alles, dan handwerk (ook
-     * zonder stempel, want gevuld doel zonder stempel is per definitie niet
-     * door ons vertaald), dan een gewijzigde bron, en pas dan "vertaald".
+     * De volgorde is de kern: uitgesloten gaat voor alles (de inhoud doet er
+     * dan niet toe), dan ontbreken, dan handwerk (ook zonder stempel, want
+     * gevuld doel zonder stempel is per definitie niet door ons vertaald),
+     * dan een gewijzigde bron, en pas dan "vertaald".
      */
-    public static function deriveStatus(bool $complete, bool $stamped, bool $targetChanged, bool $sourceChanged): string
+    public static function deriveStatus(bool $complete, bool $stamped, bool $targetChanged, bool $sourceChanged, bool $excluded = false): string
     {
+        if ($excluded) {
+            return self::STATUS_EXCLUDED;
+        }
+
         if (! $complete) {
             return self::STATUS_MISSING;
         }
@@ -101,6 +117,7 @@ class TranslationState extends Model
             self::STATUS_OUTDATED => __('Verouderd'),
             self::STATUS_MANUAL => __('Handmatig aangepast'),
             self::STATUS_TRANSLATED => __('Vertaald'),
+            self::STATUS_EXCLUDED => __('Niet vertalen'),
         ];
     }
 }

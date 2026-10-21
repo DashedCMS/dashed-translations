@@ -7,6 +7,7 @@ namespace Dashed\DashedTranslations\Filament\Resources;
 use BackedEnum;
 use Dashed\DashedCore\Classes\Locales;
 use Dashed\DashedCore\Classes\QueryHelpers\TokenizedSearch;
+use Dashed\DashedCore\Filament\Concerns\TranslatesResourceLabels;
 use Dashed\DashedCore\Models\Customsetting;
 use Dashed\DashedTranslations\Classes\AutomatedTranslation;
 use Dashed\DashedTranslations\Classes\Translatables\RunningTranslations;
@@ -18,16 +19,19 @@ use Dashed\DashedTranslations\Jobs\TranslateOutdatedJob;
 use Dashed\DashedTranslations\Models\TranslationState;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema as DbSchema;
 use UnitEnum;
@@ -35,15 +39,20 @@ use WeakMap;
 
 class TranslationStateResource extends Resource
 {
-    use \Dashed\DashedCore\Filament\Concerns\TranslatesResourceLabels;
+    use TranslatesResourceLabels;
 
     protected static ?string $model = TranslationState::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-check';
-    protected static string | UnitEnum | null $navigationGroup = 'Vertalingen';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Vertalingen';
+
     protected static ?int $navigationSort = 15;
+
     protected static ?string $navigationLabel = 'Vertaalstatus';
+
     protected static ?string $label = 'Vertaalstatus';
+
     protected static ?string $pluralLabel = 'Vertaalstatus';
 
     public static function shouldRegisterNavigation(): bool
@@ -78,7 +87,7 @@ class TranslationStateResource extends Resource
                     ->label(__('Naam'))
                     ->getStateUsing(fn (TranslationState $record) => $record->model && ($entry = $registry->vind($record->model_type))
                         ? $entry->nameFor($record->model)
-                        : '#' . $record->model_id)
+                        : '#'.$record->model_id)
                     ->searchable(query: fn (Builder $query, string $search) => self::applyNameSearch($query, $registry, $search))
                     ->limit(50),
                 TextColumn::make('model_type')
@@ -109,6 +118,7 @@ class TranslationStateResource extends Resource
                         TranslationState::STATUS_OUTDATED => 'warning',
                         TranslationState::STATUS_MANUAL => 'info',
                         TranslationState::STATUS_TRANSLATED => 'success',
+                        TranslationState::STATUS_EXCLUDED, 'running' => 'gray',
                         default => 'gray',
                     })
                     ->tooltip(function (TranslationState $record) {
@@ -119,7 +129,7 @@ class TranslationStateResource extends Resource
                         }
 
                         if ($running) {
-                            return $running->total_strings_translated . ' / ' . $running->total_strings_to_translate;
+                            return $running->total_strings_translated.' / '.$running->total_strings_to_translate;
                         }
 
                         return $record->status === TranslationState::STATUS_MANUAL && $record->source_changed
@@ -143,7 +153,7 @@ class TranslationStateResource extends Resource
             ])
             ->defaultGroup('model_type')
             ->defaultSort(fn (Builder $query) => $query
-                ->orderByRaw("CASE status WHEN 'missing' THEN 0 WHEN 'outdated' THEN 1 WHEN 'manual' THEN 2 ELSE 3 END")
+                ->orderByRaw("CASE status WHEN 'missing' THEN 0 WHEN 'outdated' THEN 1 WHEN 'manual' THEN 2 WHEN 'translated' THEN 3 ELSE 4 END")
                 ->orderBy('model_id'))
             ->filters([
                 SelectFilter::make('model_type')
@@ -158,11 +168,49 @@ class TranslationStateResource extends Resource
                     ->label(__('Status'))
                     ->multiple()
                     ->options(TranslationState::labels()),
+                Filter::make('translated_at')
+                    ->label(__('Laatst vertaald'))
+                    ->schema([
+                        Select::make('ooit')
+                            ->label(__('Laatst vertaald'))
+                            ->options([
+                                'nooit' => __('Nog nooit vertaald'),
+                                'ooit' => __('Ooit vertaald'),
+                            ])
+                            ->placeholder(__('Maakt niet uit')),
+                        DatePicker::make('vanaf')->label(__('Vertaald vanaf')),
+                        DatePicker::make('tot')->label(__('Vertaald tot en met')),
+                    ])
+                    ->query(fn (Builder $query, array $data) => $query
+                        ->when(($data['ooit'] ?? null) === 'nooit', fn (Builder $q) => $q->whereNull('translated_at'))
+                        ->when(($data['ooit'] ?? null) === 'ooit', fn (Builder $q) => $q->whereNotNull('translated_at'))
+                        ->when($data['vanaf'] ?? null, fn (Builder $q, $vanaf) => $q->whereDate('translated_at', '>=', $vanaf))
+                        ->when($data['tot'] ?? null, fn (Builder $q, $tot) => $q->whereDate('translated_at', '<=', $tot)))
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if (($data['ooit'] ?? null) === 'nooit') {
+                            $indicators[] = __('Nog nooit vertaald');
+                        } elseif (($data['ooit'] ?? null) === 'ooit') {
+                            $indicators[] = __('Ooit vertaald');
+                        }
+
+                        if ($data['vanaf'] ?? null) {
+                            $indicators[] = __('Vertaald vanaf').' '.$data['vanaf'];
+                        }
+
+                        if ($data['tot'] ?? null) {
+                            $indicators[] = __('Vertaald tot en met').' '.$data['tot'];
+                        }
+
+                        return $indicators;
+                    }),
             ])
             ->recordActions([
                 Action::make('translate')
                     ->label(__('Vertaal'))
                     ->icon('heroicon-o-language')
+                    ->visible(fn (TranslationState $record) => ! $record->excluded)
                     ->requiresConfirmation(fn (TranslationState $record) => $record->status === TranslationState::STATUS_MANUAL)
                     ->modalDescription(__('Deze vertaling is met de hand aangepast. Opnieuw vertalen overschrijft dat handwerk.'))
                     ->action(function (TranslationState $record) {
@@ -178,6 +226,28 @@ class TranslationStateResource extends Resource
                         TranslationStarter::start($record->model, $record->from_locale, [$record->to_locale]);
 
                         Notification::make()->title(__('Vertaling gestart, dit kan even duren.'))->warning()->send();
+                    }),
+                Action::make('exclude')
+                    ->label(__('Niet vertalen'))
+                    ->icon('heroicon-o-no-symbol')
+                    ->color('gray')
+                    ->visible(fn (TranslationState $record) => ! $record->excluded && $record->model)
+                    ->requiresConfirmation()
+                    ->modalDescription(__('Dit item wordt in alle talen overgeslagen door de vertaalrondes en de knoppen op dit scherm, totdat je op "Toch vertalen" klikt.'))
+                    ->action(function (TranslationState $record) {
+                        TranslationStateUpdater::exclude($record->model);
+
+                        Notification::make()->title(__('Item uitgesloten van vertalen.'))->success()->send();
+                    }),
+                Action::make('include')
+                    ->label(__('Toch vertalen'))
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->color('gray')
+                    ->visible(fn (TranslationState $record) => $record->excluded && $record->model)
+                    ->action(function (TranslationState $record) {
+                        TranslationStateUpdater::include($record->model);
+
+                        Notification::make()->title(__('Item doet weer mee met vertalen.'))->success()->send();
                     }),
                 Action::make('open')
                     ->label(__('Open'))
@@ -207,6 +277,32 @@ class TranslationStateResource extends Resource
                         Notification::make()->title(__('Vertalingen gestart, dit kan even duren.'))->warning()->send();
                     })
                     ->deselectRecordsAfterCompletion(),
+                BulkAction::make('excludeSelection')
+                    ->label(__('Niet vertalen'))
+                    ->icon('heroicon-o-no-symbol')
+                    ->color('gray')
+                    ->requiresConfirmation()
+                    ->modalDescription(__('De geselecteerde items worden in alle talen overgeslagen door de vertaalrondes, totdat je ze weer op "Toch vertalen" zet.'))
+                    ->action(function (Collection $records) {
+                        foreach (self::uniekeModellen($records) as $model) {
+                            TranslationStateUpdater::exclude($model);
+                        }
+
+                        Notification::make()->title(__('Items uitgesloten van vertalen.'))->success()->send();
+                    })
+                    ->deselectRecordsAfterCompletion(),
+                BulkAction::make('includeSelection')
+                    ->label(__('Toch vertalen'))
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->color('gray')
+                    ->action(function (Collection $records) {
+                        foreach (self::uniekeModellen($records) as $model) {
+                            TranslationStateUpdater::include($model);
+                        }
+
+                        Notification::make()->title(__('Items doen weer mee met vertalen.'))->success()->send();
+                    })
+                    ->deselectRecordsAfterCompletion(),
             ])
             ->poll('5s');
     }
@@ -234,7 +330,7 @@ class TranslationStateResource extends Resource
                     ->groupBy('to_locale')
                     ->pluck('aantal', 'to_locale');
 
-                return $perTaal->map(fn ($aantal, $taal) => strtoupper($taal) . ': ' . $aantal)->implode(', ') ?: __('Niets te doen.');
+                return $perTaal->map(fn ($aantal, $taal) => strtoupper($taal).': '.$aantal)->implode(', ') ?: __('Niets te doen.');
             })
             ->schema([
                 Select::make('to_locales')
@@ -262,6 +358,22 @@ class TranslationStateResource extends Resource
     }
 
     /**
+     * Een selectie bevat per item één rij per doeltaal; uitsluiten en weer
+     * meenemen gebeurt per item (alle talen), dus elk model één keer.
+     *
+     * @return array<int, Model>
+     */
+    protected static function uniekeModellen(Collection $records): array
+    {
+        return $records
+            ->unique(fn (TranslationState $record) => $record->model_type.'#'.$record->model_id)
+            ->map(fn (TranslationState $record) => $record->model)
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
      * urlFor() bouwt een Filament-route-url op, geen kale property-lezing.
      * De "open"-actie vraagt dit zowel in url() als in visible() op; een
      * WeakMap per rij-record voorkomt dat dat twee keer gebeurt, zonder een
@@ -271,7 +383,7 @@ class TranslationStateResource extends Resource
     protected static function openUrlFor(TranslatableRegistry $registry, TranslationState $record): ?string
     {
         static $cache = null;
-        $cache ??= new WeakMap();
+        $cache ??= new WeakMap;
 
         // offsetExists() en niet isset(): isset() geeft false terug voor een
         // opgeslagen null, en null is precies de uitkomst die visible() hier
@@ -300,7 +412,7 @@ class TranslationStateResource extends Resource
         return $query->whereHasMorph('model', $classes, function (Builder $q, string $type) use ($search) {
             $kolommen = array_values(array_filter(
                 ['name', 'title'],
-                fn ($kolom) => class_exists($type) && DbSchema::hasColumn((new $type())->getTable(), $kolom)
+                fn ($kolom) => class_exists($type) && DbSchema::hasColumn((new $type)->getTable(), $kolom)
             ));
 
             if ($kolommen === []) {

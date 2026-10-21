@@ -2,11 +2,13 @@
 
 namespace Dashed\DashedTranslations\Jobs;
 
+use Dashed\DashedTranslations\Classes\Translatables\IgnorableKeys;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
 use Dashed\DashedTranslations\Models\AutomatedTranslationString;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Schema;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -21,19 +23,27 @@ class ExtractStringsToTranslate implements ShouldQueue
     use SerializesModels;
 
     public $timeout = 3000;
+
     public $tries = 1000;
+
     public $model;
+
     public $column;
+
     public $value;
+
     public $toLanguage;
+
     public $fromLanguage;
+
     public array $attributes;
+
     public AutomatedTranslationProgress $automatedTranslationProgress;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($model, $column, $value, $toLanguage, $fromLanguage, array $attributes = [], AutomatedTranslationProgress $automatedTranslationProgress)
+    public function __construct($model, $column, $value, $toLanguage, $fromLanguage, array $attributes, AutomatedTranslationProgress $automatedTranslationProgress)
     {
         $this->model = $model;
         $this->column = $column;
@@ -99,49 +109,15 @@ class ExtractStringsToTranslate implements ShouldQueue
     //    }
 
     /**
-     * De sleutels die in deze kolom niet naar de vertaler mogen.
-     *
-     * De vaste sleutels horen bij de structuur van een builder-blok en gelden
-     * overal. De lijst die een project zelf instelt geldt alleen voor kolommen
-     * die builder-inhoud bevatten: daar beschermt hij sleutels als 'name' en
-     * 'slug', die een blok identificeren in plaats van iets te tonen. In een
-     * kolom met gewone inhoud betekent dezelfde sleutel juist wél tekst - denk
-     * aan de opties van een keuzeveld, opgeslagen als [['name' => '...']] -
-     * en knijpt de lijst de kolom leeg: er viel dan niets meer te vertalen.
+     * Zie IgnorableKeys: dezelfde lijst als de compleetheidstoets in
+     * ContentFingerprint, zodat "er valt hier niets te vertalen" op beide
+     * plekken hetzelfde betekent.
      *
      * @return array<int, string>
      */
     private function ignorableKeys(): array
     {
-        $fixedKeys = ['type', 'url', 'icon', 'background'];
-
-        if ($this->columnHoldsPlainContent()) {
-            return $fixedKeys;
-        }
-
-        return array_merge($fixedKeys, (array) cms()->builder('ignorableKeysForTranslations'));
-    }
-
-    /**
-     * Of het model deze kolom heeft aangemeld als gewone inhoud in plaats van
-     * builder-inhoud, via:
-     *
-     *     cms()->builder('plainContentColumnsForTranslations', [
-     *         FormField::class => ['options', 'images'],
-     *     ]);
-     *
-     * De vergelijking gaat via instanceof, zodat een project dat een
-     * Dashed-model uitbreidt de registratie van de package erft.
-     */
-    private function columnHoldsPlainContent(): bool
-    {
-        foreach ((array) cms()->builder('plainContentColumnsForTranslations') as $model => $columns) {
-            if ($this->model instanceof $model && in_array($this->column, (array) $columns, true)) {
-                return true;
-            }
-        }
-
-        return false;
+        return IgnorableKeys::for($this->model, $this->column);
     }
 
     private function searchAndTranslate(&$array, $parentKeys = [])
@@ -163,7 +139,6 @@ class ExtractStringsToTranslate implements ShouldQueue
                 if ($builderBlock && ($builderBlock instanceof Select || $builderBlock instanceof Toggle || $builderBlock instanceof FileUpload)) {
                     continue;
                 }
-
 
                 //                if($value == 'image'){
                 //                    dump($value, $parentKeys, $key, $builderBlock, 'here');
@@ -236,7 +211,7 @@ class ExtractStringsToTranslate implements ShouldQueue
         if (method_exists($block, 'getDefaultChildComponents')) {
             $components = $block->getDefaultChildComponents();
 
-            if ($components instanceof \Filament\Schemas\Schema) {
+            if ($components instanceof Schema) {
                 $components = $components->getComponents();
             }
 
@@ -268,7 +243,7 @@ class ExtractStringsToTranslate implements ShouldQueue
             ->first(fn ($candidate) => $candidate->from_string === $value);
 
         if (! $string) {
-            $string = new AutomatedTranslationString();
+            $string = new AutomatedTranslationString;
             $string->from_locale = $this->fromLanguage;
             $string->to_locale = $this->toLanguage;
             $string->from_string = $value;
