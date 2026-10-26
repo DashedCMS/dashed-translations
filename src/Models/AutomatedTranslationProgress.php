@@ -2,8 +2,8 @@
 
 namespace Dashed\DashedTranslations\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Dashed\DashedTranslations\Classes\TranslationTaskMirror;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AutomatedTranslationProgress extends Model

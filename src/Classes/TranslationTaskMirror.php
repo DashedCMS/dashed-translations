@@ -2,9 +2,9 @@
 
 namespace Dashed\DashedTranslations\Classes;
 
-use Illuminate\Support\Facades\Cache;
 use Dashed\DashedCore\Models\BackgroundTask;
 use Dashed\DashedTranslations\Models\AutomatedTranslationProgress;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Spiegelt de lopende vertalingen naar één taak in het takenicoon van
