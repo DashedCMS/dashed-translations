@@ -57,6 +57,13 @@ class DashedTranslationsServiceProvider extends PackageServiceProvider
             $schedule->command('dashed:translate-outdated')
                 ->dailyAt('03:00')
                 ->withoutOverlapping();
+
+            // De laatste zin van een vertaalronde kan binnen de vijf seconden
+            // van TranslationTaskMirror::touched() vallen; deze ronde sluit
+            // de taak in de topbalk dan alsnog af.
+            $schedule->call(fn () => \Dashed\DashedTranslations\Classes\TranslationTaskMirror::sync())
+                ->everyMinute()
+                ->name('dashed:translations-task-mirror');
         });
 
         self::registreerVertaalbaren();

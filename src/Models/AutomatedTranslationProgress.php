@@ -3,6 +3,7 @@
 namespace Dashed\DashedTranslations\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Dashed\DashedTranslations\Classes\TranslationTaskMirror;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class AutomatedTranslationProgress extends Model
@@ -13,6 +14,7 @@ class AutomatedTranslationProgress extends Model
     {
         static::saved(function (AutomatedTranslationProgress $automatedTranslationProgress) {
             //            $automatedTranslationProgress->updateStats();
+            TranslationTaskMirror::touched();
         });
     }
 
@@ -63,6 +65,9 @@ class AutomatedTranslationProgress extends Model
             $this->status = 'pending';
         }
         $this->saveQuietly();
+
+        // saveQuietly() slaat de saved-hook over, dus hier zelf.
+        TranslationTaskMirror::touched();
     }
 
     public function recursiveReplace($subject, string $search, string $replace)
